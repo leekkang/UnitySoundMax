@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-public class BootStrap : MonoBehaviour {
+public class GameManager : Singleton<GameManager> {
     void Start() {
 
     }
