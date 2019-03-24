@@ -2,18 +2,17 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-public class GameManager : Singleton<GameManager> {
+public class GameManager : MonoBehaviour {
     void Start() {
-
+        GuiManager.inst.Open();
+        SoundManager.inst.Open();
+        KeyboardManager.inst.Open();
+        IngameEngine.inst.Open();
+        DataBase.inst.Open();
     }
     
-    void Update() {
-
-    }
-
-
 #if DEVELOPMENT_BUILD || UNITY_EDITOR
-    Rect buttonRect = new Rect(0, Screen.height * 0.6f, Screen.width * 0.15f, Screen.height * 0.1f);
+    Rect buttonRect = new Rect(Screen.width * 0.25f, Screen.height * 0.1f, Screen.width * 0.5f, Screen.height * 0.1f);
     bool buttonPressed = false;
     bool buttonDragging = false;
 
@@ -39,6 +38,8 @@ public class GameManager : Singleton<GameManager> {
         }
 
         if (GUI.Button(buttonRect, "PracticeBattle") && !buttonDragging) {
+            MusicData data = new MusicData();
+            data.Load("colorfulsky", Difficulty.Challenge);
         }
 
         if (GUI.Button(new Rect(buttonRect.x, buttonRect.y + Screen.height * 0.1f, buttonRect.width, buttonRect.height), "Logout") && !buttonDragging) {

@@ -3,11 +3,13 @@ using System.Collections.Generic;
 using UnityEngine;
 
 public class KeyboardManager : Singleton<KeyboardManager> {
-    void Start() {
+    public void Open() {
 
     }
-    
-    void Update() {
 
+    public void Update() {
+        if (GuiManager.inst.GetCurrentPanel() == GuiManager.CurPanel.Main) {
+
+        }
     }
 }
