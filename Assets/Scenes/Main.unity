@@ -190,6 +190,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 252842040}
+  - component: {fileID: 252842041}
   m_Layer: 0
   m_Name: KeyboardManager
   m_TagString: Untagged
@@ -211,6 +212,18 @@ Transform:
   m_Father: {fileID: 0}
   m_RootOrder: 4
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &252842041
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 252842039}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 0b855b1ed89228046859e11cf2593152, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!1 &370620471
 GameObject:
   m_ObjectHideFlags: 0
@@ -2218,6 +2231,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 1150684752}
+  - component: {fileID: 1150684753}
   m_Layer: 0
   m_Name: SoundManager
   m_TagString: Untagged
@@ -2239,6 +2253,18 @@ Transform:
   m_Father: {fileID: 0}
   m_RootOrder: 5
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &1150684753
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1150684751}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 0649616f88fd4a2418f9d7ec013c8409, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!1 &1174929604
 GameObject:
   m_ObjectHideFlags: 0
@@ -2616,7 +2642,7 @@ Transform:
   m_GameObject: {fileID: 1365493124}
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
-  m_LocalScale: {x: 0.0012353305, y: 0.0012353305, z: 0.0012353305}
+  m_LocalScale: {x: 0.0010416667, y: 0.0010416667, z: 0.0010416667}
   m_Children:
   - {fileID: 1083427180}
   - {fileID: 683720371}
@@ -3445,6 +3471,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 1872664745}
+  - component: {fileID: 1872664746}
   m_Layer: 0
   m_Name: IngameEngine
   m_TagString: Untagged
@@ -3466,6 +3493,18 @@ Transform:
   m_Father: {fileID: 0}
   m_RootOrder: 6
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &1872664746
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1872664744}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d0210a3af6a80f64292de4ff4408b9d7, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!1 &1942017381
 GameObject:
   m_ObjectHideFlags: 0
