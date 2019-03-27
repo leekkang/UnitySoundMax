@@ -29,14 +29,14 @@ public class CursorMain : MonoBehaviour {
         Debug.Log("mMouseY " + mMouseY);
         Debug.Log("Cursor Local Position" + mCursorMain.transform.position);
         
-        CusorMove(); //커서무빙함수
+        CusorMoveMain(); //커서무빙함수
     }
 
-    void CusorMove() {
-        if (mMouseY < 0) { //마우스가 아래로 움직이면 커서가 exit로 움직임
+    void CusorMoveMain() {
+        if (mMouseX < 0) { //마우스가 아래로 움직이면 커서가 exit로 움직임
             mCursorMain.transform.position = mExit.transform.position;
         }
-        else if (mMouseY > 0) { //마우스가 위로 움직이면 커서가 start로 움직임
+        else if (mMouseX > 0) { //마우스가 위로 움직이면 커서가 start로 움직임
             mCursorMain.transform.position = mStart.transform.position;
         }
     }

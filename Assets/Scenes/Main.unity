@@ -224,7 +224,7 @@ GameObject:
   - component: {fileID: 370620474}
   - component: {fileID: 370620473}
   m_Layer: 5
-  m_Name: BackPanel (8)
+  m_Name: BackPanel8
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -339,7 +339,7 @@ GameObject:
   - component: {fileID: 439310559}
   - component: {fileID: 439310558}
   m_Layer: 5
-  m_Name: BackPanel (10)
+  m_Name: BackPanel10
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -889,8 +889,8 @@ BoxCollider:
   m_IsTrigger: 1
   m_Enabled: 1
   serializedVersion: 2
-  m_Size: {x: 35, y: 225.59998, z: 0}
-  m_Center: {x: 0, y: 137.20001, z: 0}
+  m_Size: {x: 35, y: 339.54575, z: 0}
+  m_Center: {x: 0, y: 80.22713, z: 0}
 --- !u!114 &684967186
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -959,7 +959,7 @@ GameObject:
   - component: {fileID: 780218156}
   - component: {fileID: 780218155}
   m_Layer: 5
-  m_Name: BackPanel (9)
+  m_Name: BackPanel9
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -1161,7 +1161,7 @@ GameObject:
   - component: {fileID: 859437675}
   - component: {fileID: 859437674}
   m_Layer: 5
-  m_Name: BackPanel (5)
+  m_Name: BackPanel5
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -1529,7 +1529,7 @@ GameObject:
   - component: {fileID: 1015781450}
   - component: {fileID: 1015781449}
   m_Layer: 5
-  m_Name: BackPanel
+  m_Name: BackPanel0
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -1645,7 +1645,7 @@ GameObject:
   - component: {fileID: 1025652965}
   - component: {fileID: 1025652964}
   m_Layer: 5
-  m_Name: BackPanel (1)
+  m_Name: BackPanel1
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -1760,7 +1760,7 @@ GameObject:
   - component: {fileID: 1052704976}
   - component: {fileID: 1052704975}
   m_Layer: 5
-  m_Name: BackPanel (12)
+  m_Name: BackPanel12
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -1992,7 +1992,7 @@ GameObject:
   - component: {fileID: 1083687891}
   - component: {fileID: 1083687890}
   m_Layer: 5
-  m_Name: BackPanel (3)
+  m_Name: BackPanel3
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -2107,7 +2107,7 @@ GameObject:
   - component: {fileID: 1123874299}
   - component: {fileID: 1123874298}
   m_Layer: 5
-  m_Name: BackPanel (7)
+  m_Name: BackPanel7
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -2722,7 +2722,7 @@ GameObject:
   - component: {fileID: 1456954589}
   - component: {fileID: 1456954588}
   m_Layer: 5
-  m_Name: BackPanel (4)
+  m_Name: BackPanel4
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -2966,7 +2966,7 @@ GameObject:
   - component: {fileID: 1751800234}
   - component: {fileID: 1751800233}
   m_Layer: 5
-  m_Name: BackPanel (11)
+  m_Name: BackPanel11
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -3081,7 +3081,7 @@ GameObject:
   - component: {fileID: 1755477519}
   - component: {fileID: 1755477518}
   m_Layer: 5
-  m_Name: BackPanel (6)
+  m_Name: BackPanel6
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -3194,6 +3194,7 @@ GameObject:
   - component: {fileID: 1775832750}
   - component: {fileID: 1775832752}
   - component: {fileID: 1775832751}
+  - component: {fileID: 1775832753}
   m_Layer: 5
   m_Name: CursorSelect
   m_TagString: Untagged
@@ -3227,6 +3228,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 3c8b3275fa13c204c80a9c691b3e3a61, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  mMouseX: 0
+  mMouseY: 0
+  mMouseXSpeed: 2
+  mMouseYSpeed: 2
 --- !u!114 &1775832752
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -3242,19 +3247,19 @@ MonoBehaviour:
   leftAnchor:
     target: {fileID: 0}
     relative: 0
-    absolute: 0
+    absolute: -25
   rightAnchor:
     target: {fileID: 0}
     relative: 1
-    absolute: 0
+    absolute: 25
   bottomAnchor:
     target: {fileID: 0}
     relative: 0
-    absolute: 0
+    absolute: -25
   topAnchor:
     target: {fileID: 0}
     relative: 1
-    absolute: 0
+    absolute: 25
   updateAnchors: 1
   mColor: {r: 0.33521718, g: 0.8292143, b: 0.8773585, a: 1}
   mPivot: 4
@@ -3282,6 +3287,28 @@ MonoBehaviour:
   mAtlas: {fileID: 11400000, guid: 62adb30369acbf943a67cee0f69267a3, type: 3}
   mSpriteName: Glow - Outer
   mFillCenter: 1
+--- !u!1773428102 &1775832753
+ParentConstraint:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1775832749}
+  m_Enabled: 1
+  m_Weight: 1
+  m_TranslationAtRest: {x: 0, y: 0, z: 0}
+  m_RotationAtRest: {x: 0, y: 0, z: 0}
+  m_TranslationOffsets: []
+  m_RotationOffsets: []
+  m_AffectTranslationX: 1
+  m_AffectTranslationY: 1
+  m_AffectTranslationZ: 1
+  m_AffectRotationX: 1
+  m_AffectRotationY: 1
+  m_AffectRotationZ: 1
+  m_IsContraintActive: 0
+  m_IsLocked: 0
+  m_Sources: []
 --- !u!1 &1794616021
 GameObject:
   m_ObjectHideFlags: 0
@@ -3406,7 +3433,7 @@ MonoBehaviour:
   rawValue: 1
   direction: 2
   mInverted: 0
-  mSize: 0.43999994
+  mSize: 0.67254233
   mScroll: 0
   mDir: 2
 --- !u!1 &1872664744
@@ -3452,7 +3479,7 @@ GameObject:
   - component: {fileID: 1942017384}
   - component: {fileID: 1942017383}
   m_Layer: 5
-  m_Name: BackPanel (2)
+  m_Name: BackPanel2
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -3567,7 +3594,7 @@ GameObject:
   - component: {fileID: 1972386705}
   - component: {fileID: 1972386704}
   m_Layer: 5
-  m_Name: BackPanel (13)
+  m_Name: BackPanel13
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -3863,7 +3890,7 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 2101960677}
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: 0, y: 3, z: 0}
+  m_LocalPosition: {x: 0, y: 346, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children:
   - {fileID: 2083221290}
@@ -3883,8 +3910,8 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   movement: 1
-  dragEffect: 2
-  restrictWithinPanel: 1
+  dragEffect: 0
+  restrictWithinPanel: 0
   constrainOnDrag: 0
   disableDragIfFits: 1
   smoothDragStart: 0
@@ -3896,7 +3923,7 @@ MonoBehaviour:
   verticalScrollBar: {fileID: 1794616025}
   showScrollBars: 1
   customMovement: {x: 1, y: 0}
-  contentPivot: 1
+  contentPivot: 0
   scale: {x: 0, y: 0, z: 0}
   relativePositionOnReset: {x: 0, y: 0}
   centerOnChild: {fileID: 0}
@@ -3948,7 +3975,7 @@ MonoBehaviour:
   mDepth: 3
   mSortingOrder: 0
   mSortingLayerName: 
-  mClipOffset: {x: 0, y: -3}
+  mClipOffset: {x: 0, y: -346}
   useSortingOrder: 0
 --- !u!54 &2101960681
 Rigidbody:
