@@ -3,28 +3,50 @@ using System.Collections.Generic;
 using UnityEngine;
 
 public class CursorSelect : MonoBehaviour {
+    readonly int MOUSE_MOVE_POINT = 5;
+    readonly int MAX_MUSIC_NUM = 14;
 
     private GameObject mCursorSelect;
 
-    private GameObject[] mBackPanel = new GameObject[14];
+    private GameObject[] mBackPanel;
 
     public float mMouseX; //마우스 축의 움직임을 받기 위한 변수
     public float mMouseY;
     public float mMouseXSpeed = 2.0f; //마우스 움직임 민감도
     public float mMouseYSpeed = 2.0f;
 
+    int mCurIndex;
+
     void Start() {
         mCursorSelect = GameObject.Find("CursorSelect");
-
-        for (int i = 0; i < 14; i++) {
+        mBackPanel = new GameObject[14];
+        for (int i = 0; i < MAX_MUSIC_NUM; i++) {
             mBackPanel[i] = GameObject.Find("BackPanel" + i);
         }
 
-        mCursorSelect.transform.SetParent(mBackPanel[0].transform, false);
+        mCurIndex = 0;
+        mCursorSelect.transform.SetParent(mBackPanel[mCurIndex].transform, false);
+    }
+
+    bool CheckDirectionChange(float a, float b) {
+        return (a > 0 && b < 0) || (b > 0 && a < 0);
     }
 
     void Update() {
-        mMouseX = mMouseXSpeed * Input.GetAxis("Mouse X"); //마우스의 움직임을 받음
+        ControlXAxis();
+        mMouseY = mMouseYSpeed * Input.GetAxis("Mouse Y");
+
+    }
+
+    void ControlXAxis() {
+        float xMove = Input.GetAxis("Mouse X");
+        if (xMove == 0)
+            return;
+
+        if (CheckDirectionChange(xMove, mMouseX))
+            mMouseX = 0f;
+
+        mMouseX += mMouseXSpeed * xMove; //마우스의 움직임을 받음
         mMouseY = mMouseYSpeed * Input.GetAxis("Mouse Y");
 
         CursorMoveSelect();
@@ -34,25 +56,14 @@ public class CursorSelect : MonoBehaviour {
     }
 
     void CursorMoveSelect() {
-        for (int i = 0; i < 14; i++) {
-            if (mCursorSelect.transform.parent == mBackPanel[i].transform) { // 1의 위치
-                if (mMouseX > 0) {
-                    if (mCursorSelect.transform.parent == mBackPanel[13].transform) {
-                        mCursorSelect.transform.SetParent(mBackPanel[0].transform, false);
-                    }
-                    else {
-                        mCursorSelect.transform.SetParent(mBackPanel[i + 1].transform, false);
-                    }
-                }
-                else if (mMouseX < 0) {
-                    if (mCursorSelect.transform.parent == mBackPanel[0].transform) {
-                        mCursorSelect.transform.SetParent(mBackPanel[13].transform, false);
-                    }
-                    else {
-                        mCursorSelect.transform.SetParent(mBackPanel[i - 1].transform, false);
-                    }
-                }
-            }
+        if (mMouseX > MOUSE_MOVE_POINT) {
+            mCurIndex = ++mCurIndex % MAX_MUSIC_NUM;
+            mCursorSelect.transform.SetParent(mBackPanel[mCurIndex].transform, false);
+            mMouseX = 0f;
+        } else if (mMouseX < -MOUSE_MOVE_POINT) {
+            mCurIndex = (--mCurIndex + MAX_MUSIC_NUM) % MAX_MUSIC_NUM; // 음수처리
+            mCursorSelect.transform.SetParent(mBackPanel[mCurIndex].transform, false);
+            mMouseX = 0f;
         }
     }
 }

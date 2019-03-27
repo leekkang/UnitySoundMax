@@ -8,8 +8,8 @@ public class KeyboardManager : Singleton<KeyboardManager> {
     }
 
     public void Update() {
-        if (GuiManager.inst.GetCurrentPanel() == GuiManager.CurPanel.Main) {
+        //if (GuiManager.inst.GetCurrentPanel() == GuiManager.CurPanel.Main) {
 
-        }
+        //}
     }
 }
