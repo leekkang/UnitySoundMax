@@ -112,6 +112,38 @@ NavMeshSettings:
     debug:
       m_Flags: 0
   m_NavMeshData: {fileID: 0}
+--- !u!1 &145326460
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 145326461}
+  m_Layer: 0
+  m_Name: Ingame
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &145326461
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 145326460}
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: -36.44, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_Children:
+  - {fileID: 534669905}
+  - {fileID: 1179948007}
+  m_Father: {fileID: 0}
+  m_RootOrder: 7
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &170076733
 GameObject:
   m_ObjectHideFlags: 0
@@ -179,7 +211,7 @@ Transform:
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children: []
   m_Father: {fileID: 0}
-  m_RootOrder: 1
+  m_RootOrder: 0
   m_LocalEulerAnglesHint: {x: 50, y: -30, z: 0}
 --- !u!1 &252842039
 GameObject:
@@ -210,7 +242,7 @@ Transform:
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children: []
   m_Father: {fileID: 0}
-  m_RootOrder: 4
+  m_RootOrder: 3
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!114 &252842041
 MonoBehaviour:
@@ -224,6 +256,88 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 0b855b1ed89228046859e11cf2593152, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+--- !u!1 &320220558
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 320220559}
+  - component: {fileID: 320220560}
+  m_Layer: 9
+  m_Name: panel_track
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &320220559
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 320220558}
+  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_Children:
+  - {fileID: 1996895907}
+  m_Father: {fileID: 1179948007}
+  m_RootOrder: 0
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &320220560
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 320220558}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: ae942c9068183dc40a9d01f648273726, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  leftAnchor:
+    target: {fileID: 0}
+    relative: 0
+    absolute: 0
+  rightAnchor:
+    target: {fileID: 0}
+    relative: 1
+    absolute: 0
+  bottomAnchor:
+    target: {fileID: 0}
+    relative: 0
+    absolute: 0
+  topAnchor:
+    target: {fileID: 0}
+    relative: 1
+    absolute: 0
+  updateAnchors: 1
+  showInPanelTool: 1
+  generateNormals: 0
+  generateUV2: 0
+  shadowMode: 0
+  widgetsAreStatic: 0
+  cullWhileDragging: 1
+  alwaysOnScreen: 0
+  anchorOffset: 0
+  softBorderPadding: 1
+  renderQueue: 0
+  startingRenderQueue: 3000
+  mClipTexture: {fileID: 0}
+  mAlpha: 1
+  mClipping: 0
+  mClipRange: {x: 0, y: 0, z: 300, w: 200}
+  mClipSoftness: {x: 4, y: 4}
+  mDepth: 1
+  mSortingOrder: 0
+  mSortingLayerName: 
+  mClipOffset: {x: 0, y: 0}
+  useSortingOrder: 0
 --- !u!1 &370620471
 GameObject:
   m_ObjectHideFlags: 0
@@ -236,7 +350,7 @@ GameObject:
   - component: {fileID: 370620475}
   - component: {fileID: 370620474}
   - component: {fileID: 370620473}
-  m_Layer: 5
+  m_Layer: 9
   m_Name: BackPanel8
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -351,7 +465,7 @@ GameObject:
   - component: {fileID: 439310560}
   - component: {fileID: 439310559}
   - component: {fileID: 439310558}
-  m_Layer: 5
+  m_Layer: 9
   m_Name: BackPanel10
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -464,7 +578,7 @@ GameObject:
   m_Component:
   - component: {fileID: 454135214}
   - component: {fileID: 454135215}
-  m_Layer: 5
+  m_Layer: 9
   m_Name: HowToPlay
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -550,7 +664,7 @@ GameObject:
   m_Component:
   - component: {fileID: 526145513}
   - component: {fileID: 526145514}
-  m_Layer: 5
+  m_Layer: 9
   m_Name: BackgroundMain
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -638,7 +752,7 @@ GameObject:
   - component: {fileID: 534669904}
   - component: {fileID: 534669903}
   m_Layer: 0
-  m_Name: Main Camera
+  m_Name: IngameCamera
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -664,19 +778,19 @@ Camera:
   m_ClearFlags: 1
   m_BackGroundColor: {r: 0.19215687, g: 0.3019608, b: 0.4745098, a: 0}
   m_projectionMatrixMode: 1
-  m_SensorSize: {x: 36, y: 24}
+  m_SensorSize: {x: 33.2, y: 7}
   m_LensShift: {x: 0, y: 0}
   m_GateFitMode: 2
-  m_FocalLength: 50
+  m_FocalLength: 44.471714
   m_NormalizedViewPortRect:
     serializedVersion: 2
     x: 0
     y: 0
     width: 1
     height: 1
-  near clip plane: 0.3
-  far clip plane: 1000
-  field of view: 60
+  near clip plane: 1
+  far clip plane: 5
+  field of view: 84
   orthographic: 0
   orthographic size: 5
   m_Depth: -1
@@ -701,13 +815,13 @@ Transform:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 534669902}
-  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: 1, z: -10}
+  m_LocalRotation: {x: 0.5000009, y: 0, z: 0, w: -0.8660249}
+  m_LocalPosition: {x: 0, y: 0.7, z: -1.22}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children: []
-  m_Father: {fileID: 0}
+  m_Father: {fileID: 145326461}
   m_RootOrder: 0
-  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+  m_LocalEulerAnglesHint: {x: -60.000004, y: 0, z: 1.0450001}
 --- !u!1 &556093304
 GameObject:
   m_ObjectHideFlags: 0
@@ -719,7 +833,7 @@ GameObject:
   - component: {fileID: 556093305}
   - component: {fileID: 556093307}
   - component: {fileID: 556093306}
-  m_Layer: 5
+  m_Layer: 9
   m_Name: CursorMain
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -821,7 +935,7 @@ GameObject:
   m_Component:
   - component: {fileID: 683720371}
   - component: {fileID: 683720372}
-  m_Layer: 5
+  m_Layer: 9
   m_Name: GuiManager
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -870,7 +984,7 @@ GameObject:
   - component: {fileID: 684967184}
   - component: {fileID: 684967186}
   - component: {fileID: 684967185}
-  m_Layer: 5
+  m_Layer: 9
   m_Name: Foreground
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -971,7 +1085,7 @@ GameObject:
   - component: {fileID: 780218157}
   - component: {fileID: 780218156}
   - component: {fileID: 780218155}
-  m_Layer: 5
+  m_Layer: 9
   m_Name: BackPanel9
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -1084,7 +1198,7 @@ GameObject:
   m_Component:
   - component: {fileID: 805870988}
   - component: {fileID: 805870990}
-  m_Layer: 5
+  m_Layer: 9
   m_Name: Exit
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -1173,7 +1287,7 @@ GameObject:
   - component: {fileID: 859437676}
   - component: {fileID: 859437675}
   - component: {fileID: 859437674}
-  m_Layer: 5
+  m_Layer: 9
   m_Name: BackPanel5
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -1286,7 +1400,7 @@ GameObject:
   m_Component:
   - component: {fileID: 878163123}
   - component: {fileID: 878163124}
-  m_Layer: 5
+  m_Layer: 9
   m_Name: panel_main
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -1371,7 +1485,7 @@ GameObject:
   m_Component:
   - component: {fileID: 955376487}
   - component: {fileID: 955376488}
-  m_Layer: 5
+  m_Layer: 9
   m_Name: panel_ingame
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -1431,7 +1545,7 @@ MonoBehaviour:
   anchorOffset: 0
   softBorderPadding: 1
   renderQueue: 0
-  startingRenderQueue: 3000
+  startingRenderQueue: 3001
   mClipTexture: {fileID: 0}
   mAlpha: 1
   mClipping: 0
@@ -1452,7 +1566,7 @@ GameObject:
   m_Component:
   - component: {fileID: 1013013509}
   - component: {fileID: 1013013511}
-  m_Layer: 5
+  m_Layer: 9
   m_Name: Start
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -1541,7 +1655,7 @@ GameObject:
   - component: {fileID: 1015781451}
   - component: {fileID: 1015781450}
   - component: {fileID: 1015781449}
-  m_Layer: 5
+  m_Layer: 9
   m_Name: BackPanel0
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -1657,7 +1771,7 @@ GameObject:
   - component: {fileID: 1025652966}
   - component: {fileID: 1025652965}
   - component: {fileID: 1025652964}
-  m_Layer: 5
+  m_Layer: 9
   m_Name: BackPanel1
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -1772,7 +1886,7 @@ GameObject:
   - component: {fileID: 1052704977}
   - component: {fileID: 1052704976}
   - component: {fileID: 1052704975}
-  m_Layer: 5
+  m_Layer: 9
   m_Name: BackPanel12
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -1886,13 +2000,13 @@ GameObject:
   - component: {fileID: 1083427180}
   - component: {fileID: 1083427182}
   - component: {fileID: 1083427181}
-  m_Layer: 5
+  m_Layer: 9
   m_Name: Camera
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!4 &1083427180
 Transform:
   m_ObjectHideFlags: 0
@@ -1980,7 +2094,7 @@ Camera:
   m_Depth: 0
   m_CullingMask:
     serializedVersion: 2
-    m_Bits: 32
+    m_Bits: 544
   m_RenderingPath: -1
   m_TargetTexture: {fileID: 0}
   m_TargetDisplay: 0
@@ -2004,7 +2118,7 @@ GameObject:
   - component: {fileID: 1083687892}
   - component: {fileID: 1083687891}
   - component: {fileID: 1083687890}
-  m_Layer: 5
+  m_Layer: 9
   m_Name: BackPanel3
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -2119,7 +2233,7 @@ GameObject:
   - component: {fileID: 1123874300}
   - component: {fileID: 1123874299}
   - component: {fileID: 1123874298}
-  m_Layer: 5
+  m_Layer: 9
   m_Name: BackPanel7
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -2251,7 +2365,7 @@ Transform:
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children: []
   m_Father: {fileID: 0}
-  m_RootOrder: 5
+  m_RootOrder: 4
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!114 &1150684753
 MonoBehaviour:
@@ -2275,7 +2389,7 @@ GameObject:
   m_Component:
   - component: {fileID: 1174929605}
   - component: {fileID: 1174929606}
-  m_Layer: 5
+  m_Layer: 9
   m_Name: panel_option
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -2335,7 +2449,7 @@ MonoBehaviour:
   anchorOffset: 0
   softBorderPadding: 1
   renderQueue: 0
-  startingRenderQueue: 3000
+  startingRenderQueue: 3001
   mClipTexture: {fileID: 0}
   mAlpha: 1
   mClipping: 0
@@ -2346,6 +2460,127 @@ MonoBehaviour:
   mSortingLayerName: 
   mClipOffset: {x: 0, y: 0}
   useSortingOrder: 0
+--- !u!1 &1179948003
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 1179948007}
+  - component: {fileID: 1179948006}
+  - component: {fileID: 1179948005}
+  - component: {fileID: 1179948004}
+  m_Layer: 9
+  m_Name: UITrack
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!54 &1179948004
+Rigidbody:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1179948003}
+  serializedVersion: 2
+  m_Mass: 1
+  m_Drag: 0
+  m_AngularDrag: 0.05
+  m_UseGravity: 0
+  m_IsKinematic: 1
+  m_Interpolate: 0
+  m_Constraints: 0
+  m_CollisionDetection: 0
+--- !u!114 &1179948005
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1179948003}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: ae942c9068183dc40a9d01f648273726, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  leftAnchor:
+    target: {fileID: 0}
+    relative: 0
+    absolute: 0
+  rightAnchor:
+    target: {fileID: 0}
+    relative: 1
+    absolute: 0
+  bottomAnchor:
+    target: {fileID: 0}
+    relative: 0
+    absolute: 0
+  topAnchor:
+    target: {fileID: 0}
+    relative: 1
+    absolute: 0
+  updateAnchors: 1
+  showInPanelTool: 1
+  generateNormals: 0
+  generateUV2: 0
+  shadowMode: 0
+  widgetsAreStatic: 0
+  cullWhileDragging: 1
+  alwaysOnScreen: 0
+  anchorOffset: 0
+  softBorderPadding: 1
+  renderQueue: 0
+  startingRenderQueue: 3000
+  mClipTexture: {fileID: 0}
+  mAlpha: 1
+  mClipping: 0
+  mClipRange: {x: 0, y: 0, z: 300, w: 200}
+  mClipSoftness: {x: 4, y: 4}
+  mDepth: 0
+  mSortingOrder: 0
+  mSortingLayerName: 
+  mClipOffset: {x: 0, y: 0}
+  useSortingOrder: 0
+--- !u!114 &1179948006
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1179948003}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 2c5ecb5660b11414fb042fb826e03b73, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  scalingStyle: 1
+  manualWidth: 1080
+  manualHeight: 1920
+  minimumHeight: 320
+  maximumHeight: 1536
+  fitWidth: 0
+  fitHeight: 0
+  adjustByDPI: 0
+  shrinkPortraitUI: 0
+--- !u!4 &1179948007
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1179948003}
+  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 0.0010416667, y: 0.0010416667, z: 0.0010416667}
+  m_Children:
+  - {fileID: 320220559}
+  m_Father: {fileID: 145326461}
+  m_RootOrder: 1
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &1210284038
 GameObject:
   m_ObjectHideFlags: 0
@@ -2356,7 +2591,7 @@ GameObject:
   m_Component:
   - component: {fileID: 1210284039}
   - component: {fileID: 1210284040}
-  m_Layer: 5
+  m_Layer: 9
   m_Name: panel_result
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -2416,7 +2651,7 @@ MonoBehaviour:
   anchorOffset: 0
   softBorderPadding: 1
   renderQueue: 0
-  startingRenderQueue: 3000
+  startingRenderQueue: 3001
   mClipTexture: {fileID: 0}
   mAlpha: 1
   mClipping: 0
@@ -2437,7 +2672,7 @@ GameObject:
   m_Component:
   - component: {fileID: 1277003774}
   - component: {fileID: 1277003775}
-  m_Layer: 5
+  m_Layer: 9
   m_Name: ExitLabel
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -2539,7 +2774,7 @@ GameObject:
   - component: {fileID: 1365493127}
   - component: {fileID: 1365493126}
   - component: {fileID: 1365493125}
-  m_Layer: 5
+  m_Layer: 9
   m_Name: UI Root
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -2647,7 +2882,70 @@ Transform:
   - {fileID: 1083427180}
   - {fileID: 683720371}
   m_Father: {fileID: 0}
-  m_RootOrder: 2
+  m_RootOrder: 1
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!1 &1390668346
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 1390668348}
+  - component: {fileID: 1390668347}
+  m_Layer: 0
+  m_Name: CameraBackground
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!328 &1390668347
+VideoPlayer:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1390668346}
+  m_Enabled: 1
+  m_VideoClip: {fileID: 32900000, guid: cbe70f1c4de1174439639eea3d6c589f, type: 3}
+  m_TargetCameraAlpha: 1
+  m_TargetCamera3DLayout: 0
+  m_TargetCamera: {fileID: 534669904}
+  m_TargetTexture: {fileID: 0}
+  m_TimeReference: 0
+  m_TargetMaterialRenderer: {fileID: 0}
+  m_TargetMaterialProperty: _MainTex
+  m_RenderMode: 0
+  m_AspectRatio: 2
+  m_DataSource: 0
+  m_PlaybackSpeed: 1
+  m_AudioOutputMode: 2
+  m_TargetAudioSources: []
+  m_DirectAudioVolumes: []
+  m_Url: 
+  m_EnabledAudioTracks: 
+  m_DirectAudioMutes: 
+  m_ControlledAudioTrackCount: 0
+  m_PlayOnAwake: 1
+  m_SkipOnDrop: 1
+  m_Looping: 1
+  m_WaitForFirstFrame: 1
+  m_FrameReadyEventEnabled: 0
+--- !u!4 &1390668348
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1390668346}
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: -0.30456346, y: 0.010170045, z: 8.230924}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_RootOrder: 6
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &1390793992
 GameObject:
@@ -2659,7 +2957,7 @@ GameObject:
   m_Component:
   - component: {fileID: 1390793993}
   - component: {fileID: 1390793994}
-  m_Layer: 5
+  m_Layer: 9
   m_Name: BackgroundSelect
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -2747,7 +3045,7 @@ GameObject:
   - component: {fileID: 1456954590}
   - component: {fileID: 1456954589}
   - component: {fileID: 1456954588}
-  m_Layer: 5
+  m_Layer: 9
   m_Name: BackPanel4
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -2879,7 +3177,7 @@ Transform:
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children: []
   m_Father: {fileID: 0}
-  m_RootOrder: 3
+  m_RootOrder: 2
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!114 &1467184680
 MonoBehaviour:
@@ -2903,7 +3201,7 @@ GameObject:
   m_Component:
   - component: {fileID: 1520507006}
   - component: {fileID: 1520507007}
-  m_Layer: 5
+  m_Layer: 9
   m_Name: Upside
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -2991,7 +3289,7 @@ GameObject:
   - component: {fileID: 1751800235}
   - component: {fileID: 1751800234}
   - component: {fileID: 1751800233}
-  m_Layer: 5
+  m_Layer: 9
   m_Name: BackPanel11
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -3106,7 +3404,7 @@ GameObject:
   - component: {fileID: 1755477520}
   - component: {fileID: 1755477519}
   - component: {fileID: 1755477518}
-  m_Layer: 5
+  m_Layer: 9
   m_Name: BackPanel6
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -3221,7 +3519,7 @@ GameObject:
   - component: {fileID: 1775832752}
   - component: {fileID: 1775832751}
   - component: {fileID: 1775832753}
-  m_Layer: 5
+  m_Layer: 9
   m_Name: CursorSelect
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -3347,7 +3645,7 @@ GameObject:
   - component: {fileID: 1794616025}
   - component: {fileID: 1794616024}
   - component: {fileID: 1794616023}
-  m_Layer: 5
+  m_Layer: 9
   m_Name: Scroll Bar
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -3425,7 +3723,7 @@ MonoBehaviour:
   anchorOffset: 0
   softBorderPadding: 1
   renderQueue: 0
-  startingRenderQueue: 3002
+  startingRenderQueue: 3003
   mClipTexture: {fileID: 0}
   mAlpha: 1
   mClipping: 0
@@ -3491,7 +3789,7 @@ Transform:
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children: []
   m_Father: {fileID: 0}
-  m_RootOrder: 6
+  m_RootOrder: 5
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!114 &1872664746
 MonoBehaviour:
@@ -3517,7 +3815,7 @@ GameObject:
   - component: {fileID: 1942017385}
   - component: {fileID: 1942017384}
   - component: {fileID: 1942017383}
-  m_Layer: 5
+  m_Layer: 9
   m_Name: BackPanel2
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -3632,7 +3930,7 @@ GameObject:
   - component: {fileID: 1972386706}
   - component: {fileID: 1972386705}
   - component: {fileID: 1972386704}
-  m_Layer: 5
+  m_Layer: 9
   m_Name: BackPanel13
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -3735,6 +4033,92 @@ MonoBehaviour:
   mAtlas: {fileID: 11400000, guid: 62adb30369acbf943a67cee0f69267a3, type: 3}
   mSpriteName: Window
   mFillCenter: 1
+--- !u!1 &1996895906
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 1996895907}
+  - component: {fileID: 1996895908}
+  m_Layer: 9
+  m_Name: Track
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &1996895907
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1996895906}
+  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
+  m_LocalPosition: {x: 0, y: 3046, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_Children: []
+  m_Father: {fileID: 320220559}
+  m_RootOrder: 0
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &1996895908
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1996895906}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 1b3dc54f924693f41b5cbecb267e647a, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  leftAnchor:
+    target: {fileID: 0}
+    relative: 0
+    absolute: 0
+  rightAnchor:
+    target: {fileID: 0}
+    relative: 1
+    absolute: 0
+  bottomAnchor:
+    target: {fileID: 0}
+    relative: 0
+    absolute: 0
+  topAnchor:
+    target: {fileID: 0}
+    relative: 1
+    absolute: 0
+  updateAnchors: 1
+  mColor: {r: 1, g: 1, b: 1, a: 1}
+  mPivot: 4
+  mWidth: 1080
+  mHeight: 5000
+  mDepth: 1
+  mMat: {fileID: 0}
+  autoResizeBoxCollider: 0
+  hideIfOffScreen: 0
+  keepAspectRatio: 0
+  aspectRatio: 0.216
+  mType: 1
+  mFillDirection: 4
+  mFillAmount: 1
+  mInvert: 0
+  mFlip: 0
+  mApplyGradient: 0
+  mGradientTop: {r: 1, g: 1, b: 1, a: 1}
+  mGradientBottom: {r: 0.7, g: 0.7, b: 0.7, a: 1}
+  centerType: 1
+  leftType: 1
+  rightType: 1
+  bottomType: 1
+  topType: 1
+  mAtlas: {fileID: 11400000, guid: f95e07e3d350bf748b0c42b453a69d2e, type: 3}
+  mSpriteName: Bright
+  mFillCenter: 1
 --- !u!1 &2062201259
 GameObject:
   m_ObjectHideFlags: 0
@@ -3746,7 +4130,7 @@ GameObject:
   - component: {fileID: 2062201260}
   - component: {fileID: 2062201262}
   - component: {fileID: 2062201261}
-  m_Layer: 5
+  m_Layer: 9
   m_Name: Background
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -3845,7 +4229,7 @@ GameObject:
   m_Component:
   - component: {fileID: 2083221290}
   - component: {fileID: 2083221291}
-  m_Layer: 5
+  m_Layer: 9
   m_Name: UIGrid
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -3914,7 +4298,7 @@ GameObject:
   - component: {fileID: 2101960680}
   - component: {fileID: 2101960679}
   - component: {fileID: 2101960681}
-  m_Layer: 5
+  m_Layer: 9
   m_Name: Scroll View
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -4005,7 +4389,7 @@ MonoBehaviour:
   anchorOffset: 0
   softBorderPadding: 1
   renderQueue: 0
-  startingRenderQueue: 3003
+  startingRenderQueue: 3004
   mClipTexture: {fileID: 0}
   mAlpha: 1
   mClipping: 3
@@ -4042,7 +4426,7 @@ GameObject:
   m_Component:
   - component: {fileID: 2109289612}
   - component: {fileID: 2109289613}
-  m_Layer: 5
+  m_Layer: 9
   m_Name: StartLabel
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -4142,7 +4526,7 @@ GameObject:
   m_Component:
   - component: {fileID: 2120858303}
   - component: {fileID: 2120858304}
-  m_Layer: 5
+  m_Layer: 9
   m_Name: panel_select
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -4207,7 +4591,7 @@ MonoBehaviour:
   anchorOffset: 0
   softBorderPadding: 1
   renderQueue: 0
-  startingRenderQueue: 3000
+  startingRenderQueue: 3001
   mClipTexture: {fileID: 0}
   mAlpha: 1
   mClipping: 0
