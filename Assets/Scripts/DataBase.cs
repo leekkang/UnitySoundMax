@@ -4,12 +4,13 @@ using System.Collections.Generic;
 using UnityEngine;
 using System.IO;
 using UnityEngine.Networking;
+using SoundMax;
 
-public class Blocks {
-    public List<Tick> mListTick = new List<Tick>();
+public class KShootBlock {
+    public List<KShootTick> mListTick = new List<KShootTick>();
 }
 
-public class Tick {
+public class KShootTick {
     public Dictionary<string, string> mDicSetting = new Dictionary<string, string>();
     public string mButtons;
     public string mFx;
@@ -24,26 +25,26 @@ public class Tick {
     }
 }
 
-public class TimeIndex {
+public class KShootTime {
     public int mIndexBlock;
     public int mIndexTick;
 
-    public TimeIndex(int block = -1, int tick = -1) {
+    public void Reset(int block, int tick) {
         mIndexBlock = block;
         mIndexTick = tick;
     }
 }
 
-public enum Difficulty {
-    Light,
-    Challenge,
-    Extended,
-    Infinite
+public class KShootEffectDefinition {
+    public string mTypeName;
+    public Dictionary<string, string> mParameters = new Dictionary<string, string>();
 }
 
 public class DataBase : Singleton<DataBase> {
-
     public List<char> mListLaserChar = new List<char>();
+    public DefaultEffectSettings mEffectSetting;
+
+    public MusicData mListMusic = new MusicData();
 
     public void Open() {
         for (char c = '0'; c <= '9'; c++)
@@ -52,6 +53,8 @@ public class DataBase : Singleton<DataBase> {
             mListLaserChar.Add(c);
         for (char c = 'a'; c <= 'o'; c++)
             mListLaserChar.Add(c);
+
+        mEffectSetting = new DefaultEffectSettings();
 
         LoadAudio("colorfulsky", AudioType.OGGVORBIS, (audio) => { Debug.Log("load complete"); });
     }
@@ -110,16 +113,18 @@ public class MusicData {
     public string mName;
     public int mBpm;
 
-    TimeIndex mTime;
-    List<Blocks> mListBlocks;
-    Dictionary<string, string> mDicSettings = new Dictionary<string, string>();
+    public KShootTime mTime = new KShootTime();
+    public List<KShootBlock> mListBlocks = new List<KShootBlock>();
+
+    public Dictionary<string, string> mDicSettings = new Dictionary<string, string>();
+    public Dictionary<string, KShootEffectDefinition> mDicFilterDefine = new Dictionary<string, KShootEffectDefinition>();
+    public Dictionary<string, KShootEffectDefinition> mDicFxDefine = new Dictionary<string, KShootEffectDefinition>();
 
     public void Load(string musicName, Difficulty difficulty) {
+        string ksh = string.Format("{0}{1}{0}_{2}.ksh", musicName, Path.DirectorySeparatorChar, DataBase.inst.GetDifficultyPostfix(difficulty));
+
         mDicSettings.Clear();
         mListBlocks.Clear();
-
-        string ksh = string.Format("{0}{1}{0}_{2}.ksh", musicName, Path.DirectorySeparatorChar, DataBase.inst.GetDifficultyPostfix(difficulty));
-        mListBlocks = new List<Blocks>();
 
         using (StreamReader sr = new StreamReader(Application.streamingAssetsPath + Path.DirectorySeparatorChar + ksh)) {
             // setting
@@ -143,19 +148,21 @@ public class MusicData {
             }
 
             // note information
-            Blocks block = new Blocks();
-            Tick tick = new Tick();
-            mTime = new TimeIndex(0, 0);
+            int n_count = 0;
+            KShootBlock block = new KShootBlock();
+            KShootTick tick = new KShootTick();
+            mTime.Reset(0, 0);
             while (sr.Peek() >= 0) {
                 line = sr.ReadLine().Trim();
 
                 if (string.IsNullOrEmpty(line))
                     continue;
 
+                n_count++;
                 // next block create
                 if (line == BLOCK_SEPARATOR) {
                     mListBlocks.Add(block);
-                    block = new Blocks();
+                    block = new KShootBlock();
                     mTime.mIndexBlock++;
                     mTime.mIndexTick = 0;
                 } else {
@@ -165,7 +172,31 @@ public class MusicData {
                         continue;
 
                     if (line[0].Equals("#")) {
-                        // 커스텀 fx 이펙트를 설정할 수 있으나 일단 복잡해서 뺌
+                        // TODO : 커스텀 fx 이펙트를 설정할 수 있으나 일단 복잡해서 뺌
+                        string[] custom = line.Split(' ');
+                        if (custom.Length != 3) {
+                            Debug.Log(string.Format( "Invalid define found in ksh map @{0}: {1}", n_count, line));
+                        }
+                        KShootEffectDefinition def = new KShootEffectDefinition();
+                        def.mTypeName = custom[1];
+
+                        string[] parameters = custom[2].Split(';');
+                        for (int i = 0; i < parameters.Length; i++) {
+                            string[] param = parameters[i].Split('=');
+                            if (param.Length != 2) {
+                                Debug.Log(string.Format("Invalid parameter in custom effect definition for {0}@{1}: \"{2}\"", def.mTypeName, n_count, line));
+                                continue;
+                            }
+                            def.mParameters.Add(param[0], param[1]);
+                        }
+
+                        if (custom[0] == "#define_fx")
+                            mDicFxDefine.Add(def.mTypeName, def);
+                        else if (custom[0] == "#define_filter")
+                            mDicFilterDefine.Add(def.mTypeName, def);
+                        else
+                            Debug.Log(string.Format("Unkown define statement in ksh @{0}: {1}", n_count, line));
+
                         continue;
                     }
 
@@ -177,6 +208,9 @@ public class MusicData {
                     }
 
                     splitted = line.Split('|');
+                    tick.mButtons = splitted[0];
+                    tick.mFx = splitted[1];
+                    tick.mLaser = splitted[2];
                     if (splitted.Length < 3) {
                         Debug.Log("text format error : note information malformed");
                         return;
@@ -199,14 +233,14 @@ public class MusicData {
                     }
 
                     block.mListTick.Add(tick);
-                    tick = new Tick();
+                    tick = new KShootTick();
                     mTime.mIndexTick++;
                 }
             }
         }
     }
 
-    bool NextTime() {
+    public bool NextTime() {
         mTime.mIndexTick++;
         if (mTime.mIndexTick >= GetCurBlock().mListTick.Count) {
             mTime.mIndexTick = 0;
@@ -216,7 +250,7 @@ public class MusicData {
         return GetCurBlock() != null;
     }
 
-    public Blocks GetCurBlock() {
+    public KShootBlock GetCurBlock() {
         if (mTime.mIndexBlock == -1)
             return null;
 
@@ -226,19 +260,19 @@ public class MusicData {
         return mListBlocks[mTime.mIndexBlock];
     }
 
-    public Tick GetCurTick() {
-        Blocks curBlock = GetCurBlock();
+    public KShootTick GetCurTick() {
+        KShootBlock curBlock = GetCurBlock();
         if (mTime.mIndexTick == -1 || mTime.mIndexTick >= curBlock.mListTick.Count)
             return null;
 
         return curBlock.mListTick[mTime.mIndexTick];
     }
 
-    public float TimeToFloat(Time time) {
-        Blocks curBlock = GetCurBlock();
+    public float TimeToFloat() {
+        KShootBlock curBlock = GetCurBlock();
         if (curBlock == null)
             return -1f;
 
-        return (float)mTime.mIndexBlock + (mTime.mIndexTick / curBlock.mListTick.Count);
+        return mTime.mIndexBlock + ((float)mTime.mIndexTick / curBlock.mListTick.Count);
     }
 }
