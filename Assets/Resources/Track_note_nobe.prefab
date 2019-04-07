@@ -1,0 +1,168 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!1 &6554629252667435646
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 6499408228005601027}
+  - component: {fileID: 8600554363492252079}
+  m_Layer: 0
+  m_Name: Track_note_nobe
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &6499408228005601027
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6554629252667435646}
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_RootOrder: 0
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &8600554363492252079
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6554629252667435646}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 4d0c51bb0b6e93049af5e88f93826e3b, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  material: {fileID: 2100000, guid: fd3818924aa6a624cb3802e53963e7b0, type: 2}
+  mSprites:
+  - name: FXNote
+    x: 1447
+    y: 2010
+    width: 338
+    height: 38
+    borderLeft: 0
+    borderRight: 0
+    borderTop: 0
+    borderBottom: 0
+    paddingLeft: 331
+    paddingRight: 331
+    paddingTop: 462
+    paddingBottom: 500
+  - name: JudgementLine
+    x: 0
+    y: 1877
+    width: 1080
+    height: 171
+    borderLeft: 0
+    borderRight: 0
+    borderTop: 0
+    borderBottom: 0
+    paddingLeft: 0
+    paddingRight: 0
+    paddingTop: 374
+    paddingBottom: 455
+  - name: Nobe_Left
+    x: 1786
+    y: 1723
+    width: 365
+    height: 325
+    borderLeft: 0
+    borderRight: 0
+    borderTop: 0
+    borderBottom: 0
+    paddingLeft: 317
+    paddingRight: 318
+    paddingTop: 314
+    paddingBottom: 361
+  - name: Nobe_Left_Glow
+    x: 517
+    y: 1551
+    width: 365
+    height: 325
+    borderLeft: 0
+    borderRight: 0
+    borderTop: 0
+    borderBottom: 0
+    paddingLeft: 317
+    paddingRight: 318
+    paddingTop: 314
+    paddingBottom: 361
+  - name: Nobe_Right
+    x: 1081
+    y: 1723
+    width: 365
+    height: 325
+    borderLeft: 0
+    borderRight: 0
+    borderTop: 0
+    borderBottom: 0
+    paddingLeft: 317
+    paddingRight: 318
+    paddingTop: 314
+    paddingBottom: 361
+  - name: Nobe_Right_Glow
+    x: 151
+    y: 1551
+    width: 365
+    height: 325
+    borderLeft: 0
+    borderRight: 0
+    borderTop: 0
+    borderBottom: 0
+    paddingLeft: 317
+    paddingRight: 318
+    paddingTop: 314
+    paddingBottom: 361
+  - name: NormalNote
+    x: 0
+    y: 1846
+    width: 150
+    height: 30
+    borderLeft: 0
+    borderRight: 0
+    borderTop: 0
+    borderBottom: 0
+    paddingLeft: 416
+    paddingRight: 434
+    paddingTop: 427
+    paddingBottom: 543
+  - name: Track
+    x: 2595
+    y: 0
+    width: 442
+    height: 2048
+    borderLeft: 0
+    borderRight: 0
+    borderTop: 0
+    borderBottom: 0
+    paddingLeft: 0
+    paddingRight: 0
+    paddingTop: 0
+    paddingBottom: 0
+  - name: Track_Highlight
+    x: 2152
+    y: 1970
+    width: 442
+    height: 78
+    borderLeft: 0
+    borderRight: 0
+    borderTop: 0
+    borderBottom: 0
+    paddingLeft: 0
+    paddingRight: 0
+    paddingTop: 554
+    paddingBottom: 1416
+  mPixelSize: 1
+  mReplacement: {fileID: 0}
+  mCoordinates: 0
+  sprites: []
