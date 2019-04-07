@@ -122,7 +122,7 @@ public class ChartStop {
     public int duration;
 };
 
-class BeatmapSetting {
+public class BeatmapSetting {
     // Basic song meta data
     public string title;
     public string artist;
@@ -174,7 +174,7 @@ public class Beatmap {
     public List<ZoomControlPoint> mListZoomPoint = new List<ZoomControlPoint>();
     public List<string> mListSamplePath = new List<string>();
 
-    BeatmapSetting mSetting;
+    public BeatmapSetting mSetting;
 
     void Reset() {
         mDicCustomEffect.Clear();
