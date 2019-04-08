@@ -102,7 +102,8 @@ public class IngameEngine : Singleton<IngameEngine> {
 
         BeatmapSetting mapSettings = m_beatmap.mSetting;
 
-        m_gaugeSamples.Initialize();
+        for (int i = 0; i < m_gaugeSamples.Length; i++)
+            m_gaugeSamples[0] = 0;
         int firstObjectTime = m_beatmap.mListObjectState[0].mTime;
         int idx = m_beatmap.mListObjectState.Count - 1;
         while (m_beatmap.mListObjectState[idx].mType == ButtonType.Event &&
@@ -233,7 +234,7 @@ public class IngameEngine : Singleton<IngameEngine> {
             m_playback.OnTimingPointChanged = OnTimingPointChanged;
         }
         m_playback.cMod = m_usecMod;
-        m_playback.cModSpeed = m_hispeed * (float)m_playback.GetCurrentTimingPoint().GetBpm();
+        m_playback.cModSpeed = m_hispeed * (float)m_playback.GetCurrentTimingPoint().GetBPM();
         // Register input bindings
         m_scoring.OnButtonMiss = OnButtonMiss;
         m_scoring.OnLaserSlamHit = OnLaserSlamHit;
@@ -406,8 +407,7 @@ public class IngameEngine : Singleton<IngameEngine> {
         }
 
     }
-    void OnButtonMiss(Input.Button button, bool hitEffect) {
-        uint buttonIdx = (uint)button;
+    void OnButtonMiss(int buttonIdx, bool hitEffect) {
         if (hitEffect) {
             Color c = m_track.hitColors[0];
             m_track.AddEffect(new ButtonHitEffect(buttonIdx, c));
@@ -442,7 +442,7 @@ public class IngameEngine : Singleton<IngameEngine> {
 
 
     void OnTimingPointChanged(TimingPoint tp) {
-        m_hispeed = m_modSpeed / (float)tp.GetBpm();
+        m_hispeed = m_modSpeed / (float)tp.GetBPM();
     }
 
     void OnLaneToggleChanged(LaneHideTogglePoint tp) {

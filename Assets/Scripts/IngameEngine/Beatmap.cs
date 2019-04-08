@@ -28,6 +28,20 @@ public class HoldButtonData : NormalButtonData {
     public HoldButtonData mPrev;
 
     public new const ButtonType mButtonType = ButtonType.Hold;
+
+    public HoldButtonData GetRoot() {
+        HoldButtonData ptr = this;
+        while (ptr.mPrev != null)
+            ptr = ptr.mPrev;
+        return ptr;
+    }
+
+    public HoldButtonData GetTail() {
+        HoldButtonData ptr = this;
+        while (ptr.mNext != null)
+            ptr = ptr.mNext;
+        return ptr;
+    }
 }
 
 public class SpinStruct {
@@ -56,6 +70,33 @@ public class LaserData : ObjectDataBase {
     public static byte mFlagInstant = 0x1;
     // Indicates that the range of this laser is extended from -0.5 to 1.5
     public static byte mFlagExtended = 0x2;
+
+    public LaserData GetRoot() {
+        LaserData ptr = this;
+        while (ptr.mPrev != null)
+            ptr = ptr.mPrev;
+        return ptr;
+    }
+
+    public LaserData GetTail() {
+        LaserData ptr = this;
+        while (ptr.mNext != null)
+            ptr = ptr.mNext;
+        return ptr;
+    }
+
+    public int GetDirection() {
+        return Math.Sign(mPoints[1] - mPoints[0]);
+    }
+
+    public float SamplePosition(int time) {
+        LaserData state = this;
+        while (state.mNext != null && (state.mTime + state.mDuration) < time) {
+            state = state.mNext;
+        }
+        float f = Mathf.Clamp((float)(time - state.mTime) / Math.Max(1, state.mDuration), 0.0f, 1.0f);
+        return (state.mPoints[1] - state.mPoints[0]) * f + state.mPoints[0];
+    }
 }
 
 public class EventData : ObjectDataBase {
@@ -90,7 +131,7 @@ public class TimingPoint {
     public double GetBarDuration() {
         return GetWholeNoteLength() * ((double)mNumerator / mDenominator);
     }
-    public double GetBpm() {
+    public double GetBPM() {
         return 60000.0f / mBeatDuration;
     }
 }

@@ -15,6 +15,9 @@ public class KeyboardManager : Singleton<KeyboardManager> {
     const float normalClickTime = .1f;
     const float doubleClickTime = .1f;
 
+    public float mMouseXSpeed = 2.0f; //마우스 움직임 민감도
+    public float mMouseYSpeed = 2.0f;
+
     class KeyInfo {
         public bool down;
         public bool stay;
@@ -64,47 +67,18 @@ public class KeyboardManager : Singleton<KeyboardManager> {
         }
     }
 
-    public bool CheckDouble(InputCode type) {
-        int compareNum = Mathf.CeilToInt(frame * doubleTime); // 올림(넉넉한 판정)
-        int num = 0, downNum = 0;
-        for (int i = 0; i < compareNum; i++) {
-            if (index - i < 0) num = saveNum + (index - i);
-            else num = index - i;
-
-            if (info[(int)type, num].down) downNum++;
-            if (downNum > 1) return true;
-        }
-
-        return false;
+    public bool CheckHold(int num) {
+        return info[(int)mButtonInputCode[num], index].stay;
     }
 
-    // 단일클릭과 양클릭을 구분하기 위해 만든 함수, 정해진 프레임 동안 키를 누르고 있지 않으면 false 반환
-    public bool CheckClick(InputCode type) {
-        int compareNum = Mathf.CeilToInt(frame * doubleClickTime); // 올림(넉넉한 판정)
-        int num = 0;
-        for (int i = 0; i < compareNum; i++) {
-            if (index - i < 0) num = saveNum + (index - i);
-            else num = index - i;
-
-            if (!info[(int)type, num].stay)
-                return false;
-        }
-        return true;
+    public float GetLaserAxisValue(int num) {
+        // 0 : left, 1 : right
+        return Input.GetAxis(num == 0 ? "Mouse X" : "Mouse Y");
     }
 
-    public bool CheckDoubleClick() {
-        int compareNum = Mathf.CeilToInt(frame * doubleClickTime); // 올림(넉넉한 판정)
-        int num = 0, downNum = 0;
-        for (int i = 0; i < compareNum; i++) {
-            if (index - i < 0) num = saveNum + (index - i);
-            else num = index - i;
-
-            if (info[(int)InputCode.mouseLeft, num].down) downNum++;
-            if (info[(int)InputCode.mouseRight, num].down) downNum++;
-            if (downNum > 1) return true;
-        }
-
-        return false;
+    public int GetLaserDirection(int num) {
+        // 0 : left, 1 : right
+        return System.Math.Sign(Input.GetAxis(num == 0 ? "Mouse X" : "Mouse Y"));
     }
 
     void SaveInfo(InputCode type) {
@@ -185,4 +159,51 @@ public class KeyboardManager : Singleton<KeyboardManager> {
         info[type, index].stay = Input.GetMouseButton(num);
         info[type, index].up = Input.GetMouseButtonUp(num);
     }
+
+    #region Not Used In SoundMax
+
+    public bool CheckDouble(InputCode type) {
+        int compareNum = Mathf.CeilToInt(frame * doubleTime); // 올림(넉넉한 판정)
+        int num = 0, downNum = 0;
+        for (int i = 0; i < compareNum; i++) {
+            if (index - i < 0) num = saveNum + (index - i);
+            else num = index - i;
+
+            if (info[(int)type, num].down) downNum++;
+            if (downNum > 1) return true;
+        }
+
+        return false;
+    }
+
+    // 단일클릭과 양클릭을 구분하기 위해 만든 함수, 정해진 프레임 동안 키를 누르고 있지 않으면 false 반환
+    public bool CheckClick(InputCode type) {
+        int compareNum = Mathf.CeilToInt(frame * doubleClickTime); // 올림(넉넉한 판정)
+        int num = 0;
+        for (int i = 0; i < compareNum; i++) {
+            if (index - i < 0) num = saveNum + (index - i);
+            else num = index - i;
+
+            if (!info[(int)type, num].stay)
+                return false;
+        }
+        return true;
+    }
+
+    public bool CheckDoubleClick() {
+        int compareNum = Mathf.CeilToInt(frame * doubleClickTime); // 올림(넉넉한 판정)
+        int num = 0, downNum = 0;
+        for (int i = 0; i < compareNum; i++) {
+            if (index - i < 0) num = saveNum + (index - i);
+            else num = index - i;
+
+            if (info[(int)InputCode.mouseLeft, num].down) downNum++;
+            if (info[(int)InputCode.mouseRight, num].down) downNum++;
+            if (downNum > 1) return true;
+        }
+
+        return false;
+    }
+
+    #endregion
 }

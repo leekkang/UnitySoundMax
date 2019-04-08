@@ -67,7 +67,7 @@ public class PlaybackEngine {
     public float m_barTime;
     public float m_beatTime;
 
-    Beatmap m_beatmap;
+    public Beatmap m_beatmap { get; private set; }
 
     public void SetBeatmap(Beatmap map) {
         m_beatmap = map;
@@ -495,7 +495,7 @@ public class PlaybackEngine {
 
         return m_currentTiming;
     }
-    TimingPoint GetTimingPointAt(int time, bool allowReset) {
+    public TimingPoint GetTimingPointAt(int time, bool allowReset = false) {
         int index = GetSelectTimingPointIndex(time, allowReset);
         if (index == -1)
             return null;
