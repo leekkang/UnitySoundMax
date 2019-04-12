@@ -167,13 +167,13 @@ public class Scoring : Singleton<Scoring> {
     public float currentGauge = 0.0f;
 
     // Current combo
-    uint currentComboCounter;
+    int currentComboCounter;
 
     // Combo state (0 = regular, 1 = full combo, 2 = perfect)
     byte comboState = 2;
 
     // Highest combo in current run
-    uint maxComboCounter;
+    int maxComboCounter;
 
     // The timings of hit objects, sorted by time hit
     // these are used for debugging
@@ -193,7 +193,7 @@ public class Scoring : Singleton<Scoring> {
     // Current lasers are extended
     bool[] lasersAreExtend = new bool[2];
     // Time since laser has been used
-    float[] timeSinceLaserUsed = new float[2];
+    public float[] timeSinceLaserUsed = new float[2];
 
     bool m_interpolateLaserOutput = false;
 
@@ -266,7 +266,7 @@ public class Scoring : Singleton<Scoring> {
     public System.Action<LaserData> OnLaserSlamHit;
     // Called when the combo counter changed
     // (New Combo)
-    public System.Action<uint> OnComboChanged;
+    public System.Action<int> OnComboChanged;
 
     // Called when score has changed
     //	(New Score)
@@ -403,7 +403,7 @@ public class Scoring : Singleton<Scoring> {
         }
     }
 
-    void Tick(float deltaTime) {
+    public void Tick(float deltaTime) {
         m_UpdateLasers(deltaTime);
         m_UpdateTicks();
         if (!autoplay && !autoplayButtons)

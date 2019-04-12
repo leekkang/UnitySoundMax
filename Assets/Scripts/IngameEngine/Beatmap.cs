@@ -205,8 +205,8 @@ public class BeatmapSetting {
 }
 
 public class Beatmap {
-    Dictionary<EffectType, AudioEffect> mDicCustomEffect = new Dictionary<EffectType, AudioEffect>();
-    Dictionary<EffectType, AudioEffect> mDicCustomFilter = new Dictionary<EffectType, AudioEffect>();
+    public Dictionary<EffectType, AudioEffect> mDicCustomEffect = new Dictionary<EffectType, AudioEffect>();
+    public Dictionary<EffectType, AudioEffect> mDicCustomFilter = new Dictionary<EffectType, AudioEffect>();
 
     public List<TimingPoint> mListTimingPoint = new List<TimingPoint>();
     public List<ChartStop> mListChartStop = new List<ChartStop>();
@@ -1080,6 +1080,20 @@ public class Beatmap {
 
         return effect;
     }
+
+    public AudioEffect GetEffect(EffectType type) {
+        if (type >= EffectType.UserDefined0) {
+            return mDicCustomEffect[type];
+        }
+        return DataBase.inst.mEffectSetting.GetDefault(type);
+    }
+    public AudioEffect GetFilter(EffectType type) {
+        if (type >= EffectType.UserDefined0) {
+            return mDicCustomFilter[type];
+        }
+        return DataBase.inst.mEffectSetting.GetDefault(type);
+    }
+
 }
 
 

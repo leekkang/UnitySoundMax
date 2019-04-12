@@ -7,12 +7,12 @@ using System;
 
 public enum GameFlags : byte {
     None = 0,
-    Hard = 1,
-    Mirror = 2,
-    Random = 4,
-    AutoBT = 8,
-    AutoFX = 16,
-    AutoLaser = 32,
+    Hard = 1 << 0,
+    Mirror = 1 << 1,
+    Random = 1 << 2,
+    AutoBT = 1 << 3,
+    AutoFX = 1 << 4,
+    AutoLaser = 1 << 5,
 }
 
 public class IngameEngine : Singleton<IngameEngine> {
@@ -51,7 +51,7 @@ public class IngameEngine : Singleton<IngameEngine> {
     // Beatmap playback manager (object and timing point selector)
     PlaybackEngine m_playback;
     // Audio playback manager (music and FX))
-    //AudioPlayback m_audioPlayback;
+    AudioEngine m_audioPlayback;
     // Applied audio offset
     int m_audioOffset = 0;
     int m_fpsTarget = 0;
@@ -372,9 +372,8 @@ public class IngameEngine : Singleton<IngameEngine> {
         //ex.position = m_track.TransformPoint(ex.position);
     }
 
-    void OnButtonHit(Input.Button button, ScoreHitRating rating, ObjectDataBase hitObject, bool late) {
+    void OnButtonHit(int buttonIdx, ScoreHitRating rating, ObjectDataBase hitObject, bool late) {
         NormalButtonData st = (NormalButtonData)hitObject;
-        uint buttonIdx = (uint)button;
 
         // The color effect in the button lane
         // 버튼 히트 이펙트
@@ -390,6 +389,7 @@ public class IngameEngine : Singleton<IngameEngine> {
             //m_track.AddEffect(new ButtonHitRatingEffect(buttonIdx, rating));
 
             if (rating == ScoreHitRating.Good) {
+                Debug.Log("Hit Good");
                 // 판정 굿 이펙트??
                 //m_track.timedHitEffect.late = late;
                 //m_track.timedHitEffect.Reset(0.75f);
@@ -408,22 +408,23 @@ public class IngameEngine : Singleton<IngameEngine> {
 
     }
     void OnButtonMiss(int buttonIdx, bool hitEffect) {
-        if (hitEffect) {
-            Color c = m_track.hitColors[0];
-            m_track.AddEffect(new ButtonHitEffect(buttonIdx, c));
-        }
-        m_track.AddEffect(new ButtonHitRatingEffect(buttonIdx, ScoreHitRating.Miss));
+        Debug.Log("Hit Miss");
+        //if (hitEffect) {
+        //    Color c = m_track.hitColors[0];
+        //    m_track.AddEffect(new ButtonHitEffect(buttonIdx, c));
+        //}
+        //m_track.AddEffect(new ButtonHitRatingEffect(buttonIdx, ScoreHitRating.Miss));
     }
-    void OnComboChanged(uint newCombo) {
+    void OnComboChanged(int newCombo) {
         // 콤보 체인지 이펙트 또는 라벨 변경
         //m_comboAnimation.Restart();
     }
-    void OnScoreChanged(uint newScore) {
+    void OnScoreChanged(int newScore) {
         // 스코어 라벨 변경
     }
 
     // These functions control if FX button DSP's are muted or not
-    void OnObjectHold(Input.Button, ObjectDataBase obj) {
+    void OnObjectHold(int ButtonIdx, ObjectDataBase obj) {
         if (obj.mType == ButtonType.Hold) {
             HoldButtonData hold = (HoldButtonData)obj;
             if (hold.mEffectType != EffectType.None) {
@@ -431,7 +432,7 @@ public class IngameEngine : Singleton<IngameEngine> {
             }
         }
     }
-    void OnObjectReleased(Input.Button, ObjectDataBase obj) {
+    void OnObjectReleased(int ButtonIdx, ObjectDataBase obj) {
         if (obj.mType == ButtonType.Hold) {
             HoldButtonData hold = (HoldButtonData)obj;
             if (hold.mEffectType != EffectType.None) {
@@ -448,7 +449,7 @@ public class IngameEngine : Singleton<IngameEngine> {
     void OnLaneToggleChanged(LaneHideTogglePoint tp) {
         // Calculate how long the transition should be in seconds
         double duration = m_currentTiming.mBeatDuration * 4.0f * (tp.duration / 192.0f) * 0.001f;
-        m_track.SetLaneHide(!m_hideLane, duration);
+        //m_track.SetLaneHide(!m_hideLane, duration);
         m_hideLane = !m_hideLane;
     }
 
@@ -491,7 +492,7 @@ public class IngameEngine : Singleton<IngameEngine> {
     }
     void OnLaserAlertEntered(LaserData obj) {
         if (m_scoring.timeSinceLaserUsed[obj.mIndex] > 3.0f) {
-            m_track.SendLaserAlert(obj.mIndex);
+            //m_track.SendLaserAlert(obj.mIndex);
             //lua_getglobal(m_lua, "laser_alert");
             //lua_pushboolean(m_lua, object.index == 1);
             //if (lua_pcall(m_lua, 1, 0, 0) != 0) {
@@ -499,17 +500,20 @@ public class IngameEngine : Singleton<IngameEngine> {
             //}
         }
     }
-    void m_OnButtonPressed(Input.Button buttonCode) {
-        if (buttonCode == Input.Button.BT_S) {
-            if (g_input.Are3BTsHeld()) {
-                ObjectState *const* lastObj = &m_beatmap.GetLinearObjects().back();
-                int timePastEnd = m_lastMapTime - (*lastObj).time;
-                if (timePastEnd < 0)
-                    m_manualExit = true;
 
-                FinishGame();
-            }
-        }
+    // 필요한건지?
+    void m_OnButtonPressed(InputCode code) {
+        // 강제 종료?
+        //if (buttonCode == Input.Button.BT_S) {
+        //    if (g_input.Are3BTsHeld()) {
+        //        ObjectState *const* lastObj = &m_beatmap.GetLinearObjects().back();
+        //        int timePastEnd = m_lastMapTime - (*lastObj).time;
+        //        if (timePastEnd < 0)
+        //            m_manualExit = true;
+
+        //        FinishGame();
+        //    }
+        //}
     }
 
     // Skips ahead to the right before the first object in the map
@@ -543,7 +547,7 @@ public class IngameEngine : Singleton<IngameEngine> {
     }
 
     bool GetTickRate(int rate) {
-        if (!m_audioPlayback.IsPaused()) {
+        if (!m_audioPlayback.m_paused) {
             rate = m_fpsTarget;
             return true;
         }

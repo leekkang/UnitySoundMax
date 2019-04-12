@@ -256,6 +256,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 0b855b1ed89228046859e11cf2593152, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  mMouseXSpeed: 2
+  mMouseYSpeed: 2
 --- !u!1 &320220558
 GameObject:
   m_ObjectHideFlags: 0
@@ -3803,6 +3805,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: d0210a3af6a80f64292de4ff4408b9d7, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  m_playing: 1
 --- !u!1 &1942017381
 GameObject:
   m_ObjectHideFlags: 0
