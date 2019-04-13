@@ -377,7 +377,7 @@ public class DefaultEffectSettings {
                 freq = new EffectParam<float>(80f, 2000f, EasingFunction.Ease.EaseInExpo),
                 q = new EffectParam<float>(10f, 5f)
             };
-        } else if (type == EffectType.Bitcrusher) {
+        } else if (type == EffectType.BitCrusher) {
             effect = new AudioEffectBitcrusher() {
                 reduction = new EffectParam<int>(0, 45)
             };

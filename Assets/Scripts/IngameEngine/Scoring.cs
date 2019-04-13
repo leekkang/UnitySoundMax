@@ -167,7 +167,7 @@ public class Scoring : Singleton<Scoring> {
     public float currentGauge = 0.0f;
 
     // Current combo
-    int currentComboCounter;
+    public int currentComboCounter;
 
     // Combo state (0 = regular, 1 = full combo, 2 = perfect)
     byte comboState = 2;
@@ -245,7 +245,7 @@ public class Scoring : Singleton<Scoring> {
     };
     // Hold objects
     ObjectDataBase[] m_holdObjects = new ObjectDataBase[8];
-    List<ObjectDataBase> m_heldObjects;
+    List<ObjectDataBase> m_heldObjects = new List<ObjectDataBase>();
 
     GameFlags m_flags;
 
@@ -396,7 +396,7 @@ public class Scoring : Singleton<Scoring> {
         OnScoreChanged(0);
     }
 
-    void FinishGame() {
+    public void FinishGame() {
         m_CleanupTicks();
         for (int i = 0; i < 8; i++) {
             m_ReleaseHoldObject(i);
@@ -444,7 +444,7 @@ public class Scoring : Singleton<Scoring> {
     }
 
     const float laserOutputInterpolationDuration = 0.1f;
-    float GetLaserOutput() {
+    public float GetLaserOutput() {
         float f = Math.Min(1.0f, m_timeSinceOutputSet / laserOutputInterpolationDuration);
         return m_laserOutputSource + (m_laserOutputTarget - m_laserOutputSource) * f;
     }
@@ -585,7 +585,7 @@ public class Scoring : Singleton<Scoring> {
         return m_holdObjects[index] != null;
     }
 
-    bool IsLaserHeld(int laserIndex, bool includeSlams) {
+    public bool IsLaserHeld(int laserIndex, bool includeSlams) {
         if (includeSlams)
             return IsObjectHeld(laserIndex + 6);
 

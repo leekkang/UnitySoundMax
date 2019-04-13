@@ -38,17 +38,27 @@ public class GameManager : MonoBehaviour {
             return;
         }
 
-        if (GUI.Button(buttonRect, "PracticeBattle") && !buttonDragging) {
+        if (GUI.Button(buttonRect, "colorfulsky play") && !buttonDragging) {
             MusicData data = new MusicData();
             data.Load("colorfulsky", Difficulty.Challenge);
+            IngameEngine.inst.StartGame(data);
         }
 
-        if (GUI.Button(new Rect(buttonRect.x, buttonRect.y + Screen.height * 0.1f, buttonRect.width, buttonRect.height), "Logout") && !buttonDragging) {
+        if (GUI.Button(new Rect(buttonRect.x, buttonRect.y + Screen.height * 0.1f, buttonRect.width, buttonRect.height), "audio play") && !buttonDragging) {
 
+            AudioSource source = GameObject.Find("FXSound").GetComponent<AudioSource>();
+            DataBase.inst.LoadAudio("colorfulsky", AudioType.OGGVORBIS, (audio) => {
+                Debug.Log("audio sample : " + audio.samples);
+                Debug.Log("audio length : " + audio.length);
+                source.clip = audio;
+                source.Play();
+            });
         }
 
         if (GUI.Button(new Rect(buttonRect.x, buttonRect.y + Screen.height * 0.2f, buttonRect.width, buttonRect.height), "StoryPanel") && !buttonDragging) {
 
+            AudioSource source = GameObject.Find("FXSound").GetComponent<AudioSource>();
+            Debug.Log("source is playing? : " + source.isPlaying);
         }
     }
 #endif

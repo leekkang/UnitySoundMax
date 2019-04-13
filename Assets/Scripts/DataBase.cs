@@ -44,7 +44,7 @@ public class DataBase : Singleton<DataBase> {
     public List<char> mListLaserChar = new List<char>();
     public DefaultEffectSettings mEffectSetting;
 
-    public MusicData mListMusic = new MusicData();
+    public List<MusicData> mListMusic = new List<MusicData>();
 
     public void Open() {
         for (char c = '0'; c <= '9'; c++)
@@ -89,6 +89,28 @@ public class DataBase : Singleton<DataBase> {
         StartCoroutine(CoLoadAudio( Path.Combine(Application.streamingAssetsPath, ksh), extension, onLoadCompleted));
     }
 
+    public bool LoadAudio(string path, Action<AudioClip> onLoadCompleted) {
+        if (!File.Exists(path)) {
+            Debug.Log("오디오 파일이 없습니다. : " + path);
+            return false;
+        }
+        string type = path.Split('.')[1].ToLower();
+        AudioType aType;
+        if (type == "ogg")
+            aType = AudioType.OGGVORBIS;
+        else if (type == "wav")
+            aType = AudioType.WAV;
+        else if (type == "mp3")
+            aType = AudioType.MPEG;
+        else {
+            Debug.Log("오디오 파일 확장자가 이상합니다. : " + path);
+            return false;
+        }
+        StartCoroutine(CoLoadAudio(path, aType, onLoadCompleted));
+
+        return true;
+    }
+
     IEnumerator CoLoadAudio(string url, AudioType extension, Action<AudioClip> onLoadCompleted) {
         Debug.Log(url);
         using (var request = UnityWebRequestMultimedia.GetAudioClip(url, extension)) {
@@ -112,6 +134,7 @@ public class MusicData {
     const string BLOCK_SEPARATOR = "--";
     public string mName;
     public int mBpm;
+    public Difficulty mDifficulty;
 
     public KShootTime mTime = new KShootTime();
     public List<KShootBlock> mListBlocks = new List<KShootBlock>();
@@ -121,6 +144,8 @@ public class MusicData {
     public Dictionary<string, KShootEffectDefinition> mDicFxDefine = new Dictionary<string, KShootEffectDefinition>();
 
     public void Load(string musicName, Difficulty difficulty) {
+        mName = musicName;
+        mDifficulty = difficulty;
         string ksh = string.Format("{0}{1}{0}_{2}.ksh", musicName, Path.DirectorySeparatorChar, DataBase.inst.GetDifficultyPostfix(difficulty));
 
         mDicSettings.Clear();
@@ -144,6 +169,8 @@ public class MusicData {
                 string[] splitted = line.Split('=');
                 if (splitted.Length > 1) {
                     mDicSettings.Add(splitted[0], splitted[1]);
+                    if (splitted[0] == "t")
+                        mBpm = int.Parse(splitted[1]);
                 }
             }
 

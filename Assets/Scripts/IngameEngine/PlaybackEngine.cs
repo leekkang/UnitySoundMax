@@ -58,9 +58,9 @@ public class PlaybackEngine {
     ZoomControlPoint[] m_zoomStartPoints = new ZoomControlPoint[4];
     ZoomControlPoint[] m_zoomEndPoints = new ZoomControlPoint[4];
 
-    public List<ObjectDataBase> m_hittableObjects;
-    List<ObjectDataBase> m_holdObjects;
-    List<ObjectDataBase> m_effectObjects;
+    public List<ObjectDataBase> m_hittableObjects = new List<ObjectDataBase>();
+    List<ObjectDataBase> m_holdObjects = new List<ObjectDataBase>();
+    List<ObjectDataBase> m_effectObjects = new List<ObjectDataBase>();
 
     Dictionary<EventKey, EventData> m_eventMapping;
 

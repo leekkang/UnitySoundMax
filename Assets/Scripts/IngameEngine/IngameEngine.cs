@@ -93,12 +93,18 @@ public class IngameEngine : Singleton<IngameEngine> {
     public void Open() {
         m_beatmap = new Beatmap();
         m_playback = new PlaybackEngine();
+        m_audioPlayback = new AudioEngine();
         m_camera = GameObject.Find("IngameCamera").GetComponent<Camera>();
     }
 
-    bool Load(MusicData data) {
+    public void StartGame(MusicData data) {
+        StartCoroutine(CoLoadData(data));
+    }
+
+    IEnumerator CoLoadData(MusicData data) {
         mCurMusic = data;
         m_beatmap.Load(data, false);
+        m_scoring = Scoring.inst;
 
         BeatmapSetting mapSettings = m_beatmap.mSetting;
 
@@ -131,12 +137,13 @@ public class IngameEngine : Singleton<IngameEngine> {
         // Initialize input/scoring
         if (!InitGameplay()) {
             Debug.LogError("Fail to initialize Gameplay");
-            return false;
+            yield break;
         }
 
         // Load beatmap audio
-        //if (!m_audioPlayback.Init(m_playback, m_mapRootPath))
-        //    return false;
+        if (!m_audioPlayback.Init(m_playback))
+            yield break;
+        yield return new WaitUntil(() => m_audioPlayback.bCompleteInit);
 
         ApplyAudioLeadin();
 
@@ -147,7 +154,7 @@ public class IngameEngine : Singleton<IngameEngine> {
 
         if (!InitSFX()) {
             Debug.LogError("Fail to initialize SFX file");
-            return false;
+            yield break;
         }
 
         // Do this here so we don't get input events while still loading
@@ -156,7 +163,18 @@ public class IngameEngine : Singleton<IngameEngine> {
         //m_scoring.SetInput(&g_input);
         m_scoring.Reset(); // Initialize
 
-        return true;
+        // start audio play == start game!
+
+    }
+
+    IEnumerator CoPlayGame() {
+        WaitForEndOfFrame waitFrame = new WaitForEndOfFrame();
+
+        if(!m_ended) {
+            Debug.Log("delta time : " + Time.deltaTime);
+            Tick(Time.deltaTime);
+            yield return waitFrame;
+        }
     }
 
     // Wait before start of map
@@ -174,7 +192,7 @@ public class IngameEngine : Singleton<IngameEngine> {
         if (firstObjectTime < 3000) {
             // Set start time
             m_lastMapTime = firstObjectTime - 5000;
-            //m_audioPlayback.SetPosition(m_lastMapTime);
+            m_audioPlayback.SetPosition(m_lastMapTime);
         }
 
         // Reset playback
@@ -259,7 +277,7 @@ public class IngameEngine : Singleton<IngameEngine> {
     void TickGameplay(float deltaTime) {
         if (!m_started && m_introCompleted) {
             // Start playback of audio in first gameplay tick
-            //m_audioPlayback.Play();
+            m_audioPlayback.Play();
             m_started = true;
 
             //if (g_application.GetAppCommandLine().Contains("-autoskip")) {
@@ -270,7 +288,7 @@ public class IngameEngine : Singleton<IngameEngine> {
         BeatmapSetting beatmapSettings = m_beatmap.mSetting;
 
         // Update beatmap playback
-        int playbackPositionMs = 0;//m_audioPlayback.GetPosition() - m_audioOffset;
+        int playbackPositionMs = m_audioPlayback.GetPosition() - m_audioOffset;
         m_playback.Update(playbackPositionMs);
 
         int delta = playbackPositionMs - m_lastMapTime;
@@ -291,11 +309,11 @@ public class IngameEngine : Singleton<IngameEngine> {
 
         /// #Scoring
         // Update music filter states
-        //m_audioPlayback.SetLaserFilterInput(m_scoring.GetLaserOutput(), m_scoring.IsLaserHeld(0, false) || m_scoring.IsLaserHeld(1, false));
-        //m_audioPlayback.Tick(deltaTime);
+        m_audioPlayback.SetLaserFilterInput(m_scoring.GetLaserOutput(), m_scoring.IsLaserHeld(0, false) || m_scoring.IsLaserHeld(1, false));
+        m_audioPlayback.Tick(deltaTime);
 
         // Link FX track to combo counter for now
-        //m_audioPlayback.SetFXTrackEnabled(m_scoring.currentComboCounter > 0);
+        m_audioPlayback.SetFXTrackEnabled(m_scoring.currentComboCounter > 0);
 
         // Stop playing if gauge is on hard and at 0%
         if ((m_flags & GameFlags.Hard) != GameFlags.None && m_scoring.currentGauge == 0f) {
@@ -312,8 +330,7 @@ public class IngameEngine : Singleton<IngameEngine> {
             gaugeSampleSlot = Mathf.Clamp(gaugeSampleSlot, 0, 255);
             m_gaugeSamples[gaugeSampleSlot] = m_scoring.currentGauge;
         }
-
-
+        
         // Get the current timing point
         m_currentTiming = m_playback.GetCurrentTimingPoint();
 
@@ -334,9 +351,9 @@ public class IngameEngine : Singleton<IngameEngine> {
 
         m_lastMapTime = playbackPositionMs;
 
-        //if (m_audioPlayback.HasEnded()) {
-        //    FinishGame();
-        //}
+        if (m_audioPlayback.HasEnded()) {
+            FinishGame();
+        }
     }
 
     // Called when game is finished and the score screen should show up
@@ -344,7 +361,7 @@ public class IngameEngine : Singleton<IngameEngine> {
         if (m_ended)
             return;
 
-        //m_scoring.FinishGame();
+        m_scoring.FinishGame();
         m_ended = true;
     }
 
@@ -440,8 +457,7 @@ public class IngameEngine : Singleton<IngameEngine> {
             }
         }
     }
-
-
+    
     void OnTimingPointChanged(TimingPoint tp) {
         m_hispeed = m_modSpeed / (float)tp.GetBPM();
     }

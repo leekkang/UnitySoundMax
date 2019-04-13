@@ -1,13 +1,12 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
-using System;
+using System.IO;
 using SoundMax;
-using System.Linq;
 
 public class AudioEngine {
     public PlaybackEngine m_playback;
-    string m_beatmapRootPath;
+    public bool bCompleteInit;
 
     AudioSource m_music;
     AudioSource m_fxtrack;
@@ -29,6 +28,11 @@ public class AudioEngine {
     List<DSP> mMusicDSPs = new List<DSP>();
     List<DSP> mFxDSPs = new List<DSP>();
 
+    public AudioEngine() {
+        m_music = GameObject.Find("MainSound").GetComponent<AudioSource>();
+        m_fxtrack = GameObject.Find("FXSound").GetComponent<AudioSource>();
+    }
+
     void m_CleanupDSP(DSP dsp) {
         if (dsp == null)
             return;
@@ -41,7 +45,8 @@ public class AudioEngine {
         dsp = null;
     }
 
-    public bool Init(PlaybackEngine playback, string mapRootPath) {
+    public bool Init(PlaybackEngine playback) {
+        bCompleteInit = false;
         m_currentHoldEffects[0] = null;
         m_currentHoldEffects[1] = null;
         m_CleanupDSP(m_buttonDSPs[0]);
@@ -49,48 +54,40 @@ public class AudioEngine {
         m_CleanupDSP(m_laserDSP);
 
         m_playback = playback;
-        m_beatmapRootPath = mapRootPath;
 
         // Set default effect type
         SetLaserEffect(EffectType.PeakingFilter);
 
-        //BeatmapSetting mapSettings = playback.m_beatmap.mSetting;
-        //string audioPath = Path.Normalize(m_beatmapRootPath + Path.sep + mapSettings.audioNoFX);
-        //audioPath.Trim(' ');
-        //WString audioPathUnicode = Utility.ConvertToWString(audioPath);
-        //if (!Path.FileExists(audioPath)) {
-        //    Logf("Audio file for beatmap does not exists at: \"%s\"", Logger.Error, audioPath);
-        //    return false;
-        //}
-        //m_music = g_audio.CreateStream(audioPath, true);
-        //if (!m_music) {
-        //    Logf("Failed to load any audio for beatmap \"%s\"", Logger.Error, audioPath);
-        //    return false;
-        //}
-        //m_music.SetVolume(mapSettings.musicVolume);
+        BeatmapSetting mapSettings = playback.m_beatmap.mSetting;
 
-        //// Load FX track
-        //audioPath = Path.Normalize(m_beatmapRootPath + Path.sep + mapSettings.audioFX);
-        //audioPath.TrimBack(' ');
-        //audioPathUnicode = Utility.ConvertToWString(audioPath);
-        //if (!audioPath.empty()) {
-        //    if (!Path.FileExists(audioPath) || Path.IsDirectory(audioPath)) {
-        //        Logf("FX audio for for beatmap does not exists at: \"%s\" Using real-time effects instead.", Logger.Warning, audioPath);
-        //    } else {
-        //        m_fxtrack = g_audio.CreateStream(audioPath, true);
-        //        if (m_fxtrack) {
-        //            // Initially mute normal track if fx is enabled
-        //            m_music.SetVolume(0.0f);
-        //        }
-        //    }
-        //}
+        string rootPath = Path.Combine(Application.streamingAssetsPath, mapSettings.title);
+        string audioPath = Path.Combine(rootPath, mapSettings.audioNoFX).Trim();
+
+        // Load Audio File
+        if (!DataBase.inst.LoadAudio(audioPath, (audio) => {
+            m_music.clip = audio;
+            m_music.volume = mapSettings.musicVolume;
+            if (string.IsNullOrEmpty(mapSettings.audioFX) || 
+                !DataBase.inst.LoadAudio(Path.Combine(rootPath, mapSettings.audioFX).Trim(), (fx) => {
+                    m_fxtrack.clip = fx;
+                    m_fxtrack.volume = 0f;
+                    bCompleteInit = true;
+                })
+            ) {
+                bCompleteInit = true;
+            }
+        })) {
+            return false;
+        }
 
         return true;
     }
-    void Tick(float deltaTime) {
+
+
+    public void Tick(float deltaTime) {
 
     }
-    void Play() {
+    public void Play() {
         m_music.Play();
         if (m_fxtrack)
             m_fxtrack.Play();
@@ -98,7 +95,7 @@ public class AudioEngine {
     void Advance(int ms) {
         SetPosition(GetPosition() + ms);
     }
-    int GetPosition() {
+    public int GetPosition() {
         return (int)(m_music.time * 1000);
     }
     public void SetPosition(int time) {
@@ -118,7 +115,7 @@ public class AudioEngine {
         }
         m_paused = !m_paused;
     }
-    bool HasEnded() {
+    public bool HasEnded() {
         return !m_music.isPlaying;
     }
     public void SetEffect(int index, HoldButtonData obj, PlaybackEngine playback) {
@@ -171,12 +168,12 @@ public class AudioEngine {
             m_laserEffect = m_playback.m_beatmap.GetFilter(type);
         }
     }
-    void SetLaserFilterInput(float input, bool active) {
+    public void SetLaserFilterInput(float input, bool active) {
         if (m_laserEffect.mType != EffectType.None && (active || (input != 0.0f))) {
             // Create DSP
             if (m_laserDSP == null) {
                 // Don't use Bitcrush effects over FX track
-                if (m_fxtrack.isPlaying && m_laserEffectType == EffectType.Bitcrusher)
+                if (m_fxtrack.isPlaying && m_laserEffectType == EffectType.BitCrusher)
                     return;
 
                 m_laserDSP = m_laserEffect.CreateDSP(this);
@@ -203,7 +200,7 @@ public class AudioEngine {
     float GetLaserEffectMix() {
         return m_laserEffectMix;
     }
-    void SetFXTrackEnabled(bool enabled) {
+    public void SetFXTrackEnabled(bool enabled) {
         if (!m_fxtrack)
             return;
         if (m_fxtrackEnabled != enabled) {
@@ -222,9 +219,6 @@ public class AudioEngine {
     }
     Beatmap GetBeatmap() {
         return m_playback.m_beatmap;
-    }
-    string GetBeatmapRootPath() {
-        return m_beatmapRootPath;
     }
     void SetVolume(float volume) {
         m_music.volume = volume;
@@ -246,7 +240,7 @@ public class AudioEngine {
             mix *= input / 0.1f;
 
         switch (m_laserEffect.mType) {
-            case EffectType.Bitcrusher:
+            case EffectType.BitCrusher:
                 m_laserDSP.mix = m_laserEffect.mMix.Sample(input);
                 // TODO : 샘플레이트를 구하는 방법을 모르겠음.
                 // increment, period 저장

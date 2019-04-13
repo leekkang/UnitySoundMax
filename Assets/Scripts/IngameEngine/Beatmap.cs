@@ -15,7 +15,10 @@ public class NormalButtonData : ObjectDataBase {
     public bool mHasSample = false;
     public int mSampleIndex;
     public float mSampleVolume = 1.0f;
-    public const ButtonType mButtonType = ButtonType.Single;
+
+    public NormalButtonData() {
+        mType = ButtonType.Single;
+    }
 }
 
 public class HoldButtonData : NormalButtonData {
@@ -27,7 +30,9 @@ public class HoldButtonData : NormalButtonData {
     public HoldButtonData mNext;
     public HoldButtonData mPrev;
 
-    public new const ButtonType mButtonType = ButtonType.Hold;
+    public HoldButtonData() {
+        mType = ButtonType.Hold;
+    }
 
     public HoldButtonData GetRoot() {
         HoldButtonData ptr = this;
@@ -64,8 +69,11 @@ public class LaserData : ObjectDataBase {
     public LaserData mPrev;
 
     public SpinStruct mSpin = new SpinStruct();
+    
+    public LaserData() {
+        mType = ButtonType.Laser;
+    }
 
-    public const ButtonType mButtonType = ButtonType.Laser;
     // Indicates that this segment is instant and should generate a laser slam segment
     public static byte mFlagInstant = 0x1;
     // Indicates that the range of this laser is extended from -0.5 to 1.5
@@ -101,7 +109,10 @@ public class LaserData : ObjectDataBase {
 
 public class EventData : ObjectDataBase {
     public EventKey mKey;
-    public const ButtonType mButtonType = ButtonType.Event;
+
+    public EventData() {
+        mType = ButtonType.Event;
+    }
 
     // 아래 값들 중 하나만 채워진다.
     public float mFloatVal;
@@ -115,7 +126,7 @@ public class TimingPoint {
     public int mTime;
     public double mBeatDuration;
     public int mNumerator;
-    public int mDenominator;
+    public int mDenominator = 4;
 
     public TimingPoint() { }
     public TimingPoint(TimingPoint target) {
@@ -129,6 +140,9 @@ public class TimingPoint {
         return mBeatDuration * 4;
     }
     public double GetBarDuration() {
+        if (mDenominator == 0)
+            return 0;
+
         return GetWholeNoteLength() * ((double)mNumerator / mDenominator);
     }
     public double GetBPM() {
@@ -235,7 +249,7 @@ public class Beatmap {
         Reset();
 
         Dictionary<EffectType, short> dicDefaultEffectParam = new Dictionary<EffectType, short> {
-            {EffectType.Bitcrusher, 4},
+            {EffectType.BitCrusher, 4},
             {EffectType.Gate, 8},
             {EffectType.Retrigger, 8},
             {EffectType.Phaser, 2000},
@@ -264,7 +278,7 @@ public class Beatmap {
             else if (str == "lpf1")
                 type = EffectType.LowPassFilter;
             else if (str == "fx;bitc" || str == "bitc")
-                type = EffectType.Bitcrusher;
+                type = EffectType.BitCrusher;
             else if (str == "peak")
                 type = EffectType.PeakingFilter;
             else {
@@ -296,7 +310,10 @@ public class Beatmap {
             else if (s.Key == "layer")
                 mSetting.foregroundPath = s.Value;
             else if (s.Key == "m") {
-                mSetting.title = s.Value;
+                string[] splitted = s.Value.Split(';');
+                mSetting.audioNoFX = splitted[0];
+                if (splitted.Length > 1)
+                    mSetting.audioFX = splitted[1].Split(';')[0];
             } else if (s.Key == "o")
                 mSetting.offset = int.Parse(s.Value);
             else if (s.Key == "filtertype")
@@ -618,6 +635,7 @@ public class Beatmap {
                     }
 
                     // Reset 
+                    buttonStates[i] = null;
                     tmpBtnState = null;
                 };
 
@@ -638,7 +656,8 @@ public class Beatmap {
                     }
                 } else if (tmpBtnState == null) {
                     // Create new hold state
-                    tmpBtnState = new TempButtonState(mapTime);
+                    buttonStates[i] = new TempButtonState(mapTime);
+                    tmpBtnState = buttonStates[i];
                     int div = (int)block.mListTick.Count;
 
                     if (lastHoldObject != null)
@@ -653,7 +672,7 @@ public class Beatmap {
 
                         // Set effect
                         if (c == 'B') {
-                            tmpBtnState.effectType = EffectType.Bitcrusher;
+                            tmpBtnState.effectType = EffectType.BitCrusher;
                             if (currentButtonEffectParams[(i - 4) * maxEffectParamsPerButtons] != -1)
                                 tmpBtnState.effectParams[0] = currentButtonEffectParams[(i - 4) * maxEffectParamsPerButtons];
                             else
@@ -705,7 +724,8 @@ public class Beatmap {
                         CreateButton();
 
                         // Create new hold state
-                        tmpBtnState = new TempButtonState(mapTime);
+                        buttonStates[i] = new TempButtonState(mapTime);
+                        tmpBtnState = buttonStates[i];
                         int div = block.mListTick.Count;
 
                         if (i < 4) {
@@ -816,6 +836,7 @@ public class Beatmap {
                     // Terminate laser
                     if (state != null) {
                         // Reset state
+                        laserStates[i] = null;
                         state = null;
 
                         // Reset range extension
@@ -834,6 +855,7 @@ public class Beatmap {
 
                         // Reset state
                         state = null;
+                        laserStates[i] = null;
                     }
 
                     int startTime = mapTime;
@@ -841,7 +863,8 @@ public class Beatmap {
                         // Move offset to be the same as last segment, as in ksh maps there is a 1 tick delay after laser slams
                         startTime = last.mTime;
                     }
-                    state = new TempLaserState(startTime, 0, lastTimingPoint);
+                    laserStates[i] = new TempLaserState(startTime, 0, lastTimingPoint);
+                    state = laserStates[i];
                     state.last = last; // Link together
                     state.startPosition = pos;
 
@@ -909,7 +932,7 @@ public class Beatmap {
     EffectType GetEffectType(string type) {
         if (Enum.IsDefined(typeof(EffectType), type))
             return (EffectType)Enum.Parse(typeof(EffectType), type);
-
+        
         if (type == "LPF")
             return EffectType.LowPassFilter;
         else if (type == "HPF")
@@ -1023,7 +1046,7 @@ public class Beatmap {
             if (dicParams.ContainsKey("pitch")) {
                 ((AudioEffectPitchshift)effect).amount = dicParams["pitch"].GetFloatParam();
             }
-        } else if (effect.mType == EffectType.Bitcrusher) {
+        } else if (effect.mType == EffectType.BitCrusher) {
             if (dicParams.ContainsKey("amount")) {
                 ((AudioEffectBitcrusher)effect).reduction = dicParams["amount"].GetIntParam();
             }

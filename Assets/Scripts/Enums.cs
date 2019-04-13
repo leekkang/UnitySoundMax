@@ -45,7 +45,7 @@
         Phaser,
         Gate,
         TapeStop,
-        Bitcrusher,
+        BitCrusher,
         Wobble,
         SideChain,
         Echo,
