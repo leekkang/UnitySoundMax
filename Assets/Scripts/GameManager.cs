@@ -50,11 +50,10 @@ public class GameManager : MonoBehaviour {
             Scoring.inst.autoplayButtons = true;
             //Scoring.inst.autoplayButtons = false;
             data.Load("max_burning", Difficulty.Challenge);
-            IngameEngine.inst.StartGame(data, 2f);
+            IngameEngine.inst.StartGame(data, 3f);
         }
 
         if (GUI.Button(new Rect(buttonRect.x, buttonRect.y + Screen.height * 0.2f, buttonRect.width, buttonRect.height), "audio play") && !buttonDragging) {
-
             AudioSource source = GameObject.Find("FXSound").GetComponent<AudioSource>();
             DataBase.inst.LoadAudio("colorfulsky", AudioType.OGGVORBIS, (audio) => {
                 Debug.Log("audio sample : " + audio.samples);

@@ -333,6 +333,7 @@ public class IngameEngine : Singleton<IngameEngine> {
             mHoldHitEffect[i].name = string.Format("HoldHitEffect_{0}", i);
             mHoldHitEffect[i].transform.position = pos;
             mHoldHitEffect[i].Stop();
+            mHoldHitEffect[i].gameObject.SetActive(false);
         }
 
         // init button
@@ -372,7 +373,7 @@ public class IngameEngine : Singleton<IngameEngine> {
                 if (objBase.mType == ButtonType.Hold) {
                     HoldButtonData btnHold = (HoldButtonData)objBase;
 
-                    obj.GetComponent<UISprite>().height = (int)(100f + bpmPerLength * btnHold.mDuration);
+                    obj.GetComponent<UISprite>().height = (int)(100f + bpmPerLength * btnHold.mDuration * mSpeed);
                 }
                 objBase.mNote = obj;
 
@@ -395,11 +396,13 @@ public class IngameEngine : Singleton<IngameEngine> {
             mNormalHitEffect[tmp].Emit(1);
             return mNormalHitEffect[tmp];
         } else if (type == ParticleType.Hold) {
-            while (mNormalHitEffect[tmp].isPlaying) {
+            while (mHoldHitEffect[tmp].isPlaying) {
                 tmp++;
                 tmp = tmp % mHoldHitEffect.Length;
+                Debug.Log("tetsaesdfasd");
             }
             mHoldHitEffect[tmp].transform.localPosition = target;
+            mHoldHitEffect[tmp].gameObject.SetActive(true);
             mHoldHitEffect[tmp].Play();
             return mHoldHitEffect[tmp];
         } else if (type == ParticleType.Slam) {
@@ -613,7 +616,13 @@ public class IngameEngine : Singleton<IngameEngine> {
             }
             if (hold.mHitParticle != null) {
                 hold.mHitParticle.Stop();
+                hold.mHitParticle.gameObject.SetActive(false);
                 hold.mHitParticle = null;
+            }
+
+            int currentTime = m_playback.m_playbackTime;
+            if (Math.Abs(currentTime - (hold.mDuration + hold.mTime)) <= Scoring.inst.goodHitTime) {
+                obj.mNote.SetActive(false);
             }
         }
     }
