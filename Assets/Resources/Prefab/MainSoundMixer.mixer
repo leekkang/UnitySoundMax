@@ -83,9 +83,6 @@ AudioMixerGroupController:
   m_Pitch: 19a0b9271f9992b45aa58816a384ac0e
   m_Effects:
   - {fileID: 244504601568147202}
-  - {fileID: 244696333840631882}
-  - {fileID: 244774402766461366}
-  - {fileID: 244580262427281816}
   m_UserColorIndex: 0
   m_Mute: 0
   m_Solo: 0
@@ -119,66 +116,6 @@ AudioMixerEffectController:
   m_EffectName: Attenuation
   m_MixLevel: 238c8875a3ba1a4459f2561558411bc6
   m_Parameters: []
-  m_SendTarget: {fileID: 0}
-  m_EnableWetMix: 0
-  m_Bypass: 0
---- !u!244 &244580262427281816
-AudioMixerEffectController:
-  m_ObjectHideFlags: 3
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_Name: 
-  m_EffectID: 4aef3ccfbf0043a43807621eada8efb8
-  m_EffectName: Echo
-  m_MixLevel: c05905f914357214b96fa832ce501cf2
-  m_Parameters:
-  - m_ParameterName: Delay
-    m_GUID: b49932e52818ae74da2888731aaa39b2
-  - m_ParameterName: Decay
-    m_GUID: 534d1726bfaf19c40896197869a65e2f
-  - m_ParameterName: Max channels
-    m_GUID: 6d625e623f82b71418f849761fa4bbf8
-  - m_ParameterName: Drymix
-    m_GUID: 4b92877589345d84096d4fec3783209d
-  - m_ParameterName: Wetmix
-    m_GUID: 0512f40310bf8014da99ad3506e03586
-  m_SendTarget: {fileID: 0}
-  m_EnableWetMix: 0
-  m_Bypass: 0
---- !u!244 &244696333840631882
-AudioMixerEffectController:
-  m_ObjectHideFlags: 3
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_Name: 
-  m_EffectID: 9d382322c82d8064f8588808164e4b5e
-  m_EffectName: Lowpass
-  m_MixLevel: cd11f3c4db32afc47a7a2914698d22f7
-  m_Parameters:
-  - m_ParameterName: Cutoff freq
-    m_GUID: e80aab897f4315745b07cdba7eba509e
-  - m_ParameterName: Resonance
-    m_GUID: 30780e4f7ef6ec748950a30c591ef2d7
-  m_SendTarget: {fileID: 0}
-  m_EnableWetMix: 0
-  m_Bypass: 0
---- !u!244 &244774402766461366
-AudioMixerEffectController:
-  m_ObjectHideFlags: 3
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_Name: 
-  m_EffectID: ca833cab8c5e9a94d8196b472d59226c
-  m_EffectName: Highpass
-  m_MixLevel: bef030eb10c0152478eb0474d15eb54f
-  m_Parameters:
-  - m_ParameterName: Cutoff freq
-    m_GUID: 72157480843c1cc4191181566e8f0f91
-  - m_ParameterName: Resonance
-    m_GUID: 9ace768be70dede4ea051d69fe6f96ad
   m_SendTarget: {fileID: 0}
   m_EnableWetMix: 0
   m_Bypass: 0
