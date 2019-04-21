@@ -182,7 +182,7 @@ public class Scoring : Singleton<Scoring> {
     // Autoplay mode
     bool autoplay = false;
     // Autoplay but for buttons
-    bool autoplayButtons = false;
+    public bool autoplayButtons = false;
 
     float laserDistanceLeniency = 1.0f / 12.0f;
 
@@ -517,9 +517,8 @@ public class Scoring : Singleton<Scoring> {
             return stat;
         } else if (obj.mType == ButtonType.Hold) {
             HoldButtonData hold = (HoldButtonData)obj;
-            HitStat foundStat = m_holdHitStats[obj];
-            if (foundStat != null)
-                return foundStat;
+            if (m_holdHitStats.ContainsKey(obj))
+                return m_holdHitStats[obj];
 
             HitStat stat = new HitStat(obj);
             hitStats.Add(stat);
@@ -533,9 +532,8 @@ public class Scoring : Singleton<Scoring> {
             return stat;
         } else if (obj.mType == ButtonType.Laser) {
             LaserData rootLaser = ((LaserData)obj).GetRoot();
-            HitStat foundStat = m_holdHitStats[rootLaser];
-            if (foundStat != null)
-                return foundStat;
+            if (m_holdHitStats.ContainsKey(rootLaser))
+                return m_holdHitStats[rootLaser];
 
             HitStat stat = new HitStat(rootLaser);
             hitStats.Add(stat);
@@ -903,6 +901,7 @@ public class Scoring : Singleton<Scoring> {
     }
 
     void m_TickHit(ScoreTick tick, int index, int delta = 0) {
+        Debug.Log("tick hit : " + tick.flags + ", index : " + index);
         HitStat stat = m_AddOrUpdateHitStat(tick.obj);
         if (tick.HasFlag(TickFlags.Button)) {
             stat.delta = delta;
@@ -952,6 +951,7 @@ public class Scoring : Singleton<Scoring> {
         categorizedHits[(int)stat.rating]++;
     }
     void m_TickMiss(ScoreTick tick, int index, int delta) {
+        Debug.Log("tick miss : " + tick.flags + ", index : " + index);
         HitStat stat = m_AddOrUpdateHitStat(tick.obj);
         stat.hasMissed = true;
         float shortMissDrain = 0.02f;
@@ -1026,7 +1026,7 @@ public class Scoring : Singleton<Scoring> {
     }
     void m_ReleaseHoldObject(ObjectDataBase obj) {
         int index = m_heldObjects.FindIndex((x) => x == obj);
-        if (index != m_heldObjects.Count - 1) {
+        if (index != - 1) {
             m_heldObjects.Remove(obj);
 
             // UnList hold objects
@@ -1154,6 +1154,8 @@ public class Scoring : Singleton<Scoring> {
         if (autoplay)
             return;
 
+        //Debug.Log("OnButtonPressed : " + buttonCode);
+
         if (buttonCode < 6) {
             int guardDelta = m_playback.GetLastTime() - m_buttonGuardTime[buttonCode];
             if (guardDelta < m_bounceGuard && guardDelta >= 0) {
@@ -1179,6 +1181,8 @@ public class Scoring : Singleton<Scoring> {
         }
     }
     public void OnButtonReleased(int buttonCode) {
+        //Debug.Log("OnButtonReleased : " + buttonCode);
+
         if (buttonCode < 6) {
             int guardDelta = m_playback.GetLastTime() - m_buttonGuardTime[(uint)buttonCode];
             if (guardDelta < m_bounceGuard && guardDelta >= 0) {

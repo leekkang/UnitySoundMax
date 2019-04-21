@@ -119,7 +119,7 @@ public class PlaybackEngine {
         return true;
     }
 
-    public void Update(int newTime) {
+    public void UpdateTime(int newTime) {
         int delta = newTime - m_playbackTime;
         if (newTime < m_playbackTime) {
             // Don't allow backtracking
@@ -381,7 +381,7 @@ public class PlaybackEngine {
 
         return (int)time;
     }
-    float DurationToViewDistance(int duration) {
+    public float DurationToViewDistance(int duration) {
         return DurationToViewDistanceAtTime(m_playbackTime, duration);
     }
 

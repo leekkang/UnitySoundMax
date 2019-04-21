@@ -421,11 +421,15 @@ public class DefaultEffectSettings {
             effect = new AudioEffect();
         }
 
-        if (effect != null) {
-            effect.mType = type;
-            effect.mDuration = new EffectParam<EffectDuration>(new EffectDuration(.25f));
-            effect.mMix = new EffectParam<float>(1f);
+        if (effect == null) {
+            effect = new AudioEffect();
         }
+
+        effect.mType = type;
+        if (effect.mDuration == null)
+            effect.mDuration = new EffectParam<EffectDuration>(new EffectDuration(.25f));
+        if (effect.mMix == null)
+            effect.mMix = new EffectParam<float>(1f);
 
         return effect;
     }

@@ -54,9 +54,15 @@
         LowPassFilter,
         HighPassFilter,
         PeakingFilter,
-        UserDefined0 = 0x40, // This ID or higher is user for user defined effects inside map objects
+        UserDefined0,   // This ID or higher is user for user defined effects inside map objects
         UserDefined1,   // Keep this ID at least a few ID's away from the normal effect so more native effects can be added later
         UserDefined2
+    }
+
+    public enum ParticleType {
+        Normal,
+        Hold,
+        Slam
     }
 }
 

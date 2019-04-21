@@ -45,7 +45,7 @@ public class AudioEngine {
         dsp = null;
     }
 
-    public bool Init(PlaybackEngine playback) {
+    public bool Init(PlaybackEngine playback, MusicData data) {
         bCompleteInit = false;
         m_currentHoldEffects[0] = null;
         m_currentHoldEffects[1] = null;
@@ -57,10 +57,10 @@ public class AudioEngine {
 
         // Set default effect type
         SetLaserEffect(EffectType.PeakingFilter);
-
+        
         BeatmapSetting mapSettings = playback.m_beatmap.mSetting;
 
-        string rootPath = Path.Combine(Application.streamingAssetsPath, mapSettings.title);
+        string rootPath = Path.Combine(Application.streamingAssetsPath, data.mPathName);
         string audioPath = Path.Combine(rootPath, mapSettings.audioNoFX).Trim();
 
         // Load Audio File
@@ -89,7 +89,7 @@ public class AudioEngine {
     }
     public void Play() {
         m_music.Play();
-        if (m_fxtrack)
+        if (m_fxtrack.clip != null)
             m_fxtrack.Play();
     }
     void Advance(int ms) {
@@ -100,17 +100,17 @@ public class AudioEngine {
     }
     public void SetPosition(int time) {
         m_music.time = time * 0.001f;
-        if (m_fxtrack)
+        if (m_fxtrack.clip != null)
             m_fxtrack.time = time * 0.001f;
     }
     void TogglePause() {
         if (m_paused) {
             m_music.Play();
-            if (m_fxtrack)
+            if (m_fxtrack.clip != null)
                 m_fxtrack.Play();
         } else {
             m_music.Pause();
-            if (m_fxtrack)
+            if (m_fxtrack.clip != null)
                 m_fxtrack.Pause();
         }
         m_paused = !m_paused;
@@ -201,7 +201,7 @@ public class AudioEngine {
         return m_laserEffectMix;
     }
     public void SetFXTrackEnabled(bool enabled) {
-        if (!m_fxtrack)
+        if (m_fxtrack.clip == null)
             return;
         if (m_fxtrackEnabled != enabled) {
             if (enabled) {
@@ -222,7 +222,7 @@ public class AudioEngine {
     }
     void SetVolume(float volume) {
         m_music.volume = volume;
-        if (m_fxtrack)
+        if (m_fxtrack.clip == null)
             m_fxtrack.volume = volume;
     }
     void m_SetLaserEffectParameter(float input) {

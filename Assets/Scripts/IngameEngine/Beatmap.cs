@@ -8,6 +8,7 @@ using System.Linq;
 public class ObjectDataBase {
     public int mTime;
     public ButtonType mType;
+    public GameObject mNote;
 }
 
 public class NormalButtonData : ObjectDataBase {
@@ -25,6 +26,8 @@ public class HoldButtonData : NormalButtonData {
     public int mDuration = 0;   // hold button length
     public EffectType mEffectType = EffectType.None;
     public short[] mArrEffectParams = new short[2];
+
+    public ParticleSystem mHitParticle;
 
     // Set for hold notes that are a continuation of the previous one, but with a different effect
     public HoldButtonData mNext;
@@ -249,6 +252,7 @@ public class Beatmap {
         Reset();
 
         Dictionary<EffectType, short> dicDefaultEffectParam = new Dictionary<EffectType, short> {
+            {EffectType.None, 0},
             {EffectType.BitCrusher, 4},
             {EffectType.Gate, 8},
             {EffectType.Retrigger, 8},

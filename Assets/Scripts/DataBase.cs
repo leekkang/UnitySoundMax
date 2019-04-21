@@ -132,8 +132,10 @@ public class DataBase : Singleton<DataBase> {
 
 public class MusicData {
     const string BLOCK_SEPARATOR = "--";
-    public string mName;
+    public string mTitle;
+    public string mPathName;
     public int mBpm;
+    public int mLevel;
     public Difficulty mDifficulty;
 
     public KShootTime mTime = new KShootTime();
@@ -144,7 +146,7 @@ public class MusicData {
     public Dictionary<string, KShootEffectDefinition> mDicFxDefine = new Dictionary<string, KShootEffectDefinition>();
 
     public void Load(string musicName, Difficulty difficulty) {
-        mName = musicName;
+        mPathName = musicName;
         mDifficulty = difficulty;
         string ksh = string.Format("{0}{1}{0}_{2}.ksh", musicName, Path.DirectorySeparatorChar, DataBase.inst.GetDifficultyPostfix(difficulty));
 
@@ -171,6 +173,10 @@ public class MusicData {
                     mDicSettings.Add(splitted[0], splitted[1]);
                     if (splitted[0] == "t")
                         mBpm = int.Parse(splitted[1]);
+                    else if (splitted[0] == "title")
+                        mTitle = splitted[1];
+                    else if (splitted[0] == "level")
+                        mLevel = int.Parse(splitted[1]);
                 }
             }
 

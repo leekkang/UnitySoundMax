@@ -40,11 +40,20 @@ public class GameManager : MonoBehaviour {
 
         if (GUI.Button(buttonRect, "colorfulsky play") && !buttonDragging) {
             MusicData data = new MusicData();
+            Scoring.inst.autoplayButtons = true;
             data.Load("colorfulsky", Difficulty.Challenge);
-            IngameEngine.inst.StartGame(data);
+            IngameEngine.inst.StartGame(data, 1.0f);
         }
 
-        if (GUI.Button(new Rect(buttonRect.x, buttonRect.y + Screen.height * 0.1f, buttonRect.width, buttonRect.height), "audio play") && !buttonDragging) {
+        if (GUI.Button(new Rect(buttonRect.x, buttonRect.y + Screen.height * 0.1f, buttonRect.width, buttonRect.height), "max burning play") && !buttonDragging) {
+            MusicData data = new MusicData();
+            Scoring.inst.autoplayButtons = true;
+            //Scoring.inst.autoplayButtons = false;
+            data.Load("max_burning", Difficulty.Challenge);
+            IngameEngine.inst.StartGame(data, 2f);
+        }
+
+        if (GUI.Button(new Rect(buttonRect.x, buttonRect.y + Screen.height * 0.2f, buttonRect.width, buttonRect.height), "audio play") && !buttonDragging) {
 
             AudioSource source = GameObject.Find("FXSound").GetComponent<AudioSource>();
             DataBase.inst.LoadAudio("colorfulsky", AudioType.OGGVORBIS, (audio) => {
@@ -53,12 +62,6 @@ public class GameManager : MonoBehaviour {
                 source.clip = audio;
                 source.Play();
             });
-        }
-
-        if (GUI.Button(new Rect(buttonRect.x, buttonRect.y + Screen.height * 0.2f, buttonRect.width, buttonRect.height), "StoryPanel") && !buttonDragging) {
-
-            AudioSource source = GameObject.Find("FXSound").GetComponent<AudioSource>();
-            Debug.Log("source is playing? : " + source.isPlaying);
         }
     }
 #endif

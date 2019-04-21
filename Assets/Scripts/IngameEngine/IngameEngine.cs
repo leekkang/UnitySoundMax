@@ -2,8 +2,10 @@
 using System.Collections.Generic;
 using UnityEngine;
 using System.Linq;
-using SoundMax;
 using System;
+using System.IO;
+
+using SoundMax;
 
 public enum GameFlags : byte {
     None = 0,
@@ -17,12 +19,12 @@ public enum GameFlags : byte {
 
 public class IngameEngine : Singleton<IngameEngine> {
     public bool m_playing = true;
-    bool m_started = false;
     bool m_introCompleted = false;
     bool m_outroCompleted = false;
     bool m_paused = false;
     bool m_ended = false;
     bool m_transitioning = false;
+    public float mSpeed = 1f;
 
     // Map object approach speed, scaled by BPM
     float m_hispeed = 1.0f;
@@ -56,7 +58,9 @@ public class IngameEngine : Singleton<IngameEngine> {
     int m_audioOffset = 0;
     int m_fpsTarget = 0;
     // The play field
+    Transform mTrack;
     //Track* m_track = nullptr;
+    Transform mJudgeLine;
 
     // The camera watching the playfield
     Camera m_camera;
@@ -74,7 +78,7 @@ public class IngameEngine : Singleton<IngameEngine> {
 
     // Combo gain animation
     //Timer m_comboAnimation;
-
+    Transform mAudioRoot;
     AudioSource m_slamSample;
     AudioSource[] m_clickSamples = new AudioSource[2];
     List<AudioSource> m_fxSamples = new List<AudioSource>();
@@ -88,16 +92,43 @@ public class IngameEngine : Singleton<IngameEngine> {
     float m_shakeAmount = 3;
     float m_shakeDuration = 0.083f;
 
+    // pool
+    public ParticleSystem[] mNormalHitEffect;
+    public ParticleSystem[] mHoldHitEffect;
+
     MusicData mCurMusic = new MusicData();  // 필요한건가?
 
     public void Open() {
         m_beatmap = new Beatmap();
         m_playback = new PlaybackEngine();
         m_audioPlayback = new AudioEngine();
+        mTrack = GameObject.Find("Anchor").transform;
         m_camera = GameObject.Find("IngameCamera").GetComponent<Camera>();
+        mAudioRoot = GameObject.Find("Audio").transform;
+        mJudgeLine = GameObject.Find("JudgeLine").transform;
+
+        // 샘플 오디오 로드
+        m_slamSample = GameObject.Find("SlamSound").GetComponent<AudioSource>();
+        m_clickSamples[0] = GameObject.Find("ClickSound1").GetComponent<AudioSource>();
+        m_clickSamples[1] = GameObject.Find("ClickSound2").GetComponent<AudioSource>();
+
+        string rootPath = Path.Combine(Application.streamingAssetsPath, "fxAudio");
+        string audioPath = Path.Combine(rootPath, "laser_slam.wav").Trim();
+        DataBase.inst.LoadAudio(audioPath, (audio) => {
+            m_slamSample.clip = audio;
+        });
+        audioPath = Path.Combine(rootPath, "click-01.wav").Trim();
+        DataBase.inst.LoadAudio(audioPath, (audio) => {
+            m_slamSample.clip = audio;
+        });
+        audioPath = Path.Combine(rootPath, "click-02.wav").Trim();
+        DataBase.inst.LoadAudio(audioPath, (audio) => {
+            m_slamSample.clip = audio;
+        });
     }
 
-    public void StartGame(MusicData data) {
+    public void StartGame(MusicData data, float speed) {
+        mSpeed = speed;
         StartCoroutine(CoLoadData(data));
     }
 
@@ -141,7 +172,7 @@ public class IngameEngine : Singleton<IngameEngine> {
         }
 
         // Load beatmap audio
-        if (!m_audioPlayback.Init(m_playback))
+        if (!m_audioPlayback.Init(m_playback, data))
             yield break;
         yield return new WaitUntil(() => m_audioPlayback.bCompleteInit);
 
@@ -152,10 +183,7 @@ public class IngameEngine : Singleton<IngameEngine> {
         //m_audioOffset = g_gameConfig.GetInt(GameConfigKeys::GlobalOffset);
         //m_playback.audioOffset = m_audioOffset;
 
-        if (!InitSFX()) {
-            Debug.LogError("Fail to initialize SFX file");
-            yield break;
-        }
+        yield return CoInitSFX();
 
         // Do this here so we don't get input events while still loading
         m_scoring.SetFlags(m_flags);
@@ -163,15 +191,52 @@ public class IngameEngine : Singleton<IngameEngine> {
         //m_scoring.SetInput(&g_input);
         m_scoring.Reset(); // Initialize
 
-        // start audio play == start game!
+        // Create Note, particle, etc...
+        CreateObject();
 
+        // start audio play == start game!
+        yield return CoPlayGame();
+    }
+
+    /// <summary> 샘플오디오 로드 </summary>
+    IEnumerator CoInitSFX() {
+        string rootPath = Path.Combine(Application.streamingAssetsPath, "fxAudio");
+        string audioPath;
+
+        for (int i = 0; i < m_fxSamples.Count; i++)
+            Destroy(m_fxSamples[i].gameObject);
+
+        GameObject obj = Resources.Load("Prefab/SFXSound") as GameObject;
+
+        GameObject copy;
+        List<string> samples = m_beatmap.mListSamplePath;
+        for (int i = 0; i < samples.Count; i++) {
+            copy = Instantiate(obj, mAudioRoot);
+            copy.transform.localPosition = Vector3.zero;
+            copy.transform.localScale = Vector3.one;
+            m_fxSamples.Add(copy.GetComponent<AudioSource>());
+        }
+
+        bool bLoad = false;
+        for (int i = 0; i < samples.Count; i++) {
+            audioPath = Path.Combine(rootPath, samples[i]).Trim();
+            bLoad = false;
+            if (!DataBase.inst.LoadAudio(audioPath, (audio) => {
+                m_fxSamples[i].clip = audio;
+                bLoad = true;
+            })) {
+                Debug.LogError("Fail to initialize SFX file");
+                yield break;
+            }
+            yield return new WaitUntil(() => bLoad);
+        }
     }
 
     IEnumerator CoPlayGame() {
         WaitForEndOfFrame waitFrame = new WaitForEndOfFrame();
 
-        if(!m_ended) {
-            Debug.Log("delta time : " + Time.deltaTime);
+        while(!m_ended) {
+            //Debug.Log("delta time : " + Time.deltaTime);
             Tick(Time.deltaTime);
             yield return waitFrame;
         }
@@ -199,33 +264,8 @@ public class IngameEngine : Singleton<IngameEngine> {
         m_playback.Reset(m_lastMapTime);
     }
 
-    /// <summary>
-    /// 샘플오디오 로드
-    /// </summary>
-    bool InitSFX() {
-        //CheckedLoad(m_slamSample = g_application->LoadSample("laser_slam"));
-        //CheckedLoad(m_clickSamples[0] = g_application->LoadSample("click-01"));
-        //CheckedLoad(m_clickSamples[1] = g_application->LoadSample("click-02"));
-
-        //auto samples = m_beatmap->GetSamplePaths();
-        //m_fxSamples = new Sample[samples.size()];
-        //for (int i = 0; i < samples.size(); i++) {
-        //    String ext = samples[i].substr(samples[i].length() - 4, 4);
-        //    ext.ToUpper();
-        //    if (ext == ".WAV") {
-        //        CheckedLoad(m_fxSamples[i] = g_application->LoadSample(m_mapRootPath + "/" + samples[i], true));
-        //    } else {
-        //        CheckedLoad(m_fxSamples[i] = g_application->LoadSample(samples[i]));
-        //    }
-
-        //}
-
-        return true;
-    }
-
     bool InitGameplay() {
-        m_playing = true;
-        m_started = false;
+        m_playing = false;
         m_introCompleted = false;
         m_outroCompleted = false;
         m_paused = false;
@@ -268,6 +308,106 @@ public class IngameEngine : Singleton<IngameEngine> {
         return true;
     }
 
+    List<GameObject> mListObj = new List<GameObject>();
+    void CreateObject() {
+        for (int i = 0; i < mListObj.Count; i++)
+            Destroy(mListObj[i]);
+        mListObj.Clear();
+
+        // init track
+        mTrack.localPosition = new Vector3(0f, -1440f, 0f);
+
+        // make effect pool
+        mNormalHitEffect = new ParticleSystem[15];
+        GameObject effNormal = Resources.Load("Prefab/NormalHitEffect") as GameObject;
+        Vector3 pos = new Vector3(-2000f, 0f, 0f);
+        for (int i = 0; i < 10; i++) {
+            mNormalHitEffect[i] = Instantiate(effNormal, mJudgeLine).GetComponent<ParticleSystem>();
+            mNormalHitEffect[i].name = string.Format("NormalHitEffect_{0}", i);
+            mNormalHitEffect[i].transform.position = pos;
+        }
+        mHoldHitEffect = new ParticleSystem[10];
+        GameObject effHit = Resources.Load("Prefab/HoldHitEffect") as GameObject;
+        for (int i = 0; i < 10; i++) {
+            mHoldHitEffect[i] = Instantiate(effHit, mJudgeLine).GetComponent<ParticleSystem>();
+            mHoldHitEffect[i].name = string.Format("HoldHitEffect_{0}", i);
+            mHoldHitEffect[i].transform.position = pos;
+            mHoldHitEffect[i].Stop();
+        }
+
+        // init button
+        // TODO : bpm 변경되는 곡 구현하지 않음
+        //Dictionary<double, float> dicBpmChange = new Dictionary<double, float>();
+        GameObject fxNote = Resources.Load("Prefab/FXNote") as GameObject;
+        GameObject normalNote = Resources.Load("Prefab/Note") as GameObject;
+        List<ObjectDataBase> listState = m_beatmap.mListObjectState;
+        for (int i = 0; i < listState.Count; i++) {
+            ObjectDataBase objBase = listState[i];
+            if (objBase.mType == ButtonType.Single || objBase.mType == ButtonType.Hold) {
+                NormalButtonData btnNormal = (NormalButtonData)objBase;
+                GameObject obj = null;
+                bool b_fx = btnNormal.mIndex >= 4;
+                if (b_fx)
+                    obj = Instantiate(fxNote, mTrack);
+                else
+                    obj = Instantiate(normalNote, mTrack);
+                obj.transform.parent = mTrack;
+
+                TimingPoint timing = m_playback.GetTimingPointAt(objBase.mTime, false);
+                float bpmPerLength = (float)timing.GetBPM() * 0.01f;
+                // TODO : bpm 변경되는 곡 구현하지 않음
+                //if (!dicBpmChange.ContainsKey(timing.GetBPM())) {
+                //    dicBpmChange.Add(timing.GetBPM(), timing.mTime);
+                //}
+                //float yLoc = 0;
+                //if (dicBpmChange.Count > 1) {
+                //    foreach(var key in dicBpmChange) {
+
+                //    }
+                //}
+                float xPos = b_fx ? -180f + 360f * (btnNormal.mIndex - 4) : -270f + 180f * btnNormal.mIndex;
+
+                obj.transform.localPosition = new Vector3(xPos, bpmPerLength * objBase.mTime * mSpeed, 0f);
+
+                if (objBase.mType == ButtonType.Hold) {
+                    HoldButtonData btnHold = (HoldButtonData)objBase;
+
+                    obj.GetComponent<UISprite>().height = (int)(100f + bpmPerLength * btnHold.mDuration);
+                }
+                objBase.mNote = obj;
+
+                mListObj.Add(obj);
+            } else if (objBase.mType == ButtonType.Laser) {
+
+            }
+        }
+    }
+
+    // 단일 파티클은 Emit, 다중 파티클은 Play
+    public ParticleSystem ParticlePlay(ParticleType type, Vector3 target) {
+        int tmp = 0;
+        if (type == ParticleType.Normal) {
+            while (mNormalHitEffect[tmp].isPlaying) {
+                tmp++;
+                tmp = tmp % mNormalHitEffect.Length;
+            }
+            mNormalHitEffect[tmp].transform.localPosition = target;
+            mNormalHitEffect[tmp].Emit(1);
+            return mNormalHitEffect[tmp];
+        } else if (type == ParticleType.Hold) {
+            while (mNormalHitEffect[tmp].isPlaying) {
+                tmp++;
+                tmp = tmp % mHoldHitEffect.Length;
+            }
+            mHoldHitEffect[tmp].transform.localPosition = target;
+            mHoldHitEffect[tmp].Play();
+            return mHoldHitEffect[tmp];
+        } else if (type == ParticleType.Slam) {
+
+        }
+        return null;
+    }
+
     void Tick(float deltaTime) {
         if (!m_paused)
             TickGameplay(deltaTime);
@@ -275,10 +415,10 @@ public class IngameEngine : Singleton<IngameEngine> {
 
     // Processes input and Updates scoring, also handles audio timing management
     void TickGameplay(float deltaTime) {
-        if (!m_started && m_introCompleted) {
+        if (!m_playing /*&& m_introCompleted*/) {
             // Start playback of audio in first gameplay tick
             m_audioPlayback.Play();
-            m_started = true;
+            m_playing = true;
 
             //if (g_application.GetAppCommandLine().Contains("-autoskip")) {
             //    SkipIntro();
@@ -288,8 +428,10 @@ public class IngameEngine : Singleton<IngameEngine> {
         BeatmapSetting beatmapSettings = m_beatmap.mSetting;
 
         // Update beatmap playback
+        //Debug.Log("m_audioPlayback.GetPosition() : " + m_audioPlayback.GetPosition());
+
         int playbackPositionMs = m_audioPlayback.GetPosition() - m_audioOffset;
-        m_playback.Update(playbackPositionMs);
+        m_playback.UpdateTime(playbackPositionMs);
 
         int delta = playbackPositionMs - m_lastMapTime;
         int beatStart = 0;
@@ -349,6 +491,11 @@ public class IngameEngine : Singleton<IngameEngine> {
         //    }
         //}
 
+        //Debug.Log((float)-(m_currentTiming.GetBPM() * 0.01f) * delta);
+        mTrack.localPosition = new Vector3(0f, -1440f - (float)(m_currentTiming.GetBPM() * 0.01f) * playbackPositionMs * mSpeed, 0f);
+        // TODO : 왜인지 모르겠는데 엄청나게 빠르게 값이 커짐
+        //mTrack.Translate(new Vector3(0f, (float)-(m_currentTiming.GetBPM() * 0.01f) * delta, 0f), Space.Self);
+
         m_lastMapTime = playbackPositionMs;
 
         if (m_audioPlayback.HasEnded()) {
@@ -363,6 +510,7 @@ public class IngameEngine : Singleton<IngameEngine> {
 
         m_scoring.FinishGame();
         m_ended = true;
+        m_playing = false;
     }
 
     void OnLaserSlamHit(LaserData obj) {
@@ -414,6 +562,10 @@ public class IngameEngine : Singleton<IngameEngine> {
 
             // 히트 이펙트
             // Create hit effect particle
+            float xPos = buttonIdx >= 4 ? -180f + 360f * (buttonIdx - 4) : -270f + 180f * buttonIdx;
+            ParticlePlay(ParticleType.Normal, new Vector3(xPos, 0f, 0f));
+            if (hitObject.mType == ButtonType.Single)
+                hitObject.mNote.SetActive(false);
             //Color hitColor = (buttonIdx < 4) ? Color.White : Color.FromHSV(20, 0.7f, 1.0f);
             //float hitWidth = (buttonIdx < 4) ? m_track.buttonWidth : m_track.fxbuttonWidth;
             //Ref<ParticleEmitter> emitter = CreateHitEmitter(hitColor, hitWidth);
@@ -425,7 +577,7 @@ public class IngameEngine : Singleton<IngameEngine> {
 
     }
     void OnButtonMiss(int buttonIdx, bool hitEffect) {
-        Debug.Log("Hit Miss");
+        //Debug.Log("Hit Miss");
         //if (hitEffect) {
         //    Color c = m_track.hitColors[0];
         //    m_track.AddEffect(new ButtonHitEffect(buttonIdx, c));
@@ -435,25 +587,33 @@ public class IngameEngine : Singleton<IngameEngine> {
     void OnComboChanged(int newCombo) {
         // 콤보 체인지 이펙트 또는 라벨 변경
         //m_comboAnimation.Restart();
+        Debug.Log("OnComboChanged : " + newCombo);
     }
     void OnScoreChanged(int newScore) {
         // 스코어 라벨 변경
+        //Debug.Log("OnScoreChanged : " + newScore);
     }
 
     // These functions control if FX button DSP's are muted or not
-    void OnObjectHold(int ButtonIdx, ObjectDataBase obj) {
+    void OnObjectHold(int buttonIdx, ObjectDataBase obj) {
         if (obj.mType == ButtonType.Hold) {
             HoldButtonData hold = (HoldButtonData)obj;
             if (hold.mEffectType != EffectType.None) {
                 //m_audioPlayback.SetEffectEnabled(hold.mIndex - 4, true);
             }
+            float xPos = buttonIdx >= 4 ? -180f + 360f * (buttonIdx - 4) : -270f + 180f * buttonIdx;
+            hold.mHitParticle = ParticlePlay(ParticleType.Hold, new Vector3(xPos, 0f, 0f));
         }
     }
-    void OnObjectReleased(int ButtonIdx, ObjectDataBase obj) {
+    void OnObjectReleased(int buttonIdx, ObjectDataBase obj) {
         if (obj.mType == ButtonType.Hold) {
             HoldButtonData hold = (HoldButtonData)obj;
             if (hold.mEffectType != EffectType.None) {
                 //m_audioPlayback.SetEffectEnabled(hold.mIndex - 4, false);
+            }
+            if (hold.mHitParticle != null) {
+                hold.mHitParticle.Stop();
+                hold.mHitParticle = null;
             }
         }
     }
