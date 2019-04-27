@@ -185,9 +185,8 @@ public class PlaybackEngine {
         }
 
         // Advance lasers
-        index = GetSelectHitObjectIndex(m_playbackTime + hittableObjectEnter, false);
         if (index != -1 && index != mCurLaserIndex) {
-            for (int i = mCurObjIndex; i < index; i++) {
+            for (int i = mCurLaserIndex; i < index; i++) {
                 ObjectDataBase obj = m_objects[i];
                 if (obj.mType == ButtonType.Laser) {
                     m_holdObjects.Add(obj);
@@ -202,7 +201,7 @@ public class PlaybackEngine {
         // Check for lasers within the alert time
         index = GetSelectHitObjectIndex(m_playbackTime + alertLaserThreshold, false);
         if (index != -1 && index != mCurAlertIndex) {
-            for (int i = mCurObjIndex; i < index; i++) {
+            for (int i = mCurAlertIndex; i < index; i++) {
                 ObjectDataBase obj = m_objects[i];
                 if (obj.mType == ButtonType.Laser) {
                     LaserData laser = (LaserData)obj;

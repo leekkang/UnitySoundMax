@@ -110,6 +110,22 @@ public class LaserData : ObjectDataBase {
         float f = Mathf.Clamp((float)(time - state.mTime) / Math.Max(1, state.mDuration), 0.0f, 1.0f);
         return (state.mPoints[1] - state.mPoints[0]) * f + state.mPoints[0];
     }
+    
+    /// <summary> 
+    /// 레이저 스프라이트를 변경하는 함수. 연결된 모든 레이저를 다 변경한다.
+    /// 루트에서 실행해야함.
+    /// </summary>
+    public void ChangeSprite(bool b_hit) {
+        LaserData laser = this;
+        for (; laser != null; laser = laser.mNext) {
+            if (laser.mNote == null)
+                continue;
+
+            string spr_name = b_hit ? (laser.mIndex == 0 ? "Nobe_Left_Glow" : "Nobe_Right_Glow") :
+                                      (laser.mIndex == 0 ? "Nobe_Left" : "Nobe_Right");
+            laser.mNote.GetComponent<UISprite>().spriteName = spr_name;
+        }
+    }
 }
 
 public class EventData : ObjectDataBase {

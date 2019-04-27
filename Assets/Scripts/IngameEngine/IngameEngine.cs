@@ -92,6 +92,8 @@ public class IngameEngine : Singleton<IngameEngine> {
     // pool
     public ParticleSystem[] mNormalHitEffect;
     public ParticleSystem[] mHoldHitEffect;
+    public ParticleSystem[] mLaserHitEffect;
+    public ParticleSystem[] mSlamHitEffect;
 
     MusicData mCurMusic = new MusicData();  // 필요한건가?
 
@@ -319,29 +321,45 @@ public class IngameEngine : Singleton<IngameEngine> {
 
         // make effect pool
         mNormalHitEffect = new ParticleSystem[15];
-        GameObject effNormal = Resources.Load("Prefab/NormalHitEffect") as GameObject;
+        GameObject eff = Resources.Load("Prefab/EffectNormalHit") as GameObject;
         Vector3 pos = new Vector3(-2000f, 0f, 0f);
-        for (int i = 0; i < 10; i++) {
-            mNormalHitEffect[i] = Instantiate(effNormal, mJudgeLine).GetComponent<ParticleSystem>();
-            mNormalHitEffect[i].name = string.Format("NormalHitEffect_{0}", i);
+        for (int i = 0; i < 15; i++) {
+            mNormalHitEffect[i] = Instantiate(eff, mJudgeLine).GetComponent<ParticleSystem>();
+            mNormalHitEffect[i].name = string.Format("EffectNormalHit_{0}", i);
             mNormalHitEffect[i].transform.position = pos;
         }
         mHoldHitEffect = new ParticleSystem[10];
-        GameObject effHit = Resources.Load("Prefab/HoldHitEffect") as GameObject;
+        eff = Resources.Load("Prefab/EffectHoldHit") as GameObject;
         for (int i = 0; i < 10; i++) {
-            mHoldHitEffect[i] = Instantiate(effHit, mJudgeLine).GetComponent<ParticleSystem>();
-            mHoldHitEffect[i].name = string.Format("HoldHitEffect_{0}", i);
+            mHoldHitEffect[i] = Instantiate(eff, mJudgeLine).GetComponent<ParticleSystem>();
+            mHoldHitEffect[i].name = string.Format("EffectHoldHit_{0}", i);
             mHoldHitEffect[i].transform.position = pos;
             mHoldHitEffect[i].Stop();
             mHoldHitEffect[i].gameObject.SetActive(false);
+        }
+        mLaserHitEffect = new ParticleSystem[4];
+        eff = Resources.Load("Prefab/EffectLaserHit") as GameObject;
+        for (int i = 0; i < 4; i++) {
+            mLaserHitEffect[i] = Instantiate(eff, mJudgeLine).GetComponent<ParticleSystem>();
+            mLaserHitEffect[i].name = string.Format("EffectLaserHit_{0}", i);
+            mLaserHitEffect[i].transform.position = pos;
+            mLaserHitEffect[i].Stop();
+            mLaserHitEffect[i].gameObject.SetActive(false);
+        }
+        mSlamHitEffect = new ParticleSystem[10];
+        eff = Resources.Load("Prefab/EffectSlam") as GameObject;
+        for (int i = 0; i < 10; i++) {
+            mSlamHitEffect[i] = Instantiate(eff, mJudgeLine).GetComponent<ParticleSystem>();
+            mSlamHitEffect[i].name = string.Format("EffectSlam_{0}", i);
+            mSlamHitEffect[i].transform.position = pos;
         }
 
         // init button
         // TODO : bpm 변경되는 곡 구현하지 않음
         //Dictionary<double, float> dicBpmChange = new Dictionary<double, float>();
-        GameObject fxNote = Resources.Load("Prefab/FXNote") as GameObject;
+        GameObject fxNote = Resources.Load("Prefab/NoteFX") as GameObject;
         GameObject normalNote = Resources.Load("Prefab/Note") as GameObject;
-        GameObject laserNote = Resources.Load("Prefab/LaserNote") as GameObject;
+        GameObject laserNote = Resources.Load("Prefab/NoteLaser") as GameObject;
         //GameObject laserNote2 = Resources.Load("Prefab/LaserRightNote") as GameObject;
         List<ObjectDataBase> listState = m_beatmap.mListObjectState;
         for (int i = 0; i < listState.Count; i++) {
@@ -381,7 +399,6 @@ public class IngameEngine : Singleton<IngameEngine> {
                     obj.GetComponent<UISprite>().height = (int)(100f + bpmPerLength * btnHold.mDuration * mSpeed);
                 }
                 objBase.mNote = obj;
-
                 mListObj.Add(obj);
             } else if (objBase.mType == ButtonType.Laser) {
                 LaserData btnLaser = (LaserData)objBase;
@@ -433,6 +450,7 @@ public class IngameEngine : Singleton<IngameEngine> {
                 }
 
                 objBase.mNote = obj;
+                mListObj.Add(obj);
             }
         }
     }
@@ -440,27 +458,38 @@ public class IngameEngine : Singleton<IngameEngine> {
     // 단일 파티클은 Emit, 다중 파티클은 Play
     public ParticleSystem ParticlePlay(ParticleType type, Vector3 target) {
         int tmp = 0;
+        bool b_loop = false;
+        ParticleSystem[] arr_particle = null;
         if (type == ParticleType.Normal) {
-            while (mNormalHitEffect[tmp].isPlaying) {
-                tmp++;
-                tmp = tmp % mNormalHitEffect.Length;
-            }
-            mNormalHitEffect[tmp].transform.localPosition = target;
-            mNormalHitEffect[tmp].Emit(1);
-            return mNormalHitEffect[tmp];
+            arr_particle = mNormalHitEffect;
         } else if (type == ParticleType.Hold) {
-            while (mHoldHitEffect[tmp].isPlaying) {
-                tmp++;
-                tmp = tmp % mHoldHitEffect.Length;
-            }
-            mHoldHitEffect[tmp].transform.localPosition = target;
-            mHoldHitEffect[tmp].gameObject.SetActive(true);
-            mHoldHitEffect[tmp].Play();
-            return mHoldHitEffect[tmp];
+            arr_particle = mHoldHitEffect;
+            b_loop = true;
+        } else if (type == ParticleType.Laser) {
+            arr_particle = mLaserHitEffect;
+            b_loop = true;
         } else if (type == ParticleType.Slam) {
-
+            arr_particle = mSlamHitEffect;
         }
-        return null;
+
+        if (arr_particle == null) {
+            Debug.Log("impossible! arr_particle is null!!");
+            return null;
+        }
+
+        while (arr_particle[tmp].isPlaying) {
+            tmp = (tmp + 1) % arr_particle.Length;
+        }
+        arr_particle[tmp].transform.localPosition = target;
+
+        if (b_loop) {
+            arr_particle[tmp].gameObject.SetActive(true);
+            arr_particle[tmp].Play();
+        } else {
+            arr_particle[tmp].Emit(1);
+        }
+
+        return arr_particle[tmp];
     }
 
     void Tick(float deltaTime) {
@@ -566,6 +595,8 @@ public class IngameEngine : Singleton<IngameEngine> {
         m_scoring.FinishGame();
         m_ended = true;
         m_playing = false;
+
+        Debug.Log("Game end");
     }
 
     void OnLaserSlamHit(LaserData obj) {
@@ -586,10 +617,8 @@ public class IngameEngine : Singleton<IngameEngine> {
         }
 
         // 레이저 슬램 파티클
-        //float laserPos = m_track.trackWidth * object.points[1] - m_track.trackWidth * 0.5f;
-        //Ref<ParticleEmitter> ex = CreateExplosionEmitter(m_track.laserColors[obj.mIndex], new Vector3(direction, 0, 0));
-        //ex.position = new Vector3(laserPos, 0.0f, -0.05f);
-        //ex.position = m_track.TransformPoint(ex.position);
+        ParticlePlay(ParticleType.Slam, new Vector3(-450f + obj.mPoints[1] * 900f, 0f, 0f));
+        //ParticlePlay(ParticleType.Slam, new Vector3(direction > 0 ? 450f : -450f, 0f, 0f));
     }
 
     void OnButtonHit(int buttonIdx, ScoreHitRating rating, ObjectDataBase hitObject, bool late) {
@@ -621,13 +650,6 @@ public class IngameEngine : Singleton<IngameEngine> {
             ParticlePlay(ParticleType.Normal, new Vector3(xPos, 0f, 0f));
             if (hitObject.mType == ButtonType.Single)
                 hitObject.mNote.SetActive(false);
-            //Color hitColor = (buttonIdx < 4) ? Color.White : Color.FromHSV(20, 0.7f, 1.0f);
-            //float hitWidth = (buttonIdx < 4) ? m_track.buttonWidth : m_track.fxbuttonWidth;
-            //Ref<ParticleEmitter> emitter = CreateHitEmitter(hitColor, hitWidth);
-            //emitter.position.x = m_track.GetButtonPlacement(buttonIdx);
-            //emitter.position.z = -0.05f;
-            //emitter.position.y = 0.0f;
-            //emitter.position = m_track.TransformPoint(emitter.position);
         }
 
     }
@@ -659,6 +681,9 @@ public class IngameEngine : Singleton<IngameEngine> {
             }
             float xPos = buttonIdx >= 4 ? -180f + 360f * (buttonIdx - 4) : -270f + 180f * buttonIdx;
             hold.mHitParticle = ParticlePlay(ParticleType.Hold, new Vector3(xPos, 0f, 0f));
+        } else if (obj.mType == ButtonType.Laser) {
+            LaserData laser = (LaserData)obj;
+            laser.ChangeSprite(true);
         }
     }
     void OnObjectReleased(int buttonIdx, ObjectDataBase obj) {
@@ -677,6 +702,9 @@ public class IngameEngine : Singleton<IngameEngine> {
             if (Math.Abs(currentTime - (hold.mDuration + hold.mTime)) <= Scoring.inst.goodHitTime || Scoring.inst.autoplay || Scoring.inst.autoplayButtons) {
                 obj.mNote.SetActive(false);
             }
+        } else if (obj.mType == ButtonType.Laser) {
+            LaserData laser = (LaserData)obj;
+            laser.ChangeSprite(false);
         }
     }
     

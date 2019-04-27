@@ -100,8 +100,6 @@ public class HitStat {
     // If at least one hold tick has been missed
     public bool hasMissed = false;
 
-    public bool forReplay = true;
-
     public HitStat(ObjectDataBase src) {
         obj = src;
     }
@@ -185,11 +183,11 @@ public class Scoring : Singleton<Scoring> {
     public bool autoplayButtons = false;
 
     float laserDistanceLeniency = 1.0f / 12.0f;
-
-    // Actual positions of the laser
+    /// <summary> 유저가 움직이는 노브의 위치 </summary>
     float[] laserPositions = new float[2];
-    // Sampled target position of the lasers in the Map
+    /// <summary> 현재 시각에서 레이저의 위치 </summary>
     float[] laserTargetPositions = new float[2];
+    ParticleSystem[] mLaserParticle = new ParticleSystem[2];
     // Current lasers are extended
     bool[] lasersAreExtend = new bool[2];
     // Time since laser has been used
@@ -414,7 +412,7 @@ public class Scoring : Singleton<Scoring> {
                 ScoreTick tick = m_ticks[i][0];
                 if (tick.HasFlag(TickFlags.Hold)) {
                     if (tick.obj.mTime <= m_playback.GetLastTime())
-                        m_ListHoldObject(tick.obj, i);
+                        m_SetHoldObject(tick.obj, i);
                 }
             }
         }
@@ -527,7 +525,6 @@ public class Scoring : Singleton<Scoring> {
             // Get tick count
             List<int> ticks = m_CalculateHoldTicks(hold);
             stat.holdMax = (uint)ticks.Count;
-            stat.forReplay = false;
 
             return stat;
         } else if (obj.mType == ButtonType.Laser) {
@@ -542,7 +539,6 @@ public class Scoring : Singleton<Scoring> {
             // Get tick count
             List<ScoreTick> ticks = m_CalculateLaserTicks(rootLaser);
             stat.holdMax = (uint)ticks.Count;
-            stat.forReplay = false;
 
             return stat;
         }
@@ -691,7 +687,7 @@ public class Scoring : Singleton<Scoring> {
 
     void m_OnFXBegin(HoldButtonData obj) {
         if (autoplay || autoplayButtons)
-            m_ListHoldObject(obj, obj.mIndex);
+            m_SetHoldObject(obj, obj.mIndex);
     }
 
     void m_OnObjectEntered(ObjectDataBase obj) {
@@ -880,7 +876,7 @@ public class Scoring : Singleton<Scoring> {
                 HoldButtonData hbd = (HoldButtonData)hitObject;
                 hbd = hbd.GetRoot();
                 if (hbd.mTime - goodHitTime <= currentTime + m_inputOffset)
-                    m_ListHoldObject(hitObject, buttonCode);
+                    m_SetHoldObject(hitObject, buttonCode);
                 return null;
             }
 
@@ -901,7 +897,6 @@ public class Scoring : Singleton<Scoring> {
     }
 
     void m_TickHit(ScoreTick tick, int index, int delta = 0) {
-        Debug.Log("tick hit : " + tick.flags + ", index : " + index);
         HitStat stat = m_AddOrUpdateHitStat(tick.obj);
         if (tick.HasFlag(TickFlags.Button)) {
             stat.delta = delta;
@@ -922,7 +917,7 @@ public class Scoring : Singleton<Scoring> {
         } else if (tick.HasFlag(TickFlags.Hold)) {
             HoldButtonData hold = (HoldButtonData)tick.obj;
             if (hold.mTime + hold.mDuration > m_playback.m_playbackTime) // Only List active hold object if object hasn't passed yet
-                m_ListHoldObject(tick.obj, index);
+                m_SetHoldObject(tick.obj, index);
 
             stat.rating = ScoreHitRating.Perfect;
             stat.hold++;
@@ -934,8 +929,8 @@ public class Scoring : Singleton<Scoring> {
             if (tick.HasFlag(TickFlags.Slam)) {
                 OnLaserSlamHit(laser);
                 // List laser pointer position after hitting slam
-                laserTargetPositions[laser.mIndex] = laser.mPoints[1];
                 laserPositions[laser.mIndex] = laser.mPoints[1];
+                laserTargetPositions[laser.mIndex] = laser.mPoints[1];
                 m_autoLaserTime[laser.mIndex] = m_assistTime * m_assistSlamBoost;
             }
 
@@ -950,8 +945,8 @@ public class Scoring : Singleton<Scoring> {
         // Count hits per category (miss,perfect,etc.)
         categorizedHits[(int)stat.rating]++;
     }
+
     void m_TickMiss(ScoreTick tick, int index, int delta) {
-        Debug.Log("tick miss : " + tick.flags + ", index : " + index);
         HitStat stat = m_AddOrUpdateHitStat(tick.obj);
         stat.hasMissed = true;
         float shortMissDrain = 0.02f;
@@ -983,7 +978,7 @@ public class Scoring : Singleton<Scoring> {
 
         // All misses reList combo
         currentGauge = Math.Max(0.0f, currentGauge);
-        m_ReListCombo();
+        m_ResetCombo();
         m_OnTickProcessed(tick, index);
 
         // All ticks count towards the 'miss' counter
@@ -1006,13 +1001,13 @@ public class Scoring : Singleton<Scoring> {
         maxComboCounter = Math.Max(maxComboCounter, currentComboCounter);
         OnComboChanged(currentComboCounter);
     }
-    void m_ReListCombo() {
+    void m_ResetCombo() {
         comboState = 0;
         currentComboCounter = 0;
         OnComboChanged(currentComboCounter);
     }
 
-    void m_ListHoldObject(ObjectDataBase obj, int index) {
+    void m_SetHoldObject(ObjectDataBase obj, int index) {
         if (m_holdObjects[index] == obj)
             return;
 
@@ -1040,6 +1035,7 @@ public class Scoring : Singleton<Scoring> {
         }
     }
 
+    // 레이저 노트 판정 처리 함수
     void m_UpdateLasers(float deltaTime) {
         /// TODO: Change to only re-calculate on bpm change
         m_assistTime = m_assistLevel * 0.1f;
@@ -1089,23 +1085,24 @@ public class Scoring : Singleton<Scoring> {
 
             bool notAffectingGameplay = true;
             if (currentSegment != null) {
-                // Update laser gameplay
+                // 노브 위치와 실제 레이저 위치의 차이
                 float positionDelta = laserTargetPositions[i] - laserPositions[i];
                 float moveDir = Math.Sign(positionDelta);
                 float laserDir = currentSegment.GetDirection();
                 float input = m_laserInput[i];
                 float inputDir = Math.Sign(input);
 
-                // Always snap laser to start sections if they are completely vertical
-                if (laserDir == 0.0f && currentSegment.mPrev == null) {
-                    laserPositions[i] = laserTargetPositions[i];
-                    m_autoLaserTime[i] = m_assistTime;
-                }
-                // Lock lasers on straight parts
-                else if (laserDir == 0.0f && Math.Abs(positionDelta) < laserDistanceLeniency) {
-                    laserPositions[i] = laserTargetPositions[i];
-                    m_autoLaserTime[i] = m_assistTime;
-                } else if (inputDir != 0.0f) {
+                if (laserDir == 0.0f) {
+                    // Always snap laser to start sections if they are completely vertical
+                    if (currentSegment.mPrev == null) {
+                        laserPositions[i] = laserTargetPositions[i];
+                        m_autoLaserTime[i] = m_assistTime;
+                    } else if (Math.Abs(positionDelta) < laserDistanceLeniency) {
+                        // Lock lasers on straight parts
+                        laserPositions[i] = laserTargetPositions[i];
+                        m_autoLaserTime[i] = m_assistTime;
+                    }
+                } else {
                     if (laserDir < 0 && positionDelta < 0) {
                         laserPositions[i] = Math.Max(laserPositions[i] + input, laserTargetPositions[i]);
                     } else if (laserDir > 0 && positionDelta > 0) {
@@ -1132,16 +1129,29 @@ public class Scoring : Singleton<Scoring> {
                 timeSinceLaserUsed[i] += deltaTime;
                 //laserPositions[i] = laserTargetPositions[i];
             }
+            
             if (autoplay || m_autoLaserTime[i] >= 0) {
                 laserPositions[i] = laserTargetPositions[i];
             }
+
             // Clamp cursor between 0 and 1
             laserPositions[i] = Mathf.Clamp(laserPositions[i], 0.0f, 1.0f);
             m_autoLaserTime[i] -= deltaTime;
             if (Math.Abs(laserPositions[i] - laserTargetPositions[i]) < laserDistanceLeniency && currentSegment != null) {
-                m_ListHoldObject(currentSegment.GetRoot(), 6 + i);
+                m_SetHoldObject(currentSegment.GetRoot(), 6 + i);
+
+                // 레이저 파티클 재생
+                if (mLaserParticle[i] == null)
+                    mLaserParticle[i] = IngameEngine.inst.ParticlePlay(ParticleType.Laser, new Vector3(-450f + laserTargetPositions[i] * 900f, 0f, 0f));
+                else
+                    mLaserParticle[i].transform.localPosition = new Vector3(-450f + laserTargetPositions[i] * 900f, 0f, 0f);
             } else {
                 m_ReleaseHoldObject(6 + i);
+                if (mLaserParticle[i] != null) {
+                    mLaserParticle[i].Stop();
+                    mLaserParticle[i].gameObject.SetActive(false);
+                    mLaserParticle[i] = null;
+                }
             }
         }
 

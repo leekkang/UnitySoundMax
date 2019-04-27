@@ -62,6 +62,7 @@
     public enum ParticleType {
         Normal,
         Hold,
+        Laser,
         Slam
     }
 }

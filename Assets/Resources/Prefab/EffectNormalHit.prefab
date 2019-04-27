@@ -12,7 +12,7 @@ GameObject:
   - component: {fileID: 2532887143599212703}
   - component: {fileID: 2827388531514733139}
   m_Layer: 9
-  m_Name: NormalHitEffect
+  m_Name: EffectNormalHit
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -328,7 +328,7 @@ ParticleSystem:
     startSize:
       serializedVersion: 2
       minMaxState: 0
-      scalar: 3
+      scalar: 1
       minScalar: 1
       maxCurve:
         serializedVersion: 2

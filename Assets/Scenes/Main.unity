@@ -1355,7 +1355,6 @@ GameObject:
   m_Component:
   - component: {fileID: 1220051403}
   - component: {fileID: 1220051406}
-  - component: {fileID: 1220051405}
   - component: {fileID: 1220051404}
   m_Layer: 0
   m_Name: BackgroundUICamera
@@ -1424,14 +1423,6 @@ MonoBehaviour:
   cancelKey0: 27
   cancelKey1: 331
   autoHideCursor: 1
---- !u!81 &1220051405
-AudioListener:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1220051402}
-  m_Enabled: 1
 --- !u!20 &1220051406
 Camera:
   m_ObjectHideFlags: 0
@@ -2049,6 +2040,8 @@ MonoBehaviour:
   mSpeed: 1
   mNormalHitEffect: []
   mHoldHitEffect: []
+  mLaserHitEffect: []
+  mSlamHitEffect: []
 --- !u!1 &1930476210
 GameObject:
   m_ObjectHideFlags: 0
