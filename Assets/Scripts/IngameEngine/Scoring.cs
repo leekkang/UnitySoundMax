@@ -180,7 +180,7 @@ public class Scoring : Singleton<Scoring> {
     List<HitStat> hitStats = new List<HitStat>();
 
     // Autoplay mode
-    bool autoplay = false;
+    public bool autoplay = false;
     // Autoplay but for buttons
     public bool autoplayButtons = false;
 
@@ -603,7 +603,7 @@ public class Scoring : Singleton<Scoring> {
         TimingPoint tp = m_playback.GetTimingPointAt(hold.mTime);
 
         // Tick rate based on BPM
-        double tickNoteValue = 16 / Math.Pow(2f, Math.Max((int)(Math.Log(tp.GetBPM(), 2f)) - 7, 0));
+        double tickNoteValue = 16 / Math.Pow(2f, Math.Max((Math.Log(tp.GetBPM(), 2f)) - 7f, 0));
         double tickInterval = tp.GetWholeNoteLength() / tickNoteValue;
 
         double tickpos = hold.mTime;
@@ -612,7 +612,7 @@ public class Scoring : Singleton<Scoring> {
 
         while (tickpos < hold.mTime + hold.mDuration - tickInterval) {
             ticks.Add((int)tickpos);
-            tickNoteValue = 16 / Math.Pow(2, Math.Max((int)(Math.Log(tp.GetBPM(), 2f)) - 7, 0));
+            tickNoteValue = 16 / Math.Pow(2, Math.Max((Math.Log(tp.GetBPM(), 2f)) - 7f, 0));
             tickInterval = tp.GetWholeNoteLength() / tickNoteValue;
             tickpos += tickInterval;
         }
@@ -629,7 +629,7 @@ public class Scoring : Singleton<Scoring> {
         TimingPoint tp = m_playback.GetTimingPointAt(laserRoot.mTime);
 
         // Tick rate based on BPM
-        double tickNoteValue = 16f / Math.Pow(2, Math.Max((int)(Math.Log(tp.GetBPM(), 2f)) - 7, 0));
+        double tickNoteValue = 16f / Math.Pow(2, Math.Max((Math.Log(tp.GetBPM(), 2f)) - 7f, 0));
         double tickInterval = tp.GetWholeNoteLength() / tickNoteValue;
 
         LaserData sectionStart = laserRoot;
@@ -684,7 +684,7 @@ public class Scoring : Singleton<Scoring> {
         }
         AddTicks();
         if (ticks.Count > 0)
-            ticks.Last().flags = TickFlags.End;
+            ticks.Last().flags |= TickFlags.End;
 
         return ticks;
     }
@@ -783,8 +783,8 @@ public class Scoring : Singleton<Scoring> {
                     if (tick.HasFlag(TickFlags.Hold)) {
                         HoldButtonData hold = (HoldButtonData)tick.obj;
                         int holdStart = hold.GetRoot().mTime;
-
-                        // Check buttons here for holds
+                        
+                        // 홀드버튼 첫번째 버튼을 눌렀으면 ㅇㅋ
                         if ((KeyboardManager.inst.CheckHold(buttonCode) && holdStart - goodHitTime < m_buttonHitTime[buttonCode]) || autoplay || autoplayButtons) {
                             m_TickHit(tick, buttonCode);
                             HitStat stat = new HitStat(tick.obj);
@@ -795,9 +795,10 @@ public class Scoring : Singleton<Scoring> {
                         }
                     } else if (tick.HasFlag(TickFlags.Laser)) {
                         LaserData laserObject = (LaserData)tick.obj;
+                        // 슬램 레이저 버튼인경우
                         if (tick.HasFlag(TickFlags.Slam)) {
                             // Check if slam hit
-                            float dirSign = Math.Sign(laserObject.GetDirection());
+                            float dirSign = laserObject.GetDirection();
                             float inputSign = KeyboardManager.inst.GetLaserDirection(buttonCode - 6);
                             float posDelta = (laserObject.mPoints[1] - laserPositions[buttonCode - 6]) * dirSign;
                             if (autoplay) {
@@ -813,8 +814,7 @@ public class Scoring : Singleton<Scoring> {
                                 processed = true;
                             }
                         } else {
-                            // Snap to first laser tick
-                            /// TODO: Find better solution
+                            // 첫번째 레이저면 노브 타겟 위치를 이동
                             if (tick.HasFlag(TickFlags.Start)) {
                                 laserPositions[laserObject.mIndex] = laserTargetPositions[laserObject.mIndex];
                                 m_autoLaserTime[laserObject.mIndex] = m_assistTime;
@@ -836,7 +836,7 @@ public class Scoring : Singleton<Scoring> {
                 } else if (tick.HasFlag(TickFlags.Slam) && !shouldMiss) {
                     LaserData laserObject = (LaserData)tick.obj;
                     // Check if slam hit
-                    float dirSign = Math.Sign(laserObject.GetDirection());
+                    float dirSign = laserObject.GetDirection();
                     float inputSign = KeyboardManager.inst.GetLaserDirection(buttonCode - 6);
                     float posDelta = (laserObject.mPoints[1] - laserPositions[buttonCode - 6]) * dirSign;
                     if (dirSign == inputSign && posDelta >= -laserDistanceLeniency) {

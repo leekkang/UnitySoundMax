@@ -45,22 +45,19 @@ public class IngameEngine : Singleton<IngameEngine> {
     // Texture of the map jacket image, if available
     //Image m_jacketImage;
     //Texture m_jacketTexture;
-
-    // The beatmap
+    
     Beatmap m_beatmap;
-    // Scoring system object
     Scoring m_scoring;
-    // Beatmap playback manager (object and timing point selector)
-    PlaybackEngine m_playback;
-    // Audio playback manager (music and FX))
-    AudioEngine m_audioPlayback;
-    // Applied audio offset
-    int m_audioOffset = 0;
+    PlaybackEngine m_playback;      // Beatmap playback manager (object and timing point selector)
+    AudioEngine m_audioPlayback;    // Audio playback manager (music and FX))
+    
+    int m_audioOffset = 0;          // Applied audio offset
     int m_fpsTarget = 0;
-    // The play field
-    Transform mTrack;
-    //Track* m_track = nullptr;
+    
+    Transform mTrack;               // The play field
     Transform mJudgeLine;
+    UILabel mScoreLabel;
+    UILabel mComboLabel;
 
     // The camera watching the playfield
     Camera m_camera;
@@ -107,6 +104,10 @@ public class IngameEngine : Singleton<IngameEngine> {
         mAudioRoot = GameObject.Find("Audio").transform;
         mJudgeLine = GameObject.Find("JudgeLine").transform;
 
+        // TODO : 나중에 인게임 ui로 바뀔것들
+        mScoreLabel = GameObject.Find("ScoreLabel").GetComponent<UILabel>();
+        mComboLabel = GameObject.Find("ComboLabel").GetComponent<UILabel>();
+
         // 샘플 오디오 로드
         m_slamSample = GameObject.Find("SlamSound").GetComponent<AudioSource>();
         m_clickSamples[0] = GameObject.Find("ClickSound1").GetComponent<AudioSource>();
@@ -119,11 +120,11 @@ public class IngameEngine : Singleton<IngameEngine> {
         });
         audioPath = Path.Combine(rootPath, "click-01.wav").Trim();
         DataBase.inst.LoadAudio(audioPath, (audio) => {
-            m_slamSample.clip = audio;
+            m_clickSamples[0].clip = audio;
         });
         audioPath = Path.Combine(rootPath, "click-02.wav").Trim();
         DataBase.inst.LoadAudio(audioPath, (audio) => {
-            m_slamSample.clip = audio;
+            m_clickSamples[1].clip = audio;
         });
     }
 
@@ -236,7 +237,6 @@ public class IngameEngine : Singleton<IngameEngine> {
         WaitForEndOfFrame waitFrame = new WaitForEndOfFrame();
 
         while(!m_ended) {
-            //Debug.Log("delta time : " + Time.deltaTime);
             Tick(Time.deltaTime);
             yield return waitFrame;
         }
@@ -341,9 +341,14 @@ public class IngameEngine : Singleton<IngameEngine> {
         //Dictionary<double, float> dicBpmChange = new Dictionary<double, float>();
         GameObject fxNote = Resources.Load("Prefab/FXNote") as GameObject;
         GameObject normalNote = Resources.Load("Prefab/Note") as GameObject;
+        GameObject laserNote = Resources.Load("Prefab/LaserNote") as GameObject;
+        //GameObject laserNote2 = Resources.Load("Prefab/LaserRightNote") as GameObject;
         List<ObjectDataBase> listState = m_beatmap.mListObjectState;
         for (int i = 0; i < listState.Count; i++) {
             ObjectDataBase objBase = listState[i];
+            TimingPoint timing = m_playback.GetTimingPointAt(objBase.mTime, false);
+            float bpmPerLength = (float)timing.GetBPM() * 0.01f;
+
             if (objBase.mType == ButtonType.Single || objBase.mType == ButtonType.Hold) {
                 NormalButtonData btnNormal = (NormalButtonData)objBase;
                 GameObject obj = null;
@@ -354,8 +359,6 @@ public class IngameEngine : Singleton<IngameEngine> {
                     obj = Instantiate(normalNote, mTrack);
                 obj.transform.parent = mTrack;
 
-                TimingPoint timing = m_playback.GetTimingPointAt(objBase.mTime, false);
-                float bpmPerLength = (float)timing.GetBPM() * 0.01f;
                 // TODO : bpm 변경되는 곡 구현하지 않음
                 //if (!dicBpmChange.ContainsKey(timing.GetBPM())) {
                 //    dicBpmChange.Add(timing.GetBPM(), timing.mTime);
@@ -366,6 +369,8 @@ public class IngameEngine : Singleton<IngameEngine> {
 
                 //    }
                 //}
+
+                // 트랙의 버튼홈 너비는 180f 이다.
                 float xPos = b_fx ? -180f + 360f * (btnNormal.mIndex - 4) : -270f + 180f * btnNormal.mIndex;
 
                 obj.transform.localPosition = new Vector3(xPos, bpmPerLength * objBase.mTime * mSpeed, 0f);
@@ -379,7 +384,55 @@ public class IngameEngine : Singleton<IngameEngine> {
 
                 mListObj.Add(obj);
             } else if (objBase.mType == ButtonType.Laser) {
+                LaserData btnLaser = (LaserData)objBase;
+                GameObject obj = null;
+                obj = Instantiate(laserNote, mTrack);
+                obj.transform.parent = mTrack;
+                float track_width = 180f * 5;
 
+                float xPos = -450f + btnLaser.mPoints[0] * track_width;
+                obj.transform.localPosition = new Vector3(xPos, bpmPerLength * objBase.mTime * mSpeed, 0f);
+                
+                UISprite sprLaser = obj.GetComponent<UISprite>();
+                if (btnLaser.mIndex == 1) {
+                    sprLaser.spriteName = "Nobe_Right";
+                    sprLaser.depth++;
+                } else {
+                    sprLaser.spriteName = "Nobe_Left";
+                }
+
+                int laserSlamThreshold = (int)Math.Ceiling(timing.mBeatDuration / 8.0f);
+                // 가로로 누운 형태의 레이저. 
+                // TODO : 짧은거같으니 height와 localPosition을 조절해주자
+                int dir = btnLaser.GetDirection();
+                if (btnLaser.mDuration <= laserSlamThreshold) {
+                    sprLaser.transform.localRotation = Quaternion.Euler(0f, 0f, -btnLaser.GetDirection() * 90f);
+                    //sprLaser.width = btnLaser.mDuration;
+                    sprLaser.height = (int)(track_width * Math.Abs(btnLaser.mPoints[1] - btnLaser.mPoints[0]));
+
+                    // 가장자리 보간
+                    sprLaser.pivot = UIWidget.Pivot.Center;
+                    sprLaser.height += 180;
+                } else { // 각도가 있는 레이저
+                    int width = (int)(track_width * Math.Abs(btnLaser.mPoints[1] - btnLaser.mPoints[0]));
+                    int height = (int)( bpmPerLength * btnLaser.mDuration * mSpeed);
+                    if (width != 0) {
+                        double tan = (double)width / height;
+                        double aatan = Math.Atan(tan) * Mathf.Rad2Deg;
+                        sprLaser.transform.localRotation = Quaternion.Euler(0f, 0f, -btnLaser.GetDirection() * (float)(Math.Atan(tan) * Mathf.Rad2Deg));
+                        height = (int)(height * Math.Sqrt(1 + tan * tan));
+                    }
+
+                    sprLaser.height = height;
+
+                    // 가장자리 보간
+                    if (width != 0) {
+                        sprLaser.pivot = UIWidget.Pivot.Center;
+                        sprLaser.height += 90;
+                    }
+                }
+
+                objBase.mNote = obj;
             }
         }
     }
@@ -399,7 +452,6 @@ public class IngameEngine : Singleton<IngameEngine> {
             while (mHoldHitEffect[tmp].isPlaying) {
                 tmp++;
                 tmp = tmp % mHoldHitEffect.Length;
-                Debug.Log("tetsaesdfasd");
             }
             mHoldHitEffect[tmp].transform.localPosition = target;
             mHoldHitEffect[tmp].gameObject.SetActive(true);
@@ -590,11 +642,12 @@ public class IngameEngine : Singleton<IngameEngine> {
     void OnComboChanged(int newCombo) {
         // 콤보 체인지 이펙트 또는 라벨 변경
         //m_comboAnimation.Restart();
-        Debug.Log("OnComboChanged : " + newCombo);
+        mComboLabel.text = "Combo : " + newCombo;
     }
     void OnScoreChanged(int newScore) {
         // 스코어 라벨 변경
         //Debug.Log("OnScoreChanged : " + newScore);
+        mScoreLabel.text = "Score : " + newScore;
     }
 
     // These functions control if FX button DSP's are muted or not
@@ -621,7 +674,7 @@ public class IngameEngine : Singleton<IngameEngine> {
             }
 
             int currentTime = m_playback.m_playbackTime;
-            if (Math.Abs(currentTime - (hold.mDuration + hold.mTime)) <= Scoring.inst.goodHitTime) {
+            if (Math.Abs(currentTime - (hold.mDuration + hold.mTime)) <= Scoring.inst.goodHitTime || Scoring.inst.autoplay || Scoring.inst.autoplayButtons) {
                 obj.mNote.SetActive(false);
             }
         }

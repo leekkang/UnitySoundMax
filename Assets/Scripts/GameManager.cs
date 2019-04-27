@@ -13,11 +13,14 @@ public class GameManager : MonoBehaviour {
     }
     
 #if DEVELOPMENT_BUILD || UNITY_EDITOR
-    Rect buttonRect = new Rect(Screen.width * 0.25f, Screen.height * 0.1f, Screen.width * 0.5f, Screen.height * 0.1f);
+    Rect buttonRect = new Rect(0, 0, Screen.width * 0.5f, Screen.height * 0.1f);
+    Rect scoreRect = new Rect(Screen.width * 0.5f, Screen.height * 0.1f, Screen.width * 0.5f, Screen.height * 0.1f);
     bool buttonPressed = false;
     bool buttonDragging = false;
 
+    string m_score_text;
     private void OnGUI() {
+        GUI.skin.label.fontSize = 20;
         if (buttonRect.Contains(Event.current.mousePosition)) {
             if (Event.current.type == EventType.MouseDown) {
                 buttonPressed = true;
@@ -47,9 +50,10 @@ public class GameManager : MonoBehaviour {
 
         if (GUI.Button(new Rect(buttonRect.x, buttonRect.y + Screen.height * 0.1f, buttonRect.width, buttonRect.height), "max burning play") && !buttonDragging) {
             MusicData data = new MusicData();
-            Scoring.inst.autoplayButtons = true;
+            //Scoring.inst.autoplayButtons = true;
+            Scoring.inst.autoplay = true;
             //Scoring.inst.autoplayButtons = false;
-            data.Load("max_burning", Difficulty.Challenge);
+            data.Load("max_burning", Difficulty.Infinite);
             IngameEngine.inst.StartGame(data, 3f);
         }
 

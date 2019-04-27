@@ -67,6 +67,8 @@ public class LaserData : ObjectDataBase {
     public byte mFlags;      // special options
     public float[] mPoints = new float[2];
 
+    public ParticleSystem mHitParticle;
+
     // Set the to the object state that connects to this laser, if any, otherwise null
     public LaserData mNext;
     public LaserData mPrev;
@@ -722,7 +724,7 @@ public class Beatmap {
                             }
                         }
                     }
-                } else {    // c == 1 && tmpBtnState != null
+                } else {    // c != 1 && tmpBtnState != null
                             // For buttons not using the 1/32 grid
                     if (!tmpBtnState.fineSnap) {
                         CreateButton();

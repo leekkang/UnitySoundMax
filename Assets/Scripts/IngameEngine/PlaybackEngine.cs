@@ -272,7 +272,7 @@ public class PlaybackEngine {
                 if (obj.mTime < (m_playbackTime + 2)) { // Tiny offset to make sure events are triggered before they are needed
                     // Trigger event
                     OnEventChanged(evt.mKey, evt);
-                    m_eventMapping[evt.mKey] = evt;
+                    //m_eventMapping[evt.mKey] = evt;
                     m_hittableObjects.RemoveAt(i--);
                     continue;
                 }
