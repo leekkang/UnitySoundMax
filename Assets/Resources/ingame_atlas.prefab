@@ -202,8 +202,8 @@ MonoBehaviour:
     paddingTop: 0
     paddingBottom: 0
   - name: Nobe_Guide_L
-    x: 2216
-    y: 865
+    x: 2916
+    y: 1250
     width: 300
     height: 798
     borderLeft: 0
@@ -215,8 +215,8 @@ MonoBehaviour:
     paddingTop: 0
     paddingBottom: 0
   - name: Nobe_Guide_R
-    x: 2916
-    y: 1250
+    x: 2216
+    y: 865
     width: 300
     height: 798
     borderLeft: 0
@@ -345,8 +345,8 @@ MonoBehaviour:
     paddingTop: 0
     paddingBottom: 0
   - name: Nobe_Tracker_L
-    x: 1524
-    y: 1258
+    x: 2517
+    y: 667
     width: 435
     height: 394
     borderLeft: 0
@@ -358,8 +358,8 @@ MonoBehaviour:
     paddingTop: 21
     paddingBottom: 0
   - name: Nobe_Tracker_R
-    x: 2517
-    y: 667
+    x: 1524
+    y: 1258
     width: 435
     height: 394
     borderLeft: 0
