@@ -51,20 +51,21 @@ public class GameManager : MonoBehaviour {
         if (GUI.Button(new Rect(buttonRect.x, buttonRect.y + Screen.height * 0.1f, buttonRect.width, buttonRect.height), "max burning play") && !buttonDragging) {
             MusicData data = new MusicData();
             //Scoring.inst.autoplayButtons = true;
-            Scoring.inst.autoplay = true;
             //Scoring.inst.autoplayButtons = false;
+            Scoring.inst.autoplay = true;
             data.Load("max_burning", Difficulty.Infinite);
             IngameEngine.inst.StartGame(data, 3f);
         }
 
-        if (GUI.Button(new Rect(buttonRect.x, buttonRect.y + Screen.height * 0.2f, buttonRect.width, buttonRect.height), "audio play") && !buttonDragging) {
-            AudioSource source = GameObject.Find("FXSound").GetComponent<AudioSource>();
-            DataBase.inst.LoadAudio("colorfulsky", AudioType.OGGVORBIS, (audio) => {
-                Debug.Log("audio sample : " + audio.samples);
-                Debug.Log("audio length : " + audio.length);
-                source.clip = audio;
-                source.Play();
-            });
+        if (GUI.Button(new Rect(buttonRect.x, buttonRect.y + Screen.height * 0.2f, buttonRect.width, buttonRect.height), "auto play bool") && !buttonDragging) {
+            Scoring.inst.autoplayButtons = !Scoring.inst.autoplayButtons;
+            //AudioSource source = GameObject.Find("FXSound").GetComponent<AudioSource>();
+            //DataBase.inst.LoadAudio("colorfulsky", AudioType.OGGVORBIS, (audio) => {
+            //    Debug.Log("audio sample : " + audio.samples);
+            //    Debug.Log("audio length : " + audio.length);
+            //    source.clip = audio;
+            //    source.Play();
+            //});
         }
     }
 #endif
