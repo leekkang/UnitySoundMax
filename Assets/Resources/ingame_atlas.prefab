@@ -47,7 +47,7 @@ MonoBehaviour:
   mSprites:
   - name: Combo
     x: 2953
-    y: 407
+    y: 641
     width: 1000
     height: 107
     borderLeft: 0
@@ -98,8 +98,8 @@ MonoBehaviour:
     paddingTop: 0
     paddingBottom: 0
   - name: HP_Gauge_Under70
-    x: 1984
-    y: 692
+    x: 443
+    y: 615
     width: 76
     height: 960
     borderLeft: 0
@@ -111,8 +111,8 @@ MonoBehaviour:
     paddingTop: 0
     paddingBottom: 0
   - name: HP_Percentage
-    x: 3217
-    y: 1293
+    x: 2361
+    y: 472
     width: 125
     height: 70
     borderLeft: 0
@@ -137,8 +137,8 @@ MonoBehaviour:
     paddingTop: 0
     paddingBottom: 0
   - name: Judge_DMAX
-    x: 1660
-    y: 462
+    x: 2953
+    y: 955
     width: 624
     height: 106
     borderLeft: 0
@@ -150,8 +150,8 @@ MonoBehaviour:
     paddingTop: 0
     paddingBottom: 0
   - name: JudgementLine
-    x: 2517
-    y: 901
+    x: 2953
+    y: 749
     width: 1080
     height: 160
     borderLeft: 0
@@ -176,7 +176,7 @@ MonoBehaviour:
     paddingTop: 0
     paddingBottom: 4
   - name: Maximize_Guage
-    x: 1524
+    x: 1960
     y: 510
     width: 135
     height: 1142
@@ -189,8 +189,8 @@ MonoBehaviour:
     paddingTop: 0
     paddingBottom: 0
   - name: Nobe_Guide_L
-    x: 2916
-    y: 1250
+    x: 2216
+    y: 865
     width: 300
     height: 798
     borderLeft: 0
@@ -202,8 +202,8 @@ MonoBehaviour:
     paddingTop: 0
     paddingBottom: 0
   - name: Nobe_Guide_R
-    x: 2216
-    y: 865
+    x: 2916
+    y: 1250
     width: 300
     height: 798
     borderLeft: 0
@@ -242,9 +242,9 @@ MonoBehaviour:
     paddingBottom: 0
   - name: Nobe_Left_Corner_glow
     x: 2517
-    y: 1254
-    width: 368
-    height: 409
+    y: 1276
+    width: 346
+    height: 387
     borderLeft: 0
     borderRight: 0
     borderTop: 0
@@ -254,10 +254,10 @@ MonoBehaviour:
     paddingTop: 0
     paddingBottom: 0
   - name: Nobe_Left_Glow
-    x: 2953
-    y: 531
+    x: 2096
+    y: 543
     width: 404
-    height: 369
+    height: 321
     borderLeft: 0
     borderRight: 0
     borderTop: 0
@@ -267,8 +267,8 @@ MonoBehaviour:
     paddingTop: 0
     paddingBottom: 0
   - name: Nobe_Right
-    x: 2061
-    y: 622
+    x: 443
+    y: 3
     width: 273
     height: 242
     borderLeft: 0
@@ -280,8 +280,8 @@ MonoBehaviour:
     paddingTop: 0
     paddingBottom: 0
   - name: Nobe_Right_Corner
-    x: 1660
-    y: 1082
+    x: 2361
+    y: 149
     width: 242
     height: 273
     borderLeft: 0
@@ -293,8 +293,8 @@ MonoBehaviour:
     paddingTop: 0
     paddingBottom: 0
   - name: Nobe_Right_Corner_Glow
-    x: 1660
-    y: 1356
+    x: 2096
+    y: 246
     width: 264
     height: 296
     borderLeft: 0
@@ -306,10 +306,10 @@ MonoBehaviour:
     paddingTop: 0
     paddingBottom: 0
   - name: Nobe_Right_Glow
-    x: 1660
-    y: 569
+    x: 2501
+    y: 423
     width: 323
-    height: 295
+    height: 243
     borderLeft: 0
     borderRight: 0
     borderTop: 0
@@ -320,7 +320,7 @@ MonoBehaviour:
     paddingBottom: 0
   - name: Nobe_Tracker_L
     x: 2517
-    y: 506
+    y: 667
     width: 435
     height: 394
     borderLeft: 0
@@ -332,8 +332,8 @@ MonoBehaviour:
     paddingTop: 21
     paddingBottom: 0
   - name: Nobe_Tracker_R
-    x: 3598
-    y: 515
+    x: 1524
+    y: 1258
     width: 435
     height: 394
     borderLeft: 0
