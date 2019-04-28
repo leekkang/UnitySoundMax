@@ -1,0 +1,154 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!1 &364270743284822732
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 364270743284822733}
+  - component: {fileID: 364270743284822735}
+  - component: {fileID: 364270743284822734}
+  m_Layer: 9
+  m_Name: Background_square
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &364270743284822733
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 364270743284822732}
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 660, z: 4277}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_RootOrder: 0
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &364270743284822735
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 364270743284822732}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: e96b31ce75e592f45a1cff563a4869db, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  leftAnchor:
+    target: {fileID: 0}
+    relative: 0
+    absolute: 0
+  rightAnchor:
+    target: {fileID: 0}
+    relative: 1
+    absolute: 0
+  bottomAnchor:
+    target: {fileID: 0}
+    relative: 0
+    absolute: 0
+  topAnchor:
+    target: {fileID: 0}
+    relative: 1
+    absolute: 0
+  updateAnchors: 1
+  mColor: {r: 1, g: 1, b: 1, a: 1}
+  mPivot: 4
+  mWidth: 5000
+  mHeight: 10000
+  mDepth: 4
+  mMat: {fileID: 0}
+  autoResizeBoxCollider: 0
+  hideIfOffScreen: 0
+  keepAspectRatio: 0
+  aspectRatio: 0.5
+  mType: 0
+  mFillDirection: 4
+  mFillAmount: 1
+  mInvert: 0
+  mFlip: 0
+  mApplyGradient: 0
+  mGradientTop: {r: 1, g: 1, b: 1, a: 1}
+  mGradientBottom: {r: 0.7, g: 0.7, b: 0.7, a: 1}
+  centerType: 1
+  leftType: 1
+  rightType: 1
+  bottomType: 1
+  topType: 1
+  mSprite: {fileID: 21300000, guid: eec848a6badb13e48bcc1806cf4f0207, type: 3}
+  mShader: {fileID: 4800000, guid: e75727d9555d9d14ca51d91908c681bc, type: 3}
+  mBorder: {x: 0, y: 0, z: 0, w: 0}
+  mFixedAspect: 0
+  mPixelSize: 1
+  nextSprite: {fileID: 0}
+--- !u!114 &364270743284822734
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 364270743284822732}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 6f945d2f8b430a140a60224c850dbbdb, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  frameIndex: 0
+  framerate: 45
+  ignoreTimeScale: 1
+  loop: 1
+  frames:
+  - {fileID: 21300000, guid: eec848a6badb13e48bcc1806cf4f0207, type: 3}
+  - {fileID: 21300000, guid: 559a36505c580fd4fabb948185d2ed5f, type: 3}
+  - {fileID: 21300000, guid: f5b6daba372a87145b8aa9191503de6f, type: 3}
+  - {fileID: 21300000, guid: 190ef3bfefa0d2a4ab1422f3826e1f48, type: 3}
+  - {fileID: 21300000, guid: 8e0b9f6fc7432db40803e5183b64da43, type: 3}
+  - {fileID: 21300000, guid: 9ba26ce8e9bee8f4a9ae5ed7d6ae5fff, type: 3}
+  - {fileID: 21300000, guid: efc4f93e5ae2d67459f7bbf744cf8a70, type: 3}
+  - {fileID: 21300000, guid: 6d4146064b7f69f4f9333dd940c677c1, type: 3}
+  - {fileID: 21300000, guid: 32ca856e22f5f7c4ab3acc97c2ccbc3e, type: 3}
+  - {fileID: 21300000, guid: 6773bc1324cf2c044af68d01550fc45a, type: 3}
+  - {fileID: 21300000, guid: 1d9e8ae8816d0014b9c36f7faf8090eb, type: 3}
+  - {fileID: 21300000, guid: 125480ac8d8462b47ab804049a9db0bc, type: 3}
+  - {fileID: 21300000, guid: 0af24b9524c1ed447a05f16108eec9ba, type: 3}
+  - {fileID: 21300000, guid: 35932febfcd233e4d92e31659e85bc6f, type: 3}
+  - {fileID: 21300000, guid: b573f91e2bc4f984899789f0f5f3688e, type: 3}
+  - {fileID: 21300000, guid: fcc41bb8e50da344086caa8f27c52224, type: 3}
+  - {fileID: 21300000, guid: b0d01fbe351347449a65967b2122d324, type: 3}
+  - {fileID: 21300000, guid: 1028e3f66c998ef4ba1418ee14f50270, type: 3}
+  - {fileID: 21300000, guid: e7da8f3372e787e45a6523ea6368d5b2, type: 3}
+  - {fileID: 21300000, guid: 34237f620d4b19143929e1d24b00e571, type: 3}
+  - {fileID: 21300000, guid: a78ab0dda940bd742b29e681eab27b5f, type: 3}
+  - {fileID: 21300000, guid: 10487b1dd08c3944389be859079be190, type: 3}
+  - {fileID: 21300000, guid: f51bcb9ea3992e14a9ccc1728b84ae41, type: 3}
+  - {fileID: 21300000, guid: ede5eafd6784a4a45966620dd0bf4836, type: 3}
+  - {fileID: 21300000, guid: 4330833240ea0614998e09b4ea0b83fb, type: 3}
+  - {fileID: 21300000, guid: 879de200736783544954112fdf9c9dd7, type: 3}
+  - {fileID: 21300000, guid: 6231b7108e90497408e5ac9d87d1dea0, type: 3}
+  - {fileID: 21300000, guid: 2cda43e6129a08e4fab2ed584c34c89c, type: 3}
+  - {fileID: 21300000, guid: c8efc675f1773334685972b4539a4d2f, type: 3}
+  - {fileID: 21300000, guid: 6e5459a3be3674a41a4c2c8fce3e9ebf, type: 3}
+  - {fileID: 21300000, guid: afe9943afe428944fa7ce6275bd2688c, type: 3}
+  - {fileID: 21300000, guid: a7cdf78836feb0546a3cb0cdca36cdb6, type: 3}
+  - {fileID: 21300000, guid: 7e57261bbf5c0ed4eb4d66acab5bb7de, type: 3}
+  - {fileID: 21300000, guid: d67a6db10987e7e458d104c31c51f977, type: 3}
+  - {fileID: 21300000, guid: 84a7a28e68a24c440be52b1e59c64284, type: 3}
+  - {fileID: 21300000, guid: 8694e98c8d058094c9265ba8b2811ede, type: 3}
+  - {fileID: 21300000, guid: 833283225eb160642bac158238fba5b8, type: 3}
+  - {fileID: 21300000, guid: c07287814133dd44b8cad5365a653a14, type: 3}
+  - {fileID: 21300000, guid: 5c7ff84fd2b975f4e92d84348988b949, type: 3}
+  - {fileID: 21300000, guid: 9c0496cdcef7b534eb492f1a2a63820a, type: 3}
+  - {fileID: 21300000, guid: 5507b22f8119af84b9271567e6d3bc80, type: 3}
+  - {fileID: 21300000, guid: 8161a814301526540a7589a9db2c4c7c, type: 3}
+  - {fileID: 21300000, guid: 19e40e1570f14074babbdffc1e3e148f, type: 3}
+  - {fileID: 21300000, guid: f3ee984bc9707ee469d7b168a3f254e0, type: 3}
+  - {fileID: 21300000, guid: bfd5d975d58d67745b2b64ba0575af28, type: 3}
