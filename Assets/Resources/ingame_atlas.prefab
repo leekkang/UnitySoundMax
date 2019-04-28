@@ -47,7 +47,7 @@ MonoBehaviour:
   mSprites:
   - name: Combo
     x: 443
-    y: 402
+    y: 464
     width: 1000
     height: 107
     borderLeft: 0
@@ -72,7 +72,7 @@ MonoBehaviour:
     paddingTop: 0
     paddingBottom: 0
   - name: HP_Bar
-    x: 3765
+    x: 3932
     y: 995
     width: 143
     height: 1053
@@ -85,8 +85,8 @@ MonoBehaviour:
     paddingTop: 0
     paddingBottom: 5
   - name: HP_Gauge_Over70
-    x: 3909
-    y: 1045
+    x: 443
+    y: 572
     width: 123
     height: 1003
     borderLeft: 0
@@ -111,8 +111,8 @@ MonoBehaviour:
     paddingTop: 0
     paddingBottom: 0
   - name: HP_Percentage
-    x: 3909
-    y: 974
+    x: 3932
+    y: 924
     width: 125
     height: 70
     borderLeft: 0
@@ -163,6 +163,19 @@ MonoBehaviour:
     paddingTop: 0
     paddingBottom: 0
   - name: Maximize_bar
+    x: 3765
+    y: 910
+    width: 166
+    height: 1138
+    borderLeft: 0
+    borderRight: 0
+    borderTop: 0
+    borderBottom: 0
+    paddingLeft: 0
+    paddingRight: 0
+    paddingTop: 0
+    paddingBottom: 4
+  - name: Maximize_Bar
     x: 3598
     y: 910
     width: 166
@@ -189,8 +202,8 @@ MonoBehaviour:
     paddingTop: 0
     paddingBottom: 0
   - name: Nobe_Guide_L
-    x: 2916
-    y: 1250
+    x: 2216
+    y: 865
     width: 300
     height: 798
     borderLeft: 0
@@ -202,8 +215,8 @@ MonoBehaviour:
     paddingTop: 0
     paddingBottom: 0
   - name: Nobe_Guide_R
-    x: 2216
-    y: 865
+    x: 2916
+    y: 1250
     width: 300
     height: 798
     borderLeft: 0
@@ -241,8 +254,8 @@ MonoBehaviour:
     paddingTop: 0
     paddingBottom: 0
   - name: Nobe_Left_Corner_glow
-    x: 3217
-    y: 1661
+    x: 2517
+    y: 1276
     width: 346
     height: 387
     borderLeft: 0
@@ -254,8 +267,8 @@ MonoBehaviour:
     paddingTop: 0
     paddingBottom: 0
   - name: Nobe_Left_Corner_Glow
-    x: 2517
-    y: 1276
+    x: 3217
+    y: 1661
     width: 346
     height: 387
     borderLeft: 0
@@ -280,8 +293,8 @@ MonoBehaviour:
     paddingTop: 0
     paddingBottom: 0
   - name: Nobe_Right
-    x: 1687
-    y: 267
+    x: 1444
+    y: 372
     width: 273
     height: 242
     borderLeft: 0
@@ -293,8 +306,8 @@ MonoBehaviour:
     paddingTop: 0
     paddingBottom: 0
   - name: Nobe_Right_Corner
-    x: 1444
-    y: 341
+    x: 1718
+    y: 236
     width: 242
     height: 273
     borderLeft: 0
@@ -358,8 +371,8 @@ MonoBehaviour:
     paddingTop: 21
     paddingBottom: 0
   - name: NormalNote
-    x: 3765
-    y: 943
+    x: 2953
+    y: 924
     width: 150
     height: 30
     borderLeft: 0

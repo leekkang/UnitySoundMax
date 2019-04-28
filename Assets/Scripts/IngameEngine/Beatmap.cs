@@ -106,13 +106,14 @@ namespace SoundMax {
             return Math.Sign(mPoints[1] - mPoints[0]);
         }
 
-        public float SamplePosition(int time) {
-            LaserData state = this;
-            while (state.mNext != null && (state.mTime + state.mDuration) < time) {
-                state = state.mNext;
+        /// <summary> 현재 시각에 판정선에 접하는 레이저의 위치를 반환 </summary>
+        public float CurJudgelinePosition(int time) {
+            LaserData laser = this;
+            while (laser.mNext != null && (laser.mTime + laser.mDuration) < time) {
+                laser = laser.mNext;
             }
-            float f = Mathf.Clamp((float)(time - state.mTime) / Math.Max(1, state.mDuration), 0.0f, 1.0f);
-            return (state.mPoints[1] - state.mPoints[0]) * f + state.mPoints[0];
+            float f = Mathf.Clamp((float)(time - laser.mTime) / Math.Max(1, laser.mDuration), 0.0f, 1.0f);
+            return (laser.mPoints[1] - laser.mPoints[0]) * f + laser.mPoints[0];
         }
 
         /// <summary> 

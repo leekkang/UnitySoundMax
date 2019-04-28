@@ -7,6 +7,8 @@ using System.IO;
 
 namespace SoundMax {
     public class IngameEngine : Singleton<IngameEngine> {
+        /// <summary> 트랙 노트 간격 조절용 </summary>
+        public const float TRACK_HEIGHT_INTERVAL = 0.007f;
         /// <summary> 트랙의 버튼홈 너비 </summary>
         public const float TRACK_NOTE_WIDTH = 180f;
         /// <summary> 리소스에 저장되어있는 버튼 높이 </summary>
@@ -51,7 +53,7 @@ namespace SoundMax {
         int m_audioOffset = 0;          // Applied audio offset
         int m_fpsTarget = 0;
 
-        Transform mTrackAnchor;               // The play field
+        Transform mTrackAnchor;
         Transform mJudgeLine;
         UILabel mScoreLabel;
         UILabel mComboLabel;
@@ -314,10 +316,9 @@ namespace SoundMax {
             return true;
         }
 
+        /// <summary> CreateObject 함수에서 생성한 오브젝트 전체 </summary>
         List<GameObject> mListObj = new List<GameObject>();
-        /// <summary>
-        /// 게임 실행에 필요한 오브젝트를 생성하는 함수
-        /// </summary>
+        /// <summary> 게임 실행에 필요한 오브젝트를 생성하는 함수 </summary>
         void CreateObject() {
             for (int i = 0; i < mListObj.Count; i++)
                 Destroy(mListObj[i]);
@@ -331,34 +332,42 @@ namespace SoundMax {
             GameObject eff = Resources.Load("Prefab/EffectNormalHit") as GameObject;
             Vector3 pos = new Vector3(-2000f, 0f, 0f);
             for (int i = 0; i < 15; i++) {
-                mNormalHitEffect[i] = Instantiate(eff, mJudgeLine).GetComponent<ParticleSystem>();
-                mNormalHitEffect[i].name = string.Format("EffectNormalHit_{0}", i);
-                mNormalHitEffect[i].transform.position = pos;
+                ParticleSystem particle = Instantiate(eff, mJudgeLine).GetComponent<ParticleSystem>();
+                particle.name = string.Format("EffectNormalHit_{0}", i);
+                particle.transform.position = pos;
+                mNormalHitEffect[i] = particle;
+                mListObj.Add(particle.gameObject);
             }
             mHoldHitEffect = new ParticleSystem[10];
             eff = Resources.Load("Prefab/EffectHoldHit") as GameObject;
             for (int i = 0; i < 10; i++) {
-                mHoldHitEffect[i] = Instantiate(eff, mJudgeLine).GetComponent<ParticleSystem>();
-                mHoldHitEffect[i].name = string.Format("EffectHoldHit_{0}", i);
-                mHoldHitEffect[i].transform.position = pos;
-                mHoldHitEffect[i].Stop();
-                mHoldHitEffect[i].gameObject.SetActive(false);
+                ParticleSystem particle = Instantiate(eff, mJudgeLine).GetComponent<ParticleSystem>();
+                particle.name = string.Format("EffectHoldHit_{0}", i);
+                particle.transform.position = pos;
+                particle.Stop();
+                particle.gameObject.SetActive(false);
+                mHoldHitEffect[i] = particle;
+                mListObj.Add(particle.gameObject);
             }
             mLaserHitEffect = new ParticleSystem[4];
             eff = Resources.Load("Prefab/EffectLaserHit") as GameObject;
             for (int i = 0; i < 4; i++) {
-                mLaserHitEffect[i] = Instantiate(eff, mJudgeLine).GetComponent<ParticleSystem>();
-                mLaserHitEffect[i].name = string.Format("EffectLaserHit_{0}", i);
-                mLaserHitEffect[i].transform.position = pos;
-                mLaserHitEffect[i].Stop();
-                mLaserHitEffect[i].gameObject.SetActive(false);
+                ParticleSystem particle = Instantiate(eff, mJudgeLine).GetComponent<ParticleSystem>();
+                particle.name = string.Format("EffectLaserHit_{0}", i);
+                particle.transform.position = pos;
+                particle.Stop();
+                particle.gameObject.SetActive(false);
+                mLaserHitEffect[i] = particle;
+                mListObj.Add(particle.gameObject);
             }
             mSlamHitEffect = new ParticleSystem[10];
             eff = Resources.Load("Prefab/EffectSlam") as GameObject;
             for (int i = 0; i < 10; i++) {
-                mSlamHitEffect[i] = Instantiate(eff, mJudgeLine).GetComponent<ParticleSystem>();
-                mSlamHitEffect[i].name = string.Format("EffectSlam_{0}", i);
-                mSlamHitEffect[i].transform.position = pos;
+                ParticleSystem particle = Instantiate(eff, mJudgeLine).GetComponent<ParticleSystem>();
+                particle.name = string.Format("EffectSlam_{0}", i);
+                particle.transform.position = pos;
+                mSlamHitEffect[i] = particle;
+                mListObj.Add(particle.gameObject);
             }
 
             // make laser nobe object
@@ -366,16 +375,18 @@ namespace SoundMax {
             mLaserNobeObject[0] = Instantiate(nobeObject, mJudgeLine).GetComponent<LaserNobeObject>();
             mLaserNobeObject[0].GetComponent<UISprite>().spriteName = "Nobe_Tracker_L";
             mLaserNobeObject[0].Move(0, false);
+            mListObj.Add(mLaserNobeObject[0].gameObject);
             mLaserNobeObject[1] = Instantiate(nobeObject, mJudgeLine).GetComponent<LaserNobeObject>();
             mLaserNobeObject[1].GetComponent<UISprite>().spriteName = "Nobe_Tracker_R";
             mLaserNobeObject[1].Move(1, false);
+            mListObj.Add(mLaserNobeObject[1].gameObject);
 
             // make track highlight
             GameObject trackHighlight = Resources.Load("Prefab/TrackHighlight") as GameObject;
             int nEndTime = m_beatmap.mListObjectState[m_beatmap.mListObjectState.Count - 1].mTime;
             TimingPoint curTiming = m_playback.GetCurrentTimingPoint();
             double interval = curTiming.mBeatDuration;
-            double length = curTiming.GetBPM() * 0.01f * mSpeed;
+            double length = curTiming.GetBPM() * TRACK_HEIGHT_INTERVAL * mSpeed;
             pos = Vector3.zero;
             for (double i = interval; i < nEndTime; i += interval) {
                 Transform tr = Instantiate(trackHighlight, mTrackAnchor).transform;
@@ -401,7 +412,7 @@ namespace SoundMax {
             for (int i = 0; i < listState.Count; i++) {
                 ObjectDataBase objBase = listState[i];
                 TimingPoint timing = m_playback.GetTimingPointAt(objBase.mTime, false);
-                float bpmPerLength = (float)timing.GetBPM() * 0.01f * mSpeed;
+                float bpmPerLength = (float)timing.GetBPM() * TRACK_HEIGHT_INTERVAL * mSpeed;
                 float yPos = bpmPerLength * objBase.mTime;
 
                 if (objBase.mType == ButtonType.Single || objBase.mType == ButtonType.Hold) {
@@ -704,7 +715,7 @@ namespace SoundMax {
             //}
 
             //Debug.Log((float)-(m_currentTiming.GetBPM() * 0.01f) * delta);
-            mTrackAnchor.localPosition = new Vector3(0f, -1440f - (float)(m_currentTiming.GetBPM() * 0.01f) * playbackPositionMs * mSpeed, 0f);
+            mTrackAnchor.localPosition = new Vector3(0f, -1440f - (float)(m_currentTiming.GetBPM() * TRACK_HEIGHT_INTERVAL) * playbackPositionMs * mSpeed, 0f);
             // TODO : 왜인지 모르겠는데 엄청나게 빠르게 값이 커짐
             //mTrack.Translate(new Vector3(0f, (float)-(m_currentTiming.GetBPM() * 0.01f) * delta, 0f), Space.Self);
 

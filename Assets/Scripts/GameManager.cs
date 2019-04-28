@@ -44,19 +44,29 @@ namespace SoundMax {
             if (GUI.Button(buttonRect, "colorfulsky play") && !buttonDragging) {
                 MusicData data = new MusicData();
                 Scoring.inst.autoplayButtons = true;
+                KeyboardManager.inst.mIsLaserUseMouse = true;
                 data.Load("colorfulsky", Difficulty.Challenge);
-                IngameEngine.inst.StartGame(data, 1.0f);
+                IngameEngine.inst.StartGame(data, 2.0f);
             }
 
             if (GUI.Button(new Rect(buttonRect.x, buttonRect.y + Screen.height * 0.1f, buttonRect.width, buttonRect.height), "max burning play") && !buttonDragging) {
                 MusicData data = new MusicData();
-                Scoring.inst.autoplayButtons = true;
+                //Scoring.inst.autoplayButtons = true;
                 Scoring.inst.autoplay = true;
                 data.Load("max_burning", Difficulty.Infinite);
-                IngameEngine.inst.StartGame(data, 3f);
+                IngameEngine.inst.StartGame(data, 5f);
             }
 
-            if (GUI.Button(new Rect(buttonRect.x, buttonRect.y + Screen.height * 0.2f, buttonRect.width, buttonRect.height), "auto play bool") && !buttonDragging) {
+            if (GUI.Button(new Rect(buttonRect.x, buttonRect.y + Screen.height * 0.2f, buttonRect.width, buttonRect.height), "xross infection play") && !buttonDragging) {
+                MusicData data = new MusicData();
+                Scoring.inst.autoplayButtons = true;
+                //Scoring.inst.autoplay = true;
+                KeyboardManager.inst.mIsLaserUseMouse = true;
+                data.Load("xross_infection", Difficulty.Extended);
+                IngameEngine.inst.StartGame(data, 5f);
+            }
+
+            if (GUI.Button(new Rect(buttonRect.x, buttonRect.y + Screen.height * 0.3f, buttonRect.width, buttonRect.height), "auto play bool") && !buttonDragging) {
                 Scoring.inst.autoplayButtons = !Scoring.inst.autoplayButtons;
                 //AudioSource source = GameObject.Find("FXSound").GetComponent<AudioSource>();
                 //DataBase.inst.LoadAudio("colorfulsky", AudioType.OGGVORBIS, (audio) => {

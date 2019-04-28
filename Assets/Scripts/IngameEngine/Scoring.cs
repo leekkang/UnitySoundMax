@@ -1057,7 +1057,7 @@ namespace SoundMax {
                         }
                     } else {
                         // Update target position
-                        laserTargetPositions[i] = currentSegment.SamplePosition(mapTime);
+                        laserTargetPositions[i] = currentSegment.CurJudgelinePosition(mapTime);
                     }
                 }
 
@@ -1108,7 +1108,7 @@ namespace SoundMax {
                     timeSinceLaserUsed[i] = 0.0f;
                 } else {
                     timeSinceLaserUsed[i] += deltaTime;
-                    //laserPositions[i] = laserTargetPositions[i];
+                    laserPositions[i] += m_laserInput[i];
                 }
 
                 if (autoplay || m_autoLaserTime[i] >= 0) {

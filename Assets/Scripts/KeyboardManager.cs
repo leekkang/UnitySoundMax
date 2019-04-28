@@ -65,9 +65,9 @@ public class KeyboardManager : Singleton<KeyboardManager> {
 
 
         // 게임용 체크
-        //if (!IngameEngine.inst.m_playing)
-        //    return;
-        
+        if (!IngameEngine.inst.m_playing)
+            return;
+
         for (int i = 0; i < mButtonInputCode.Length; i++) {
             if (info[(int)mButtonInputCode[i], index].down) {
                 Scoring.inst.OnButtonPressed(i);
@@ -104,7 +104,7 @@ public class KeyboardManager : Singleton<KeyboardManager> {
         // 0 : left, 1 : right
         // TODO : 기본 속도로 돌릴경우 어느정도로 갈지 결정해야함
         if (mIsLaserUseMouse)
-            return Input.GetAxis(num == 0 ? "Mouse X" : "Mouse Y") * 0.1f;
+            return (num == 0 ? Input.GetAxis("Mouse X") : -Input.GetAxis("Mouse Y")) * 0.1f;
         else
             return mLaserKeyValue[num];
     }
@@ -112,7 +112,7 @@ public class KeyboardManager : Singleton<KeyboardManager> {
     public int GetLaserDirection(int num) {
         // 0 : left, 1 : right
         if (mIsLaserUseMouse)
-            return System.Math.Sign(Input.GetAxis(num == 0 ? "Mouse X" : "Mouse Y"));
+            return System.Math.Sign(num == 0 ? Input.GetAxis("Mouse X") : -Input.GetAxis("Mouse Y"));
         else
             return System.Math.Sign(mLaserKeyValue[num]);
     }
