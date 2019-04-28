@@ -11,7 +11,7 @@ GameObject:
   - component: {fileID: 2249175218971067234}
   - component: {fileID: 3480800499156531986}
   m_Layer: 9
-  m_Name: LaserNote
+  m_Name: NoteLaser
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -83,6 +83,6 @@ MonoBehaviour:
   rightType: 1
   bottomType: 1
   topType: 1
-  mAtlas: {fileID: 8600554363492252079, guid: 2be65e6a49464d143a6dc3117eba6d88, type: 3}
+  mAtlas: {fileID: 1173416172374522772, guid: 44755db7625569643b2476e1aea5e1a5, type: 3}
   mSpriteName: Nobe_Left
   mFillCenter: 1

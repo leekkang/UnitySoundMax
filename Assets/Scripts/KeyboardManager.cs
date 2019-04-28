@@ -1,6 +1,7 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using SoundMax;
 
 public enum InputCode {
     mouseLeft, mouseRight, mouseWheel, tab, capsLock, shiftLeft, ctrlLeft, altLeft,
@@ -26,6 +27,16 @@ public class KeyboardManager : Singleton<KeyboardManager> {
     KeyInfo[,] info;
 
     InputCode[] mButtonInputCode;
+
+    /// <summary> 
+    /// 레이저 노트 처리용으로 마우스를 사용할지 키보드를 사용할지 결정하는 변수 
+    /// 마우스 사용 시 true, 키보드 사용시 false로 해야한다.
+    /// 키보드는 왼쪽 레이저가 Q, W, 오른쪽 레이저가 E, R을 사용한다.
+    /// </summary>
+    public bool mIsLaserUseMouse;
+    /// <summary> 레이저 노트 키보드 값 </summary>
+    float[] mLaserKeyValue = new float[2];
+
     public void Open() {
         info = new KeyInfo[maxKeyNum, saveNum];
         for (int i = 0; i < maxKeyNum; i++)
@@ -54,9 +65,9 @@ public class KeyboardManager : Singleton<KeyboardManager> {
 
 
         // 게임용 체크
-        if (!IngameEngine.inst.m_playing)
-            return;
-
+        //if (!IngameEngine.inst.m_playing)
+        //    return;
+        
         for (int i = 0; i < mButtonInputCode.Length; i++) {
             if (info[(int)mButtonInputCode[i], index].down) {
                 Scoring.inst.OnButtonPressed(i);
@@ -65,6 +76,24 @@ public class KeyboardManager : Singleton<KeyboardManager> {
                 Scoring.inst.OnButtonReleased(i);
             }
         }
+
+        // 에디터 디버그용. 마우스 대신 사용
+        if (!mIsLaserUseMouse) {
+            if (info[(int)InputCode.Q, index].stay)
+                mLaserKeyValue[0] = -0.1f;
+            else if (info[(int)InputCode.W, index].stay)
+                mLaserKeyValue[0] = 0.1f;
+            else
+                mLaserKeyValue[0] = 0;
+
+            if (info[(int)InputCode.E, index].stay)
+                mLaserKeyValue[1] = -0.1f;
+            else if (info[(int)InputCode.R, index].stay)
+                mLaserKeyValue[1] = 0.1f;
+            else
+                mLaserKeyValue[1] = 0;
+        }
+
     }
 
     public bool CheckHold(int num) {
@@ -73,12 +102,19 @@ public class KeyboardManager : Singleton<KeyboardManager> {
 
     public float GetLaserAxisValue(int num) {
         // 0 : left, 1 : right
-        return Input.GetAxis(num == 0 ? "Mouse X" : "Mouse Y");
+        // TODO : 기본 속도로 돌릴경우 어느정도로 갈지 결정해야함
+        if (mIsLaserUseMouse)
+            return Input.GetAxis(num == 0 ? "Mouse X" : "Mouse Y") * 0.1f;
+        else
+            return mLaserKeyValue[num];
     }
 
     public int GetLaserDirection(int num) {
         // 0 : left, 1 : right
-        return System.Math.Sign(Input.GetAxis(num == 0 ? "Mouse X" : "Mouse Y"));
+        if (mIsLaserUseMouse)
+            return System.Math.Sign(Input.GetAxis(num == 0 ? "Mouse X" : "Mouse Y"));
+        else
+            return System.Math.Sign(mLaserKeyValue[num]);
     }
 
     void SaveInfo(InputCode type) {

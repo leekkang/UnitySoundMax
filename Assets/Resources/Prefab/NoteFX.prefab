@@ -11,7 +11,7 @@ GameObject:
   - component: {fileID: 3141496778305163289}
   - component: {fileID: 3141496778305163288}
   m_Layer: 9
-  m_Name: FXNote
+  m_Name: NoteFX
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -62,14 +62,14 @@ MonoBehaviour:
   updateAnchors: 1
   mColor: {r: 1, g: 1, b: 1, a: 1}
   mPivot: 7
-  mWidth: 360
+  mWidth: 340
   mHeight: 100
   mDepth: 3
   mMat: {fileID: 0}
   autoResizeBoxCollider: 0
   hideIfOffScreen: 0
   keepAspectRatio: 0
-  aspectRatio: 3.6
+  aspectRatio: 3.4
   mType: 1
   mFillDirection: 4
   mFillAmount: 1
@@ -83,6 +83,6 @@ MonoBehaviour:
   rightType: 1
   bottomType: 1
   topType: 1
-  mAtlas: {fileID: 8600554363492252079, guid: 2be65e6a49464d143a6dc3117eba6d88, type: 3}
+  mAtlas: {fileID: 1173416172374522772, guid: 44755db7625569643b2476e1aea5e1a5, type: 3}
   mSpriteName: FXNote
   mFillCenter: 1

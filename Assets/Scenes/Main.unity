@@ -329,7 +329,7 @@ MonoBehaviour:
   anchorOffset: 0
   softBorderPadding: 1
   renderQueue: 0
-  startingRenderQueue: 3003
+  startingRenderQueue: 3001
   mClipTexture: {fileID: 0}
   mAlpha: 1
   mClipping: 0
@@ -1015,6 +1015,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   mMouseXSpeed: 2
   mMouseYSpeed: 2
+  mIsLaserUseMouse: 0
 --- !u!1 &267204992
 GameObject:
   m_ObjectHideFlags: 0
@@ -1281,7 +1282,7 @@ MonoBehaviour:
   anchorOffset: 0
   softBorderPadding: 1
   renderQueue: 0
-  startingRenderQueue: 3003
+  startingRenderQueue: 3001
   mClipTexture: {fileID: 0}
   mAlpha: 1
   mClipping: 0
@@ -1460,7 +1461,7 @@ MonoBehaviour:
   anchorOffset: 0
   softBorderPadding: 1
   renderQueue: 0
-  startingRenderQueue: 3001
+  startingRenderQueue: 3002
   mClipTexture: {fileID: 0}
   mAlpha: 1
   mClipping: 0
@@ -2223,7 +2224,7 @@ MonoBehaviour:
   anchorOffset: 0
   softBorderPadding: 1
   renderQueue: 0
-  startingRenderQueue: 3001
+  startingRenderQueue: 3004
   mClipTexture: {fileID: 0}
   mAlpha: 1
   mClipping: 0
@@ -2447,7 +2448,7 @@ PrefabInstance:
     - target: {fileID: 1516147329925673382, guid: 07fbf20ea14eb5b489a68c66aed8f611,
         type: 3}
       propertyPath: m_IsActive
-      value: 1
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 1516147329925673382, guid: 07fbf20ea14eb5b489a68c66aed8f611,
         type: 3}
@@ -3374,7 +3375,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!4 &1080686320
 Transform:
   m_ObjectHideFlags: 0
@@ -4758,7 +4759,7 @@ MonoBehaviour:
   rightType: 1
   bottomType: 1
   topType: 1
-  mAtlas: {fileID: 8600554363492252079, guid: 2be65e6a49464d143a6dc3117eba6d88, type: 3}
+  mAtlas: {fileID: 1173416172374522772, guid: 44755db7625569643b2476e1aea5e1a5, type: 3}
   mSpriteName: JudgementLine
   mFillCenter: 1
 --- !u!1 &1636061052
@@ -5075,7 +5076,7 @@ MonoBehaviour:
   anchorOffset: 0
   softBorderPadding: 1
   renderQueue: 0
-  startingRenderQueue: 3003
+  startingRenderQueue: 3004
   mClipTexture: {fileID: 0}
   mAlpha: 1
   mClipping: 0
@@ -5853,6 +5854,9 @@ MonoBehaviour:
   mHoldHitEffect: []
   mLaserHitEffect: []
   mSlamHitEffect: []
+  mLaserNobeObject:
+  - {fileID: 0}
+  - {fileID: 0}
 --- !u!1 &1913792065
 GameObject:
   m_ObjectHideFlags: 0
@@ -6313,7 +6317,7 @@ MonoBehaviour:
   rightType: 1
   bottomType: 1
   topType: 1
-  mAtlas: {fileID: 8600554363492252079, guid: 2be65e6a49464d143a6dc3117eba6d88, type: 3}
+  mAtlas: {fileID: 1173416172374522772, guid: 44755db7625569643b2476e1aea5e1a5, type: 3}
   mSpriteName: Track
   mFillCenter: 1
 --- !u!1 &2060287717
