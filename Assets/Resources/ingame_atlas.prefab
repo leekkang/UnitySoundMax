@@ -46,8 +46,8 @@ MonoBehaviour:
   material: {fileID: 2100000, guid: 29d9f8adea68be04fbfbccc0ac7624e2, type: 2}
   mSprites:
   - name: Combo
-    x: 2953
-    y: 641
+    x: 443
+    y: 402
     width: 1000
     height: 107
     borderLeft: 0
@@ -59,10 +59,10 @@ MonoBehaviour:
     paddingTop: 0
     paddingBottom: 0
   - name: FXNote
-    x: 3765
-    y: 960
+    x: 3217
+    y: 1268
     width: 329
-    height: 34
+    height: 29
     borderLeft: 0
     borderRight: 0
     borderTop: 0
@@ -98,7 +98,7 @@ MonoBehaviour:
     paddingTop: 0
     paddingBottom: 0
   - name: HP_Gauge_Under70
-    x: 443
+    x: 1444
     y: 615
     width: 76
     height: 960
@@ -111,8 +111,8 @@ MonoBehaviour:
     paddingTop: 0
     paddingBottom: 0
   - name: HP_Percentage
-    x: 2361
-    y: 472
+    x: 3909
+    y: 974
     width: 125
     height: 70
     borderLeft: 0
@@ -189,19 +189,6 @@ MonoBehaviour:
     paddingTop: 0
     paddingBottom: 0
   - name: Nobe_Guide_L
-    x: 2216
-    y: 865
-    width: 300
-    height: 798
-    borderLeft: 0
-    borderRight: 0
-    borderTop: 0
-    borderBottom: 0
-    paddingLeft: 0
-    paddingRight: 0
-    paddingTop: 0
-    paddingBottom: 0
-  - name: Nobe_Guide_R
     x: 2916
     y: 1250
     width: 300
@@ -214,9 +201,22 @@ MonoBehaviour:
     paddingRight: 0
     paddingTop: 0
     paddingBottom: 0
+  - name: Nobe_Guide_R
+    x: 2216
+    y: 865
+    width: 300
+    height: 798
+    borderLeft: 0
+    borderRight: 0
+    borderTop: 0
+    borderBottom: 0
+    paddingLeft: 0
+    paddingRight: 0
+    paddingTop: 0
+    paddingBottom: 0
   - name: Nobe_Left
-    x: 3217
-    y: 1727
+    x: 2953
+    y: 427
     width: 362
     height: 321
     borderLeft: 0
@@ -229,7 +229,7 @@ MonoBehaviour:
     paddingBottom: 0
   - name: Nobe_Left_Corner
     x: 3217
-    y: 1364
+    y: 1298
     width: 321
     height: 362
     borderLeft: 0
@@ -241,6 +241,19 @@ MonoBehaviour:
     paddingTop: 0
     paddingBottom: 0
   - name: Nobe_Left_Corner_glow
+    x: 3217
+    y: 1661
+    width: 346
+    height: 387
+    borderLeft: 0
+    borderRight: 0
+    borderTop: 0
+    borderBottom: 0
+    paddingLeft: 0
+    paddingRight: 0
+    paddingTop: 0
+    paddingBottom: 0
+  - name: Nobe_Left_Corner_Glow
     x: 2517
     y: 1276
     width: 346
@@ -267,8 +280,8 @@ MonoBehaviour:
     paddingTop: 0
     paddingBottom: 0
   - name: Nobe_Right
-    x: 443
-    y: 3
+    x: 1687
+    y: 267
     width: 273
     height: 242
     borderLeft: 0
@@ -280,8 +293,8 @@ MonoBehaviour:
     paddingTop: 0
     paddingBottom: 0
   - name: Nobe_Right_Corner
-    x: 2361
-    y: 149
+    x: 1444
+    y: 341
     width: 242
     height: 273
     borderLeft: 0
@@ -319,19 +332,6 @@ MonoBehaviour:
     paddingTop: 0
     paddingBottom: 0
   - name: Nobe_Tracker_L
-    x: 2517
-    y: 667
-    width: 435
-    height: 394
-    borderLeft: 0
-    borderRight: 0
-    borderTop: 0
-    borderBottom: 0
-    paddingLeft: 0
-    paddingRight: 0
-    paddingTop: 21
-    paddingBottom: 0
-  - name: Nobe_Tracker_R
     x: 1524
     y: 1258
     width: 435
@@ -344,9 +344,22 @@ MonoBehaviour:
     paddingRight: 0
     paddingTop: 21
     paddingBottom: 0
+  - name: Nobe_Tracker_R
+    x: 2517
+    y: 667
+    width: 435
+    height: 394
+    borderLeft: 0
+    borderRight: 0
+    borderTop: 0
+    borderBottom: 0
+    paddingLeft: 0
+    paddingRight: 0
+    paddingTop: 21
+    paddingBottom: 0
   - name: NormalNote
-    x: 3909
-    y: 1014
+    x: 3765
+    y: 943
     width: 150
     height: 30
     borderLeft: 0

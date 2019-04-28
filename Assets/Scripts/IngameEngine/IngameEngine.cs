@@ -370,10 +370,24 @@ namespace SoundMax {
             mLaserNobeObject[1].GetComponent<UISprite>().spriteName = "Nobe_Tracker_R";
             mLaserNobeObject[1].Move(1, false);
 
+            // make track highlight
+            GameObject trackHighlight = Resources.Load("Prefab/TrackHighlight") as GameObject;
+            int nEndTime = m_beatmap.mListObjectState[m_beatmap.mListObjectState.Count - 1].mTime;
+            TimingPoint curTiming = m_playback.GetCurrentTimingPoint();
+            double interval = curTiming.mBeatDuration;
+            double length = curTiming.GetBPM() * 0.01f * mSpeed;
+            pos = Vector3.zero;
+            for (double i = interval; i < nEndTime; i += interval) {
+                Transform tr = Instantiate(trackHighlight, mTrackAnchor).transform;
+                pos.Set(0f, (float)(length * i), 0f);
+                tr.localPosition = pos;
+
+                mListObj.Add(tr.gameObject);
+            }
+
             // make button and laser
             // TODO : bpm 변경되는 곡 구현하지 않음
             //Dictionary<double, float> dicBpmChange = new Dictionary<double, float>();
-            GameObject trackHighlight = Resources.Load("Prefab/TrackHighlight") as GameObject;
             GameObject fxNote = Resources.Load("Prefab/NoteFX") as GameObject;
             GameObject normalNote = Resources.Load("Prefab/Note") as GameObject;
             GameObject laserNote = Resources.Load("Prefab/NoteLaser") as GameObject;
@@ -428,7 +442,7 @@ namespace SoundMax {
                     bool b_right = btnLaser.mIndex == 1;
 
                     sprLaser.spriteName = b_right ? "Nobe_Right" : "Nobe_Left";
-                    sprLaser.depth = b_right ? sprLaser.depth++ : sprLaser.depth + 2;
+                    sprLaser.depth = b_right ? sprLaser.depth : sprLaser.depth + 2;
 
                     int laserSlamThreshold = (int)Math.Ceiling(timing.mBeatDuration / 8.0f);
                     // 가로로 누운 형태의 레이저. 
@@ -442,7 +456,7 @@ namespace SoundMax {
                         #region Start Corner Note
                         UISprite sprCorner = Instantiate(laserCorner, mTrackAnchor).GetComponent<UISprite>();
                         sprCorner.spriteName = b_right ? "Nobe_Right_Corner" : "Nobe_Left_Corner";
-                        sprCorner.depth = b_right ? sprCorner.depth++ : sprCorner.depth + 2;
+                        sprCorner.depth = b_right ? sprCorner.depth + 1 : sprCorner.depth + 3;
                         // 위치, 회전값 조절
                         pos.Set(xPos, yPos, 0f);
                         sprCorner.transform.localPosition = pos;
@@ -460,7 +474,7 @@ namespace SoundMax {
                             #region Additional Note
                             sprExtend = Instantiate(laserNote, mTrackAnchor).GetComponent<UISprite>();
                             sprExtend.spriteName = b_right ? "Nobe_Right" : "Nobe_Left";
-                            sprExtend.depth = b_right ? sprExtend.depth++ : sprExtend.depth + 2;
+                            sprExtend.depth = b_right ? sprExtend.depth : sprExtend.depth + 2;
                             // 위치 조절
                             sprExtend.pivot = UIWidget.Pivot.Center;
                             sprExtend.height = (int)TRACK_NOTE_WIDTH;
@@ -491,7 +505,7 @@ namespace SoundMax {
                         #region End Corner Note
                         sprCorner = Instantiate(laserCorner, mTrackAnchor).GetComponent<UISprite>();
                         sprCorner.spriteName = b_right ? "Nobe_Right_Corner" : "Nobe_Left_Corner";
-                        sprCorner.depth = b_right ? sprCorner.depth++ : sprCorner.depth + 2;
+                        sprCorner.depth = b_right ? sprCorner.depth + 1 : sprCorner.depth + 3;
                         // 위치, 회전값 조절
                         pos.Set(xPos, yPos, 0f);
                         sprCorner.transform.localPosition = pos;
@@ -507,7 +521,7 @@ namespace SoundMax {
                             #region Additional Note
                             sprExtend = Instantiate(laserNote, mTrackAnchor).GetComponent<UISprite>();
                             sprExtend.spriteName = b_right ? "Nobe_Right" : "Nobe_Left";
-                            sprExtend.depth = b_right ? sprExtend.depth++ : sprExtend.depth + 2;
+                            sprExtend.depth = b_right ? sprExtend.depth : sprExtend.depth + 2;
                             // 위치 조절
                             sprExtend.pivot = UIWidget.Pivot.Center;
                             sprExtend.height = (int)TRACK_NOTE_WIDTH;
@@ -558,6 +572,8 @@ namespace SoundMax {
                         mLastLaserEndTime[btnLaser.mIndex] = btnLaser.mTime;
                 }
             }
+
+            Debug.Log("length : " + mListObj.Count);
         }
 
         // 단일 파티클은 Emit, 다중 파티클은 Play
