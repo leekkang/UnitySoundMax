@@ -104,7 +104,7 @@ public class KeyboardManager : Singleton<KeyboardManager> {
         // 0 : left, 1 : right
         // TODO : 기본 속도로 돌릴경우 어느정도로 갈지 결정해야함
         if (mIsLaserUseMouse)
-            return (num == 0 ? Input.GetAxis("Mouse X") : -Input.GetAxis("Mouse Y")) * 0.1f;
+            return (num == 0 ? Input.GetAxis("Mouse X") : -Input.GetAxis("Mouse Y")) * 0.25f;
         else
             return mLaserKeyValue[num];
     }

@@ -52,14 +52,15 @@ namespace SoundMax {
             if (GUI.Button(new Rect(buttonRect.x, buttonRect.y + Screen.height * 0.1f, buttonRect.width, buttonRect.height), "max burning play") && !buttonDragging) {
                 MusicData data = new MusicData();
                 //Scoring.inst.autoplayButtons = true;
-                Scoring.inst.autoplay = true;
+                //Scoring.inst.autoplay = true;
+                KeyboardManager.inst.mIsLaserUseMouse = true;
                 data.Load("max_burning", Difficulty.Infinite);
                 IngameEngine.inst.StartGame(data, 5f);
             }
 
             if (GUI.Button(new Rect(buttonRect.x, buttonRect.y + Screen.height * 0.2f, buttonRect.width, buttonRect.height), "xross infection play") && !buttonDragging) {
                 MusicData data = new MusicData();
-                Scoring.inst.autoplayButtons = true;
+                //Scoring.inst.autoplayButtons = true;
                 //Scoring.inst.autoplay = true;
                 KeyboardManager.inst.mIsLaserUseMouse = true;
                 data.Load("xross_infection", Difficulty.Extended);
