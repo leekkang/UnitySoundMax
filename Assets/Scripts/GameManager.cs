@@ -54,7 +54,7 @@ namespace SoundMax {
                 //Scoring.inst.autoplayButtons = true;
                 //Scoring.inst.autoplay = true;
                 KeyboardManager.inst.mIsLaserUseMouse = true;
-                data.Load("max_burning", Difficulty.Infinite);
+                data.Load("max_burning", Difficulty.Extended);
                 IngameEngine.inst.StartGame(data, 5f);
             }
 
