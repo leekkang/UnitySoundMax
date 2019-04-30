@@ -51,7 +51,6 @@ public class KeyboardManager : Singleton<KeyboardManager> {
             InputCode.F,
             InputCode.Z,    // fx버튼
             InputCode.X,
-            InputCode.P     // 스타트 버튼
         };
     }
 
@@ -63,6 +62,7 @@ public class KeyboardManager : Singleton<KeyboardManager> {
         for (int i = 0; i < maxKeyNum; i++)
             SaveInfo((InputCode)i);
 
+        SaveInfo(InputCode.P);     // 스타트 버튼
 
         // 게임용 체크
         if (!IngameEngine.inst.m_playing)
@@ -75,6 +75,10 @@ public class KeyboardManager : Singleton<KeyboardManager> {
             if (info[(int)mButtonInputCode[i], index].up) {
                 Scoring.inst.OnButtonReleased(i);
             }
+        }
+
+        if (info[(int)InputCode.P, index].down) {
+            IngameEngine.inst.OnClickPauseButton();
         }
 
         // 에디터 디버그용. 마우스 대신 사용

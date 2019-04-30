@@ -145,6 +145,24 @@ namespace SoundMax {
                 }
             }
         }
+
+        /// <summary>
+        /// 지나간 레이저 오브젝트의 부모를 이동하지 않는 트랙으로 변경
+        /// 루트에서 실행해야함.
+        /// </summary>
+        public void ChangeParent(Transform parent) {
+            LaserData laser = this;
+            for (; laser != null; laser = laser.mNext) {
+                if (laser.mListNote.Count == 0)
+                    continue;
+
+                for (int i = 0; i < laser.mListNote.Count; i++) {
+                    Transform tr = laser.mListNote[i].transform;
+                    tr.parent = parent;
+                    tr.gameObject.SetActive(false);
+                }
+            }
+        }
     }
 
     public class EventData : ObjectDataBase {
@@ -160,8 +178,10 @@ namespace SoundMax {
         public EffectType mEffectVal;
         public TrackRollBehaviour mRollVal;
     }
-
-
+    
+    /// <summary>
+    /// 특정 시각에 곡의 빠르기 관련 정보를 저장하는 클래스. 변속이 없으면 1개만 생성된다.
+    /// </summary>
     public class TimingPoint {
         public int mTime;
         public double mBeatDuration;

@@ -12,11 +12,14 @@ namespace SoundMax {
         /// <summary> 트랙의 버튼홈 너비 </summary>
         public const float TRACK_NOTE_WIDTH = 180f;
         /// <summary> 리소스에 저장되어있는 버튼 높이 </summary>
-        public const float TRACK_NOTE_HEIGHT = 100f;
+        public const float TRACK_NOTE_HEIGHT = 50f;
         /// <summary> center를 기준으로 하는 트랙의 크기 </summary>
         public const float TRACK_WIDTH = 900f;
         /// <summary> Laser_Guide를 표시할 간격 </summary>
-        public const float LASER_START_INTERVAL = 20000f;
+        public const float LASER_START_INTERVAL = 10000f;
+        /// <summary> 오브젝트를 렌더링 할 시간 간격. 현재시간 + 변수 이내에 있는 오브젝트만 setactive(true) 가 된다. </summary>
+        public const float OBJECT_ACTIVE_INTERVAL = 10000f;
+
         public bool m_playing = true;
         bool m_introCompleted = false;
         bool m_outroCompleted = false;
@@ -36,27 +39,32 @@ namespace SoundMax {
         bool m_usecMod = false;
         float m_modSpeed = 400;
 
-        // Game Canvas
-        //Ref<HealthGauge> m_scoringGauge;
-        //Ref<SettingsBar> m_settingsBar;
-        //Ref<Label> m_scoreText;
-
         // Texture of the map jacket image, if available
         //Image m_jacketImage;
         //Texture m_jacketTexture;
 
         Beatmap m_beatmap;
         Scoring m_scoring;
-        PlaybackEngine m_playback;      // Beatmap playback manager (object and timing point selector)
-        AudioEngine m_audioPlayback;    // Audio playback manager (music and FX))
+        PlaybackEngine m_playback;              // Beatmap playback manager (object and timing point selector)
+        AudioEngine m_audioPlayback;            // Audio playback manager (music and FX))
 
         int m_audioOffset = 0;          // Applied audio offset
         int m_fpsTarget = 0;
 
-        Transform mTrackAnchor;
-        Transform mJudgeLine;
-        UILabel mScoreLabel;
-        UILabel mComboLabel;
+        Transform mTrackAnchor;                 // 움직이는 트랙 오브젝트
+        Transform mStaticTrack;                 // 움직이지 않는 트랙 오브젝트
+        Transform mJudgeLine;                   // 판정선 오브젝트
+        Transform mTrackerPanel;                // 파티클에 가려지지 않아야 하는 친구들의 패널
+
+        UILabel mScoreLabel;                    // 우측 상단 스코어 보드
+        UILabel mBoardComboLabel;               // 우측 상단 콤보 보드
+        UISprite mHealthBar;                    // 우측의 체력 게이지
+        Color mHealthUnder70 = new Color(118f, 255f, 255f);  // 체력 70% 미만일 때의 컬러값
+        Color mHealthOver70 = new Color(255f, 255f, 255f);   // 체력 70% 이상일 때의 컬러값
+
+        UILabel mComboText;                     // 트랙 가운데 뜨는 콤보 텍스트
+        TweenScale mComboTweenScale;            // 트랙 가운데 뜨는 콤보의 스케일 트윈
+        DisappearObject mComboDisappearScript;  // 트랙 가운데 뜨는 콤보의 알파 트윈
 
         // The camera watching the playfield
         Camera m_camera;
@@ -64,8 +72,8 @@ namespace SoundMax {
         // Currently active timing point
         TimingPoint m_currentTiming;
         // Currently visible gameplay objects
-        List<ObjectDataBase> m_currentObjectSet;
-        int m_lastMapTime;
+        int mInvisibleObjIndex;                  // 현재 카메라에 보이지 않는 첫번째 오브젝트의 인덱스
+        int m_lastMapTime;                       // 현재 오디오 재생 시간
 
         // Rate to sample gauge;
         int m_gaugeSampleRate;
@@ -93,7 +101,8 @@ namespace SoundMax {
         public ParticleSystem[] mHoldHitEffect;
         public ParticleSystem[] mLaserHitEffect;
         public ParticleSystem[] mSlamHitEffect;
-        public LaserNobeObject[] mLaserNobeObject = new LaserNobeObject[2];
+        public DisappearObject[] mLaserNobeObject = new DisappearObject[2];
+        public DisappearObject[] mJudgeObject = new DisappearObject[8];         // 판정 오브젝트
 
         MusicData mCurMusic = new MusicData();  // 필요한건가?
 
@@ -101,19 +110,30 @@ namespace SoundMax {
             m_beatmap = new Beatmap();
             m_playback = new PlaybackEngine();
             m_audioPlayback = new AudioEngine();
-            mTrackAnchor = GameObject.Find("Anchor").transform;
-            m_camera = GameObject.Find("IngameCamera").GetComponent<Camera>();
-            mAudioRoot = GameObject.Find("Audio").transform;
-            mJudgeLine = GameObject.Find("JudgeLine").transform;
+            
+            // 트랙 관련 게임 오브젝트
+            m_camera = transform.Find("IngameCamera").GetComponent<Camera>();
+            mAudioRoot = transform.Find("Audio");
+            mTrackAnchor = transform.FindRecursive("Anchor");
+            mStaticTrack = mTrackAnchor.parent.Find("Track");
+            mJudgeLine = transform.FindRecursive("JudgeLine");
+            mTrackerPanel = mJudgeLine.Find("TrackerPanel");
 
-            // TODO : 나중에 인게임 ui로 바뀔것들
-            mScoreLabel = GameObject.Find("ScoreLabel").GetComponent<UILabel>();
-            mComboLabel = GameObject.Find("ComboLabel").GetComponent<UILabel>();
+            // 오버트랙 이미지 관련
+            mComboText = transform.FindRecursive("ComboText").GetComponent<UILabel>();
+            mComboTweenScale = mComboText.GetComponent<TweenScale>();
+            mComboDisappearScript = mComboText.GetComponent<DisappearObject>();
+            mComboDisappearScript.Open(1f, 0.3f);
+
+            // 백그라운드 이미지 관련
+            mScoreLabel = transform.FindRecursive("ScoreLabel").GetComponent<UILabel>();
+            mBoardComboLabel = mScoreLabel.transform.parent.Find("ComboLabel").GetComponent<UILabel>();
+            mHealthBar = transform.FindRecursive("HPRemain").GetComponent<UISprite>();
 
             // 샘플 오디오 로드
-            m_slamSample = GameObject.Find("SlamSound").GetComponent<AudioSource>();
-            m_clickSamples[0] = GameObject.Find("ClickSound1").GetComponent<AudioSource>();
-            m_clickSamples[1] = GameObject.Find("ClickSound2").GetComponent<AudioSource>();
+            m_slamSample = mAudioRoot.Find("SlamSound").GetComponent<AudioSource>();
+            m_clickSamples[0] = mAudioRoot.Find("ClickSound1").GetComponent<AudioSource>();
+            m_clickSamples[1] = mAudioRoot.Find("ClickSound2").GetComponent<AudioSource>();
 
             string rootPath = Path.Combine(Application.streamingAssetsPath, "fxAudio");
             string audioPath = Path.Combine(rootPath, "laser_slam.wav").Trim();
@@ -128,6 +148,9 @@ namespace SoundMax {
             DataBase.inst.LoadAudio(audioPath, (audio) => {
                 m_clickSamples[1].clip = audio;
             });
+
+            // 풀링 오브젝트 생성
+            CreatePoolObject();
         }
 
         /// <summary>
@@ -316,18 +339,11 @@ namespace SoundMax {
             return true;
         }
 
-        /// <summary> CreateObject 함수에서 생성한 오브젝트 전체 </summary>
-        List<GameObject> mListObj = new List<GameObject>();
-        /// <summary> 게임 실행에 필요한 오브젝트를 생성하는 함수 </summary>
-        void CreateObject() {
-            for (int i = 0; i < mListObj.Count; i++)
-                Destroy(mListObj[i]);
-            mListObj.Clear();
-
-            // init track
-            mTrackAnchor.localPosition = new Vector3(0f, -1440f, 0f);
-
-            // make effect pool
+        /// <summary>
+        /// 인게임에서 계속 사용되는 오브젝트들을 생성 및 초기화
+        /// </summary>
+        void CreatePoolObject() {
+            // make effect and judge object pool
             mNormalHitEffect = new ParticleSystem[15];
             GameObject eff = Resources.Load("Prefab/EffectNormalHit") as GameObject;
             Vector3 pos = new Vector3(-2000f, 0f, 0f);
@@ -336,7 +352,6 @@ namespace SoundMax {
                 particle.name = string.Format("EffectNormalHit_{0}", i);
                 particle.transform.position = pos;
                 mNormalHitEffect[i] = particle;
-                mListObj.Add(particle.gameObject);
             }
             mHoldHitEffect = new ParticleSystem[10];
             eff = Resources.Load("Prefab/EffectHoldHit") as GameObject;
@@ -347,7 +362,6 @@ namespace SoundMax {
                 particle.Stop();
                 particle.gameObject.SetActive(false);
                 mHoldHitEffect[i] = particle;
-                mListObj.Add(particle.gameObject);
             }
             mLaserHitEffect = new ParticleSystem[4];
             eff = Resources.Load("Prefab/EffectLaserHit") as GameObject;
@@ -358,7 +372,6 @@ namespace SoundMax {
                 particle.Stop();
                 particle.gameObject.SetActive(false);
                 mLaserHitEffect[i] = particle;
-                mListObj.Add(particle.gameObject);
             }
             mSlamHitEffect = new ParticleSystem[10];
             eff = Resources.Load("Prefab/EffectSlam") as GameObject;
@@ -367,19 +380,53 @@ namespace SoundMax {
                 particle.name = string.Format("EffectSlam_{0}", i);
                 particle.transform.position = pos;
                 mSlamHitEffect[i] = particle;
-                mListObj.Add(particle.gameObject);
             }
 
             // make laser nobe object
-            GameObject nobeObject = Resources.Load("Prefab/LaserNobeObject") as GameObject;
-            mLaserNobeObject[0] = Instantiate(nobeObject, mJudgeLine).GetComponent<LaserNobeObject>();
+            GameObject nobeObject = Resources.Load("Prefab/ObjectLaserNobe") as GameObject;
+            mLaserNobeObject[0] = Instantiate(nobeObject, mTrackerPanel).GetComponent<DisappearObject>();
+            mLaserNobeObject[0].Open(1f, 0.3f);
             mLaserNobeObject[0].GetComponent<UISprite>().spriteName = "Nobe_Tracker_L";
             mLaserNobeObject[0].Move(0, false);
-            mListObj.Add(mLaserNobeObject[0].gameObject);
-            mLaserNobeObject[1] = Instantiate(nobeObject, mJudgeLine).GetComponent<LaserNobeObject>();
+
+            mLaserNobeObject[1] = Instantiate(nobeObject, mTrackerPanel).GetComponent<DisappearObject>();
+            mLaserNobeObject[1].Open(1f, 0.3f);
             mLaserNobeObject[1].GetComponent<UISprite>().spriteName = "Nobe_Tracker_R";
             mLaserNobeObject[1].Move(1, false);
-            mListObj.Add(mLaserNobeObject[1].gameObject);
+
+            // make judgement object
+            GameObject judgeObject = Resources.Load("Prefab/ObjectJudgement") as GameObject;
+            pos = new Vector3(0f, 152f, 0f);
+            Quaternion camera_angle = Quaternion.Euler(-65.5f, 0f, 0f);
+            for (int i = 0; i < 8; i++) {
+                mJudgeObject[i] = Instantiate(judgeObject, mTrackerPanel).GetComponent<DisappearObject>();
+                mJudgeObject[i].transform.localPosition = pos;
+                mJudgeObject[i].transform.localRotation = m_camera.transform.localRotation;
+                mJudgeObject[i].Open(0, 0.3f);
+                mJudgeObject[i].GetComponent<UISprite>().spriteName = "JudgementObject_" + i;
+                if (i < 4)
+                    mJudgeObject[i].Move(0.2f * (1 + i));
+                else if (i < 6)
+                    mJudgeObject[i].Move(0.3f + 0.4f * (i - 4));
+                else
+                    mJudgeObject[i].Move(i - 6);
+            }
+        }
+
+        /// <summary> CreateObject 함수에서 생성한 오브젝트 중 노트를 제외한 오브젝트 전체 </summary>
+        List<Transform> mListObj = new List<Transform>();
+        /// <summary> 더이상 화면에 보이지 않을 오브젝트를 다른 곳으로 옮기기 위한 지표 </summary>
+        int mListObjIndex = 0;
+        /// <summary> 게임 실행에 필요한 오브젝트를 생성하는 함수 </summary>
+        void CreateObject() {
+            for (int i = 0; i < mListObj.Count; i++)
+                Destroy(mListObj[i].gameObject);
+            mListObj.Clear();
+            mListObjIndex = 0;
+
+            // init track
+            Vector3 pos = Vector3.zero;
+            mTrackAnchor.localPosition = pos;
 
             // make track highlight
             GameObject trackHighlight = Resources.Load("Prefab/TrackHighlight") as GameObject;
@@ -393,7 +440,7 @@ namespace SoundMax {
                 pos.Set(0f, (float)(length * i), 0f);
                 tr.localPosition = pos;
 
-                mListObj.Add(tr.gameObject);
+                mListObj.Add(tr);
             }
 
             // make button and laser
@@ -408,6 +455,7 @@ namespace SoundMax {
             float[] mLastLaserEndTime = new float[2]{ 0f, 0f};   // 레이저가 끝난 시간을 저장. laserStart를 출력하기 위해서임
             List<ObjectDataBase> listState = m_beatmap.mListObjectState;
             pos = Vector3.zero;
+            mInvisibleObjIndex = 0;
 
             for (int i = 0; i < listState.Count; i++) {
                 ObjectDataBase objBase = listState[i];
@@ -437,10 +485,15 @@ namespace SoundMax {
 
                     if (objBase.mType == ButtonType.Hold) {
                         HoldButtonData btnHold = (HoldButtonData)objBase;
-                        obj.GetComponent<UISprite>().height = (int)(100f + bpmPerLength * btnHold.mDuration);
+                        obj.GetComponent<UISprite>().height = (int)(TRACK_NOTE_HEIGHT + bpmPerLength * btnHold.mDuration);
                     }
                     objBase.mNote = obj.GetComponent<UISprite>();
-                    mListObj.Add(obj);
+
+                    if (objBase.mTime > OBJECT_ACTIVE_INTERVAL) {
+                        obj.SetActive(false);
+                        if (mInvisibleObjIndex == 0)
+                            mInvisibleObjIndex = i;
+                    }
                 } else if (objBase.mType == ButtonType.Laser) {
                     LaserData btnLaser = (LaserData)objBase;
                     UISprite sprLaser = Instantiate(laserNote, mTrackAnchor).GetComponent<UISprite>();
@@ -475,7 +528,6 @@ namespace SoundMax {
                         if (dir > 0) sprCorner.transform.localRotation = Quaternion.Euler(0f, 0f, 90f);
 
                         btnLaser.mListNote.Add(sprCorner);
-                        mListObj.Add(sprCorner.gameObject);
                         #endregion
 
                         // 첫 레이저이면 하단부에 일반 노트 1개랑 스타트 노트를 붙임
@@ -493,7 +545,6 @@ namespace SoundMax {
                             sprExtend.transform.localPosition = pos;
 
                             btnLaser.mListNote.Add(sprExtend);
-                            mListObj.Add(sprExtend.gameObject);
                             #endregion
 
                             // 스타트 노트
@@ -506,7 +557,6 @@ namespace SoundMax {
                                 sprExtend.transform.localPosition = pos;
 
                                 btnLaser.mListNote.Add(sprExtend);
-                                mListObj.Add(sprExtend.gameObject);
                             }
                             #endregion
                         }
@@ -523,7 +573,6 @@ namespace SoundMax {
                         sprCorner.transform.localRotation = Quaternion.Euler(0f, 0f, dir > 0 ? - 90f : 180f);
 
                         btnLaser.mListNote.Add(sprCorner);
-                        mListObj.Add(sprCorner.gameObject);
                         #endregion
 
                         // 마지막 레이저이면 일반 노트 1개를 붙임
@@ -540,7 +589,6 @@ namespace SoundMax {
                             sprExtend.transform.localPosition = pos;
 
                             btnLaser.mListNote.Add(sprExtend);
-                            mListObj.Add(sprExtend.gameObject);
                             #endregion
                         }
 
@@ -571,20 +619,42 @@ namespace SoundMax {
                             sprExtend.transform.localPosition = pos;
 
                             btnLaser.mListNote.Add(sprExtend);
-                            mListObj.Add(sprExtend.gameObject);
                         }
                     }
 
                     btnLaser.mListNote.Add(sprLaser);
-                    mListObj.Add(sprLaser.gameObject);
 
                     // 마지막 레이저의 시간을 저장
                     if (btnLaser.mNext == null)
                         mLastLaserEndTime[btnLaser.mIndex] = btnLaser.mTime;
+
+
+                    // 보이지 않을 오브젝트는 미리 꺼놓는다.
+                    if (btnLaser.mTime > OBJECT_ACTIVE_INTERVAL) {
+                        for (int j = 0; j < btnLaser.mListNote.Count; j++)
+                            btnLaser.mListNote[j].gameObject.SetActive(false);
+
+                        if (mInvisibleObjIndex == 0)
+                            mInvisibleObjIndex = i;
+                    }
                 }
             }
 
             Debug.Log("length : " + mListObj.Count);
+        }
+
+        /// <summary>
+        /// 움직이는 트랙에 부착된 오브젝트를 움직이지 않는 트랙으로 붙여 연산량을 줄여준다.
+        /// </summary>
+        public void ChangeObjectParent(ObjectDataBase obj) {
+            if (obj.mType == ButtonType.Laser) {
+                ((LaserData)obj).ChangeParent(mStaticTrack);
+            } else {
+                if (obj.mNote != null) {
+                    obj.mNote.transform.parent = mStaticTrack;
+                    obj.mNote.gameObject.SetActive(false);
+                }
+            }
         }
 
         // 단일 파티클은 Emit, 다중 파티클은 Play
@@ -638,14 +708,9 @@ namespace SoundMax {
 
         // Processes input and Updates scoring, also handles audio timing management
         void TickGameplay(float deltaTime) {
-            if (!m_playing /*&& m_introCompleted*/) {
-                // Start playback of audio in first gameplay tick
+            if (!m_playing) {
                 m_audioPlayback.Play();
                 m_playing = true;
-
-                //if (g_application.GetAppCommandLine().Contains("-autoskip")) {
-                //    SkipIntro();
-                //}
             }
 
             BeatmapSetting beatmapSettings = m_beatmap.mSetting;
@@ -715,15 +780,52 @@ namespace SoundMax {
             //}
 
             //Debug.Log((float)-(m_currentTiming.GetBPM() * 0.01f) * delta);
-            mTrackAnchor.localPosition = new Vector3(0f, -1440f - (float)(m_currentTiming.GetBPM() * TRACK_HEIGHT_INTERVAL) * playbackPositionMs * mSpeed, 0f);
+            mTrackAnchor.localPosition = new Vector3(0f, -(float)(m_currentTiming.GetBPM() * TRACK_HEIGHT_INTERVAL) * playbackPositionMs * mSpeed, 0f);
             // TODO : 왜인지 모르겠는데 엄청나게 빠르게 값이 커짐
             //mTrack.Translate(new Vector3(0f, (float)-(m_currentTiming.GetBPM() * 0.01f) * delta, 0f), Space.Self);
 
             m_lastMapTime = playbackPositionMs;
 
+            // 게이지 수정
+            if (mHealthBar.fillAmount != m_scoring.currentGauge) {
+                mHealthBar.fillAmount = m_scoring.currentGauge;
+                mHealthBar.color = mHealthBar.fillAmount >= 0.7f ? mHealthOver70 : mHealthUnder70;
+            }
+
+            // 트랙 하이라이트 부모 변경
+            if (mListObj[mListObjIndex].localPosition.y + 200f < -mTrackAnchor.localPosition.y) {
+                mListObj[mListObjIndex].parent = mStaticTrack;
+                mListObj[mListObjIndex++].gameObject.SetActive(false);
+            }
+
+            // 시야 내에 들어올 오브젝트 액티브 활성화
+            ObjectDataBase obj = null;
+            do {
+                obj = m_beatmap.mListObjectState[mInvisibleObjIndex];
+                if (obj.mType == ButtonType.Laser) {
+                    LaserData laser = (LaserData)obj;
+                    for (int j = 0; j < laser.mListNote.Count; j++)
+                        laser.mListNote[j].gameObject.SetActive(true);
+                } else {
+                    if (obj.mNote != null)
+                        obj.mNote.gameObject.SetActive(true);
+                }
+                ++mInvisibleObjIndex;
+            } while (m_beatmap.mListObjectState[mInvisibleObjIndex].mTime == obj.mTime);
+
             if (m_audioPlayback.HasEnded()) {
                 FinishGame();
             }
+        }
+
+        /// <summary> 게임중 퍼즈 버튼을 눌렀을 때 하는 작업 </summary>
+        public void OnClickPauseButton() {
+            if (m_paused) {
+                m_audioPlayback.Play();
+            } else {
+                m_audioPlayback.Pause();
+            }
+            m_paused = !m_paused;
         }
 
         // Called when game is finished and the score screen should show up
@@ -760,28 +862,30 @@ namespace SoundMax {
             //ParticlePlay(ParticleType.Slam, new Vector3(direction > 0 ? 450f : -450f, 0f, 0f));
         }
 
+        /// <summary> 오버트랙 판정 오브젝트 출력 </summary>
+        public void PrintJudgement(int index, ScoreHitRating rate, float pos = 0f) {
+            UISprite spr = mJudgeObject[index].GetComponent<UISprite>();
+            spr.spriteName = rate == ScoreHitRating.Perfect ? "Judge_DMAX" :
+                             rate == ScoreHitRating.Good ? "Judge_DMAX" : "Judge_DMAX";
+            if (index < 6)
+                mJudgeObject[index].ResetTime();
+            else
+                mJudgeObject[index].Move(pos, false, true);
+        }
+
         void OnButtonHit(int buttonIdx, ScoreHitRating rating, ObjectDataBase hitObject, bool late) {
             NormalButtonData st = (NormalButtonData)hitObject;
 
-            // The color effect in the button lane
-            // 버튼 히트 이펙트
-            //m_track.AddEffect(new ButtonHitEffect(buttonIdx, c));
+            // 레일에 빛나는 스프라이트 출력
 
+            // fx버튼에 달려있는 오디오 출력
             if (st != null && st.mHasSample) {
                 m_fxSamples[st.mSampleIndex].volume = st.mSampleVolume;
                 m_fxSamples[st.mSampleIndex].Play();
             }
 
             if (rating != ScoreHitRating.Idle) {
-                // Floating text effect
-                //m_track.AddEffect(new ButtonHitRatingEffect(buttonIdx, rating));
-
-                if (rating == ScoreHitRating.Good) {
-                    Debug.Log("Hit Good");
-                    // 판정 굿 이펙트??
-                    //m_track.timedHitEffect.late = late;
-                    //m_track.timedHitEffect.Reset(0.75f);
-                }
+                PrintJudgement(buttonIdx, rating);
 
                 // 히트 이펙트
                 // Create hit effect particle
@@ -792,23 +896,39 @@ namespace SoundMax {
             }
 
         }
+
+        /// <summary> 오버트랙 콤보 제거 </summary>
         void OnButtonMiss(int buttonIdx, bool hitEffect) {
-            //Debug.Log("Hit Miss");
-            //if (hitEffect) {
-            //    Color c = m_track.hitColors[0];
-            //    m_track.AddEffect(new ButtonHitEffect(buttonIdx, c));
-            //}
-            //m_track.AddEffect(new ButtonHitRatingEffect(buttonIdx, ScoreHitRating.Miss));
+            if (hitEffect) {
+                PrintJudgement(buttonIdx, ScoreHitRating.Miss);
+            }
+
+            if (mComboText.gameObject.activeSelf) {
+                mComboTweenScale.ResetToBeginning();
+                mComboText.gameObject.SetActive(false);
+            }
         }
+        
+        /// <summary> 콤보 라벨 변경 및 오버트랙 콤보 출력 </summary>
         void OnComboChanged(int newCombo) {
-            // 콤보 체인지 이펙트 또는 라벨 변경
-            //m_comboAnimation.Restart();
-            mComboLabel.text = "Combo : " + newCombo;
+            if (newCombo == 0)
+                return;
+            
+            mBoardComboLabel.text = m_scoring.maxComboCounter.ToString();
+            mComboText.text = newCombo.ToString();
+            mComboDisappearScript.ResetTime();
+            if (!mComboText.gameObject.activeSelf) {
+                mComboText.gameObject.SetActive(true);
+            } else {
+                mComboTweenScale.ResetToBeginning();
+                mComboTweenScale.PlayForward();
+            }
         }
+
+        /// <summary> 스코어 라벨 변경 </summary>
         void OnScoreChanged(int newScore) {
-            // 스코어 라벨 변경
             //Debug.Log("OnScoreChanged : " + newScore);
-            mScoreLabel.text = "Score : " + newScore;
+            mScoreLabel.text = newScore.ToString();
         }
 
         // These functions control if FX button DSP's are muted or not
@@ -825,6 +945,7 @@ namespace SoundMax {
                 laser.ChangeSprite(true);
             }
         }
+
         void OnObjectReleased(int buttonIdx, ObjectDataBase obj) {
             if (obj.mType == ButtonType.Hold) {
                 HoldButtonData hold = (HoldButtonData)obj;
@@ -838,7 +959,7 @@ namespace SoundMax {
                 }
 
                 int currentTime = m_playback.m_playbackTime;
-                if (Math.Abs(currentTime - (hold.mDuration + hold.mTime)) <= Scoring.inst.goodHitTime || Scoring.inst.autoplay || Scoring.inst.autoplayButtons) {
+                if (Math.Abs(currentTime - (hold.mDuration + hold.mTime)) <= m_scoring.goodHitTime || m_scoring.autoplay || m_scoring.autoplayButtons) {
                     obj.mNote.gameObject.SetActive(false);
                 }
             } else if (obj.mType == ButtonType.Laser) {
@@ -878,7 +999,7 @@ namespace SoundMax {
                     m_rollIntensity = (14 * (1.0f + 0.5f * (i - 1))) / 360.0f;
                 }
             } else if (key == EventKey.SlamVolume) {
-                m_slamSample.volume = data.mFloatVal;
+                m_slamSample.volume = data.mFloatVal * 0.4f;
             } else if (key == EventKey.ChartEnd) {
                 FinishGame();
             }
@@ -904,59 +1025,6 @@ namespace SoundMax {
                 //    Logf("Lua error on calling laser_alert: %s", Logger.Error, lua_tostring(m_lua, -1));
                 //}
             }
-        }
-
-        // 필요한건지?
-        void m_OnButtonPressed(InputCode code) {
-            // 강제 종료?
-            //if (buttonCode == Input.Button.BT_S) {
-            //    if (g_input.Are3BTsHeld()) {
-            //        ObjectState *const* lastObj = &m_beatmap.GetLinearObjects().back();
-            //        int timePastEnd = m_lastMapTime - (*lastObj).time;
-            //        if (timePastEnd < 0)
-            //            m_manualExit = true;
-
-            //        FinishGame();
-            //    }
-            //}
-        }
-
-        // Skips ahead to the right before the first object in the map
-        bool SkipIntro() {
-            int index = 0;
-            while (m_beatmap.mListObjectState[index].mType == ButtonType.Event && index < m_beatmap.mListObjectState.Count) {
-                index++;
-            }
-            ObjectDataBase firstObj = m_beatmap.mListObjectState[index];
-            int skipTime = firstObj.mTime - 1000;
-            if (skipTime > m_lastMapTime) {
-                m_audioPlayback.SetPosition(skipTime);
-                return true;
-            }
-            return false;
-        }
-        // Skips ahead at the end to the score screen
-        void SkipOutro() {
-            // Just to be sure
-            if (m_beatmap.mListObjectState.Count == 0) {
-                FinishGame();
-                return;
-            }
-
-            // Check if last object has passed
-            ObjectDataBase lastObj = m_beatmap.mListObjectState.Last();
-            int timePastEnd = m_lastMapTime - lastObj.mTime;
-            if (timePastEnd > 250) {
-                FinishGame();
-            }
-        }
-
-        bool GetTickRate(int rate) {
-            if (!m_audioPlayback.m_paused) {
-                rate = m_fpsTarget;
-                return true;
-            }
-            return false; // Default otherwise
         }
     }
 }

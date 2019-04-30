@@ -150,7 +150,7 @@ namespace SoundMax {
         byte comboState = 2;
 
         // Highest combo in current run
-        int maxComboCounter;
+        public int maxComboCounter;
 
         // The timings of hit objects, sorted by time hit
         // these are used for debugging
@@ -193,7 +193,7 @@ namespace SoundMax {
         // Saves the time when a button was hit or released for bounce guarding
         int[] m_buttonGuardTime = new int[6];
         // 레이저 노트 최초 진입 시 마커 자동 도우미 시간
-        float m_assistLevel = 1f;
+        float m_assistLevel = .5f;
         float m_assistSlamBoost = 1.5f;
         float m_assistPunish = 1.5f;
         float m_assistTime = 0.0f;
@@ -334,14 +334,6 @@ namespace SoundMax {
             // Clear hit statistics
             hitStats.Clear();
 
-            // Get input offset
-            //m_inputOffset = g_gameConfig.GetInt(GameConfigKeys.InputOffset);
-            //// Get bounce guard duration
-            //m_bounceGuard = g_gameConfig.GetInt(GameConfigKeys.InputBounceGuard);
-            //// Get laser assist level
-            //m_assistLevel = g_gameConfig.GetFloat(GameConfigKeys.LaserAssistLevel);
-            //m_assistSlamBoost = g_gameConfig.GetFloat(GameConfigKeys.LaserSlamBoost);
-            //m_assistPunish = g_gameConfig.GetFloat(GameConfigKeys.LaserPunish);
             // Recalculate maximum score
             mapTotals = CalculateMapTotals();
 
@@ -736,6 +728,8 @@ namespace SoundMax {
                 obj = laser.GetRoot();
             }
             m_ReleaseHoldObject(obj);
+
+            IngameEngine.inst.ChangeObjectParent(obj);
         }
 
         void m_UpdateTicks() {
@@ -903,6 +897,7 @@ namespace SoundMax {
                 stat.hold++;
                 currentGauge += tickGaugeGain;
                 m_AddScore(2);
+                IngameEngine.inst.PrintJudgement(index, stat.rating);
             } else if (tick.HasFlag(TickFlags.Laser)) {
                 LaserData laser = (LaserData)tick.obj;
                 LaserData rootObject = ((LaserData)tick.obj).GetRoot();
@@ -1122,6 +1117,9 @@ namespace SoundMax {
                 if (Math.Abs(laserPositions[i] - laserTargetPositions[i]) < laserDistanceLeniency && currentSegment != null) {
                     m_SetHoldObject(currentSegment.GetRoot(), 6 + i);
                     bHitLaser = true;
+
+                    // 레이저 판정 출력
+                    IngameEngine.inst.PrintJudgement(i + 6, ScoreHitRating.Perfect, laserPositions[i]);
 
                     // 레이저 파티클 재생
                     if (mLaserParticle[i] == null)

@@ -10,7 +10,8 @@ public class AudioEngine {
 
     AudioSource m_music;
     AudioSource m_fxtrack;
-    public bool m_paused = false;
+    float mPausedTIme;
+    float mFxPausedTime;
     bool m_fxtrackEnabled = true;
 
     EffectType m_laserEffectType = EffectType.None;
@@ -87,11 +88,32 @@ public class AudioEngine {
     public void Tick(float deltaTime) {
 
     }
+
     public void Play() {
         m_music.Play();
         if (m_fxtrack.clip != null)
             m_fxtrack.Play();
     }
+
+    public void Pause() {
+        m_music.Pause();
+        mPausedTIme = m_music.time;
+        if (m_fxtrack.clip != null) {
+            m_fxtrack.Pause();
+            mFxPausedTime = m_fxtrack.time;
+        }
+    }
+
+    // 혹시나 해서 넣어둠. 쓰진않는다.
+    public void Resume() {
+        m_music.time = mPausedTIme;
+        m_music.Play();
+        if (m_fxtrack.clip != null) {
+            m_fxtrack.time = mFxPausedTime;
+            m_fxtrack.Play();
+        }
+    }
+
     void Advance(int ms) {
         SetPosition(GetPosition() + ms);
     }
@@ -102,18 +124,6 @@ public class AudioEngine {
         m_music.time = time * 0.001f;
         if (m_fxtrack.clip != null)
             m_fxtrack.time = time * 0.001f;
-    }
-    void TogglePause() {
-        if (m_paused) {
-            m_music.Play();
-            if (m_fxtrack.clip != null)
-                m_fxtrack.Play();
-        } else {
-            m_music.Pause();
-            if (m_fxtrack.clip != null)
-                m_fxtrack.Pause();
-        }
-        m_paused = !m_paused;
     }
     public bool HasEnded() {
         return !m_music.isPlaying;
