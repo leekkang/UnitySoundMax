@@ -41,12 +41,17 @@ public class KShootEffectDefinition {
 }
 
 public class DataBase : Singleton<DataBase> {
+    public bool mOpenComplete;
+    public Texture mDefaultJacket;
     public List<char> mListLaserChar = new List<char>();
     public DefaultEffectSettings mEffectSetting;
 
-    public List<MusicData> mListMusic = new List<MusicData>();
+    public Dictionary<string, List<MusicData>> mDicMusic = new Dictionary<string, List<MusicData>>();
 
     public void Open() {
+        mOpenComplete = false;
+        mDefaultJacket = Resources.Load("Default_Jacket") as Texture;
+
         for (char c = '0'; c <= '9'; c++)
             mListLaserChar.Add(c);
         for (char c = 'A'; c <= 'Z'; c++)
@@ -56,7 +61,8 @@ public class DataBase : Singleton<DataBase> {
 
         mEffectSetting = new DefaultEffectSettings();
 
-        LoadAudio("colorfulsky", AudioType.OGGVORBIS, (audio) => { Debug.Log("load complete"); });
+        StartCoroutine(CoLoadMusicList());
+        //LoadAudio("colorfulsky", AudioType.OGGVORBIS, (audio) => { Debug.Log("load complete"); });
     }
 
     public float TranslateLaserChar(char c) {
@@ -128,6 +134,53 @@ public class DataBase : Singleton<DataBase> {
             request.Dispose();
         }
     }
+
+    public void LoadImage(string musicname, string filename, Action<Texture> onLoadCompleted) {
+        string url = string.Format("{0}{1}{2}", musicname, Path.DirectorySeparatorChar, filename);
+        StartCoroutine(CoLoadImage(Path.Combine(Application.streamingAssetsPath, url), onLoadCompleted));
+    }
+
+    IEnumerator CoLoadImage(string url, Action<Texture> onLoadCompleted) {
+        Debug.Log(url);
+        using (var request = UnityWebRequestTexture.GetTexture(url)) {
+            yield return request.SendWebRequest();
+
+            if (request.isNetworkError || request.isHttpError) {
+                Debug.LogWarning(request.error + ", so replace default jacket");
+                if (onLoadCompleted != null)
+                    onLoadCompleted(mDefaultJacket);
+                yield break;
+            }
+            Texture tex = DownloadHandlerTexture.GetContent(request);
+
+            if (onLoadCompleted != null)
+                onLoadCompleted(tex);
+
+            request.Dispose();
+        }
+    }
+
+    IEnumerator CoLoadMusicList() {
+        string[] arrMusic = { "colorfulsky", "max_burning", "xross_infection" };
+        for (int i = 0; i < arrMusic.Length; i++) {
+            List<MusicData> dataList = new List<MusicData>();
+            for (Difficulty j = Difficulty.Light; j <= Difficulty.Infinite; j++) {
+                bool bComplete = false;
+                bool bSuccess = false;
+                MusicData data = new MusicData();
+                data.Load(arrMusic[i], j, (success) => { bSuccess = success; bComplete = true; });
+                yield return new WaitUntil(() => bComplete);
+                if (bSuccess)
+                    dataList.Add(data);
+            }
+            mDicMusic.Add(arrMusic[i], dataList);
+        }
+
+        for (int i = 0; i < arrMusic.Length; i++) {
+            Debug.Log(arrMusic[i] + " : " + mDicMusic[arrMusic[i]].Count);
+        }
+        mOpenComplete = true;
+    }
 }
 
 public class MusicData {
@@ -137,6 +190,7 @@ public class MusicData {
     public int mBpm;
     public int mLevel;
     public Difficulty mDifficulty;
+    public Texture mJacketImage;
 
     public KShootTime mTime = new KShootTime();
     public List<KShootBlock> mListBlocks = new List<KShootBlock>();
@@ -145,7 +199,7 @@ public class MusicData {
     public Dictionary<string, KShootEffectDefinition> mDicFilterDefine = new Dictionary<string, KShootEffectDefinition>();
     public Dictionary<string, KShootEffectDefinition> mDicFxDefine = new Dictionary<string, KShootEffectDefinition>();
 
-    public void Load(string musicName, Difficulty difficulty) {
+    public void Load(string musicName, Difficulty difficulty, System.Action<bool> afterLoad) {
         mPathName = musicName;
         mDifficulty = difficulty;
         string ksh = string.Format("{0}{1}{0}_{2}.ksh", musicName, Path.DirectorySeparatorChar, DataBase.inst.GetDifficultyPostfix(difficulty));
@@ -153,123 +207,141 @@ public class MusicData {
         mDicSettings.Clear();
         mListBlocks.Clear();
 
-        using (StreamReader sr = new StreamReader(Application.streamingAssetsPath + Path.DirectorySeparatorChar + ksh)) {
-            // setting
-            string line = "";
-            while (sr.Peek() >= 0) {
-                line = sr.ReadLine().Trim();
+        try {
+            string imageName = null;
+            using (StreamReader sr = new StreamReader(Application.streamingAssetsPath + Path.DirectorySeparatorChar + ksh)) {
+                // setting
+                string line = "";
+                while (sr.Peek() >= 0) {
+                    line = sr.ReadLine().Trim();
 
-                if (line == BLOCK_SEPARATOR)
-                    break;
+                    if (line == BLOCK_SEPARATOR)
+                        break;
 
-                if (string.IsNullOrEmpty(line))
-                    continue;
+                    if (string.IsNullOrEmpty(line))
+                        continue;
 
-                if (line.Substring(0, 2).Equals("//"))
-                    continue;
-
-                string[] splitted = line.Split('=');
-                if (splitted.Length > 1) {
-                    mDicSettings.Add(splitted[0], splitted[1]);
-                    if (splitted[0] == "t")
-                        mBpm = int.Parse(splitted[1]);
-                    else if (splitted[0] == "title")
-                        mTitle = splitted[1];
-                    else if (splitted[0] == "level")
-                        mLevel = int.Parse(splitted[1]);
-                }
-            }
-
-            // note information
-            int n_count = 0;
-            KShootBlock block = new KShootBlock();
-            KShootTick tick = new KShootTick();
-            mTime.Reset(0, 0);
-            while (sr.Peek() >= 0) {
-                line = sr.ReadLine().Trim();
-
-                if (string.IsNullOrEmpty(line))
-                    continue;
-
-                n_count++;
-                // next block create
-                if (line == BLOCK_SEPARATOR) {
-                    mListBlocks.Add(block);
-                    block = new KShootBlock();
-                    mTime.mIndexBlock++;
-                    mTime.mIndexTick = 0;
-                } else {
                     if (line.Substring(0, 2).Equals("//"))
                         continue;
-                    if (line[0].Equals(";"))
+
+                    string[] splitted = line.Split('=');
+                    if (splitted.Length > 1) {
+                        mDicSettings.Add(splitted[0], splitted[1]);
+                        if (splitted[0] == "t")
+                            mBpm = int.Parse(splitted[1]);
+                        else if (splitted[0] == "title")
+                            mTitle = splitted[1];
+                        else if (splitted[0] == "level")
+                            mLevel = int.Parse(splitted[1]);
+                        else if (splitted[0] == "jacket")
+                            imageName = splitted[1];
+                    }
+                }
+
+                // note information
+                int n_count = 0;
+                KShootBlock block = new KShootBlock();
+                KShootTick tick = new KShootTick();
+                mTime.Reset(0, 0);
+                while (sr.Peek() >= 0) {
+                    line = sr.ReadLine().Trim();
+
+                    if (string.IsNullOrEmpty(line))
                         continue;
 
-                    if (line[0].Equals("#")) {
-                        // TODO : 커스텀 fx 이펙트를 설정할 수 있으나 일단 복잡해서 뺌
-                        string[] custom = line.Split(' ');
-                        if (custom.Length != 3) {
-                            Debug.Log(string.Format( "Invalid define found in ksh map @{0}: {1}", n_count, line));
-                        }
-                        KShootEffectDefinition def = new KShootEffectDefinition();
-                        def.mTypeName = custom[1];
+                    n_count++;
+                    // next block create
+                    if (line == BLOCK_SEPARATOR) {
+                        mListBlocks.Add(block);
+                        block = new KShootBlock();
+                        mTime.mIndexBlock++;
+                        mTime.mIndexTick = 0;
+                    } else {
+                        if (line.Substring(0, 2).Equals("//"))
+                            continue;
+                        if (line[0].Equals(";"))
+                            continue;
 
-                        string[] parameters = custom[2].Split(';');
-                        for (int i = 0; i < parameters.Length; i++) {
-                            string[] param = parameters[i].Split('=');
-                            if (param.Length != 2) {
-                                Debug.Log(string.Format("Invalid parameter in custom effect definition for {0}@{1}: \"{2}\"", def.mTypeName, n_count, line));
-                                continue;
+                        if (line[0].Equals("#")) {
+                            // TODO : 커스텀 fx 이펙트를 설정할 수 있으나 일단 복잡해서 뺌
+                            string[] custom = line.Split(' ');
+                            if (custom.Length != 3) {
+                                Debug.Log(string.Format("Invalid define found in ksh map @{0}: {1}", n_count, line));
                             }
-                            def.mParameters.Add(param[0], param[1]);
+                            KShootEffectDefinition def = new KShootEffectDefinition();
+                            def.mTypeName = custom[1];
+
+                            string[] parameters = custom[2].Split(';');
+                            for (int i = 0; i < parameters.Length; i++) {
+                                string[] param = parameters[i].Split('=');
+                                if (param.Length != 2) {
+                                    Debug.Log(string.Format("Invalid parameter in custom effect definition for {0}@{1}: \"{2}\"", def.mTypeName, n_count, line));
+                                    continue;
+                                }
+                                def.mParameters.Add(param[0], param[1]);
+                            }
+
+                            if (custom[0] == "#define_fx")
+                                mDicFxDefine.Add(def.mTypeName, def);
+                            else if (custom[0] == "#define_filter")
+                                mDicFilterDefine.Add(def.mTypeName, def);
+                            else
+                                Debug.Log(string.Format("Unkown define statement in ksh @{0}: {1}", n_count, line));
+
+                            continue;
                         }
 
-                        if (custom[0] == "#define_fx")
-                            mDicFxDefine.Add(def.mTypeName, def);
-                        else if (custom[0] == "#define_filter")
-                            mDicFilterDefine.Add(def.mTypeName, def);
-                        else
-                            Debug.Log(string.Format("Unkown define statement in ksh @{0}: {1}", n_count, line));
+                        string[] splitted;
+                        if (line.Contains("=")) {
+                            splitted = line.Split('=');
+                            tick.mDicSetting.Add(splitted[0], splitted[1]);
+                            continue;
+                        }
 
-                        continue;
-                    }
+                        splitted = line.Split('|');
+                        tick.mButtons = splitted[0];
+                        tick.mFx = splitted[1];
+                        tick.mLaser = splitted[2];
+                        if (splitted.Length < 3) {
+                            Debug.Log("text format error : note information malformed");
+                            return;
+                        }
+                        if (splitted[0].Length != 4) {
+                            Debug.Log("text format error : normal button information malformed");
+                            return;
+                        }
+                        if (splitted[1].Length != 2) {
+                            Debug.Log("text format error : fx button information malformed");
+                            return;
+                        }
+                        if (splitted[2].Length < 2) {
+                            Debug.Log("text format error : laser information malformed");
+                            return;
+                        }
+                        if (splitted[2].Length > 2) {
+                            tick.mAdd = splitted[2].Substring(2);
+                            tick.mLaser = splitted[2].Substring(0, 2);
+                        }
 
-                    string[] splitted;
-                    if(line.Contains("=")) {
-                        splitted = line.Split('=');
-                        tick.mDicSetting.Add(splitted[0], splitted[1]);
-                        continue;
+                        block.mListTick.Add(tick);
+                        tick = new KShootTick();
+                        mTime.mIndexTick++;
                     }
-
-                    splitted = line.Split('|');
-                    tick.mButtons = splitted[0];
-                    tick.mFx = splitted[1];
-                    tick.mLaser = splitted[2];
-                    if (splitted.Length < 3) {
-                        Debug.Log("text format error : note information malformed");
-                        return;
-                    }
-                    if (splitted[0].Length != 4) {
-                        Debug.Log("text format error : normal button information malformed");
-                        return;
-                    }
-                    if (splitted[1].Length != 2) {
-                        Debug.Log("text format error : fx button information malformed");
-                        return;
-                    }
-                    if (splitted[2].Length < 2) {
-                        Debug.Log("text format error : laser information malformed");
-                        return;
-                    }
-                    if (splitted[2].Length > 2) {
-                        tick.mAdd = splitted[2].Substring(2);
-                        tick.mLaser = splitted[2].Substring(0, 2);
-                    }
-
-                    block.mListTick.Add(tick);
-                    tick = new KShootTick();
-                    mTime.mIndexTick++;
                 }
             }
+
+            if (string.IsNullOrEmpty(imageName)) {
+                mJacketImage = DataBase.inst.mDefaultJacket;
+                afterLoad(true);
+            } else {
+                DataBase.inst.LoadImage(musicName, imageName, (texture) => {
+                    mJacketImage = texture;
+                    afterLoad(true);
+                });
+            }
+        } catch (Exception e) {
+            Debug.Log("exception : " + e.Message);
+            afterLoad(false);
         }
     }
 

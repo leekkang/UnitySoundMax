@@ -95,6 +95,15 @@ public class AudioEngine {
             m_fxtrack.Play();
     }
 
+    public void Stop() {
+        m_music.Stop();
+        m_music.clip = null;
+        if (m_fxtrack.clip != null) {
+            m_fxtrack.Stop();
+            m_music.clip = null;
+        }
+    }
+
     public void Pause() {
         m_music.Pause();
         mPausedTIme = m_music.time;

@@ -65,7 +65,7 @@ public class KeyboardManager : Singleton<KeyboardManager> {
         SaveInfo(InputCode.P);     // 스타트 버튼
 
         // 게임용 체크
-        if (!IngameEngine.inst.m_playing)
+        if (!IngameEngine.inst.mPlaying)
             return;
 
         for (int i = 0; i < mButtonInputCode.Length; i++) {

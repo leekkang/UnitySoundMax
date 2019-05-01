@@ -264,7 +264,7 @@ namespace SoundMax {
         public int difficulty;
 
         // Total, total gauge gained when played perfectly
-        public int total = 210;
+        public float total = 210f;
 
         // Preview offset
         public int previewOffset;
@@ -399,7 +399,7 @@ namespace SoundMax {
                 else if (s.Key == "plength")
                     mSetting.previewDuration = int.Parse(s.Value);
                 else if (s.Key == "total")
-                    mSetting.total = int.Parse(s.Value);
+                    mSetting.total = float.Parse(s.Value);
                 else if (s.Key == "mvol")
                     mSetting.musicVolume = int.Parse(s.Value) / 100.0f;
             }

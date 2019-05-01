@@ -20,12 +20,10 @@ namespace SoundMax {
         /// <summary> 오브젝트를 렌더링 할 시간 간격. 현재시간 + 변수 이내에 있는 오브젝트만 setactive(true) 가 된다. </summary>
         public const float OBJECT_ACTIVE_INTERVAL = 10000f;
 
-        public bool m_playing = true;
-        bool m_introCompleted = false;
-        bool m_outroCompleted = false;
-        bool m_paused = false;
-        bool m_ended = false;
-        bool m_transitioning = false;
+        public bool mPlaying;
+        public bool mForceEnd;
+        bool m_paused;
+        bool m_ended;
         public float mSpeed = 1f;
 
         // Map object approach speed, scaled by BPM
@@ -39,16 +37,12 @@ namespace SoundMax {
         bool m_usecMod = false;
         float m_modSpeed = 400;
 
-        // Texture of the map jacket image, if available
-        //Image m_jacketImage;
-        //Texture m_jacketTexture;
-
         Beatmap m_beatmap;
         Scoring m_scoring;
         PlaybackEngine m_playback;              // Beatmap playback manager (object and timing point selector)
         AudioEngine m_audioPlayback;            // Audio playback manager (music and FX))
 
-        int m_audioOffset = 0;          // Applied audio offset
+        int m_audioOffset = 0;                  // Applied audio offset
         int m_fpsTarget = 0;
 
         Transform mTrackAnchor;                 // 움직이는 트랙 오브젝트
@@ -56,11 +50,17 @@ namespace SoundMax {
         Transform mJudgeLine;                   // 판정선 오브젝트
         Transform mTrackerPanel;                // 파티클에 가려지지 않아야 하는 친구들의 패널
 
+        UITexture mJacketImage;                 // 좌측 상단 앨범 재킷
+        UILabel mDifficultyLabel;               // 좌측 상단 난이도
+        UILabel mLevelLabel;                    // 좌측 상단 곡 레벨
+        UILabel mBpmLabel;                      // 좌측 상단 곡 bpm
+        UILabel mSpeedLabel;                    // 좌측 상단 곡 스피드
         UILabel mScoreLabel;                    // 우측 상단 스코어 보드
         UILabel mBoardComboLabel;               // 우측 상단 콤보 보드
         UISprite mHealthBar;                    // 우측의 체력 게이지
-        Color mHealthUnder70 = new Color(118f, 255f, 255f);  // 체력 70% 미만일 때의 컬러값
-        Color mHealthOver70 = new Color(255f, 255f, 255f);   // 체력 70% 이상일 때의 컬러값
+        bool mIsHPOver70;                       // 컬러값을 바꿔야 하는지 확인
+        Color mHealthUnder70 = new Color(118f / 255f, 1f, 1f, 1f);  // 체력 70% 미만일 때의 컬러값
+        Color mHealthOver70 = Color.white;      // 체력 70% 이상일 때의 컬러값
 
         UILabel mComboText;                     // 트랙 가운데 뜨는 콤보 텍스트
         TweenScale mComboTweenScale;            // 트랙 가운데 뜨는 콤보의 스케일 트윈
@@ -74,11 +74,6 @@ namespace SoundMax {
         // Currently visible gameplay objects
         int mInvisibleObjIndex;                  // 현재 카메라에 보이지 않는 첫번째 오브젝트의 인덱스
         int m_lastMapTime;                       // 현재 오디오 재생 시간
-
-        // Rate to sample gauge;
-        int m_gaugeSampleRate;
-        float[] m_gaugeSamples = new float[256];
-        int m_endTime;
 
         // Combo gain animation
         //Timer m_comboAnimation;
@@ -104,8 +99,6 @@ namespace SoundMax {
         public DisappearObject[] mLaserNobeObject = new DisappearObject[2];
         public DisappearObject[] mJudgeObject = new DisappearObject[8];         // 판정 오브젝트
 
-        MusicData mCurMusic = new MusicData();  // 필요한건가?
-
         public void Open() {
             m_beatmap = new Beatmap();
             m_playback = new PlaybackEngine();
@@ -129,6 +122,12 @@ namespace SoundMax {
             mScoreLabel = transform.FindRecursive("ScoreLabel").GetComponent<UILabel>();
             mBoardComboLabel = mScoreLabel.transform.parent.Find("ComboLabel").GetComponent<UILabel>();
             mHealthBar = transform.FindRecursive("HPRemain").GetComponent<UISprite>();
+            Transform musicInfo = transform.FindRecursive("MusicInfo");
+            mJacketImage = musicInfo.Find("JacketImage").GetComponent<UITexture>();
+            mDifficultyLabel = musicInfo.Find("MusicDifficulty").GetComponent<UILabel>();
+            mLevelLabel = musicInfo.Find("MusicLevel").GetComponent<UILabel>();
+            mBpmLabel = musicInfo.Find("MusicBpm").GetComponent<UILabel>();
+            mSpeedLabel = musicInfo.Find("MusicSpeed").GetComponent<UILabel>();
 
             // 샘플 오디오 로드
             m_slamSample = mAudioRoot.Find("SlamSound").GetComponent<AudioSource>();
@@ -160,18 +159,21 @@ namespace SoundMax {
         /// <param name="speed"> 게임 속도 </param>
         public void StartGame(MusicData data, float speed) {
             mSpeed = speed;
+            mJacketImage.mainTexture = data.mJacketImage;
+            mDifficultyLabel.text = data.mDifficulty.ToString();
+            mLevelLabel.text = data.mLevel.ToString();
+            mBpmLabel.text = data.mBpm.ToString();
+            mSpeedLabel.text = mSpeed.ToString();
+
             StartCoroutine(CoLoadData(data));
         }
 
         IEnumerator CoLoadData(MusicData data) {
-            mCurMusic = data;
             m_beatmap.Load(data, false);
             m_scoring = Scoring.inst;
 
             BeatmapSetting mapSettings = m_beatmap.mSetting;
-
-            for (int i = 0; i < m_gaugeSamples.Length; i++)
-                m_gaugeSamples[0] = 0;
+            
             int firstObjectTime = m_beatmap.mListObjectState[0].mTime;
             int idx = m_beatmap.mListObjectState.Count - 1;
             while (m_beatmap.mListObjectState[idx].mType == ButtonType.Event &&
@@ -188,9 +190,6 @@ namespace SoundMax {
                 LaserData lastHold = (LaserData)lastObj;
                 lastObjectTime += lastHold.mDuration;
             }
-
-            m_endTime = lastObjectTime;
-            m_gaugeSampleRate = lastObjectTime / 256;
 
             // mmod, cmod는 고려하지 않음
 
@@ -286,7 +285,7 @@ namespace SoundMax {
             int firstObjectTime = firstObj.mTime;
             if (firstObjectTime < 3000) {
                 // Set start time
-                m_lastMapTime = firstObjectTime - 5000;
+                m_lastMapTime = Math.Max(0, firstObjectTime - 5000);
                 m_audioPlayback.SetPosition(m_lastMapTime);
             }
 
@@ -296,12 +295,10 @@ namespace SoundMax {
 
         /// <summary> 게임 시작 전 초기화를 담당하는 함수 </summary>
         bool InitGameplay() {
-            m_playing = false;
-            m_introCompleted = false;
-            m_outroCompleted = false;
+            mPlaying = false;
             m_paused = false;
             m_ended = false;
-            m_transitioning = false;
+            mForceEnd = false;
 
             // Playback and timing
             m_playback.SetBeatmap(m_beatmap);
@@ -336,6 +333,8 @@ namespace SoundMax {
             m_playback.hittableObjectEnter = m_scoring.missHitTime;
             m_playback.hittableObjectLeave = m_scoring.goodHitTime;
 
+            mIsHPOver70 = false;
+            mHealthBar.color = mHealthUnder70;
             return true;
         }
 
@@ -704,13 +703,16 @@ namespace SoundMax {
         void Tick(float deltaTime) {
             if (!m_paused)
                 TickGameplay(deltaTime);
+
+            if (mForceEnd)
+                FinishGame();
         }
 
         // Processes input and Updates scoring, also handles audio timing management
         void TickGameplay(float deltaTime) {
-            if (!m_playing) {
+            if (!mPlaying) {
                 m_audioPlayback.Play();
-                m_playing = true;
+                mPlaying = true;
             }
 
             BeatmapSetting beatmapSettings = m_beatmap.mSetting;
@@ -749,35 +751,14 @@ namespace SoundMax {
             if ((m_flags & GameFlags.Hard) != GameFlags.None && m_scoring.currentGauge == 0f) {
                 FinishGame();
             }
-
-
+            
             // Update scoring
             if (!m_ended) {
                 m_scoring.Tick(deltaTime);
-                // Update scoring gauge
-                int gaugeSampleSlot = playbackPositionMs;
-                gaugeSampleSlot /= m_gaugeSampleRate;
-                gaugeSampleSlot = Mathf.Clamp(gaugeSampleSlot, 0, 255);
-                m_gaugeSamples[gaugeSampleSlot] = m_scoring.currentGauge;
             }
 
             // Get the current timing point
             m_currentTiming = m_playback.GetCurrentTimingPoint();
-
-
-            // Update hispeed
-            //if (g_input.GetButton(Input.Button.BT_S)) {
-            //    for (int i = 0; i < 2; i++) {
-            //        float change = g_input.GetInputLaserDir(i) / 3.0f;
-            //        m_hispeed += change;
-            //        m_hispeed = Math.Clamp(m_hispeed, 0.1f, 16f);
-            //        if ((m_usecMod || m_usemMod) && change != 0.0f) {
-            //            g_gameConfig.Set(GameConfigKeys.ModSpeed, m_hispeed * (float)m_currentTiming.GetBPM());
-            //            m_modSpeed = m_hispeed * (float)m_currentTiming.GetBPM();
-            //            m_playback.cModSpeed = m_modSpeed;
-            //        }
-            //    }
-            //}
 
             //Debug.Log((float)-(m_currentTiming.GetBPM() * 0.01f) * delta);
             mTrackAnchor.localPosition = new Vector3(0f, -(float)(m_currentTiming.GetBPM() * TRACK_HEIGHT_INTERVAL) * playbackPositionMs * mSpeed, 0f);
@@ -789,7 +770,13 @@ namespace SoundMax {
             // 게이지 수정
             if (mHealthBar.fillAmount != m_scoring.currentGauge) {
                 mHealthBar.fillAmount = m_scoring.currentGauge;
-                mHealthBar.color = mHealthBar.fillAmount >= 0.7f ? mHealthOver70 : mHealthUnder70;
+                if (mIsHPOver70 && mHealthBar.fillAmount < 0.7f) {
+                    mIsHPOver70 = false;
+                    mHealthBar.color = mHealthUnder70;
+                } else if (!mIsHPOver70 && mHealthBar.fillAmount >= 0.7f) {
+                    mIsHPOver70 = true;
+                    mHealthBar.color = mHealthOver70;
+                }
             }
 
             // 트랙 하이라이트 부모 변경
@@ -798,24 +785,28 @@ namespace SoundMax {
                 mListObj[mListObjIndex++].gameObject.SetActive(false);
             }
 
-            // 시야 내에 들어올 오브젝트 액티브 활성화
-            ObjectDataBase obj = null;
-            do {
-                obj = m_beatmap.mListObjectState[mInvisibleObjIndex];
-                if (obj.mType == ButtonType.Laser) {
-                    LaserData laser = (LaserData)obj;
-                    for (int j = 0; j < laser.mListNote.Count; j++)
-                        laser.mListNote[j].gameObject.SetActive(true);
-                } else {
-                    if (obj.mNote != null)
-                        obj.mNote.gameObject.SetActive(true);
-                }
-                ++mInvisibleObjIndex;
-            } while (m_beatmap.mListObjectState[mInvisibleObjIndex].mTime == obj.mTime);
-
             if (m_audioPlayback.HasEnded()) {
                 FinishGame();
             }
+
+            // 시야 내에 들어올 오브젝트 액티브 활성화
+            #region Visible Object Activity Control
+            if (m_beatmap.mListObjectState.Count <= mInvisibleObjIndex)
+                return;
+            ObjectDataBase obj = m_beatmap.mListObjectState[mInvisibleObjIndex];
+            if (obj.mTime > m_lastMapTime + OBJECT_ACTIVE_INTERVAL)
+                return;
+        
+            if (obj.mType == ButtonType.Laser) {
+                LaserData laser = (LaserData)obj;
+                for (int j = 0; j < laser.mListNote.Count; j++)
+                    laser.mListNote[j].gameObject.SetActive(true);
+            } else {
+                if (obj.mNote != null)
+                    obj.mNote.gameObject.SetActive(true);
+            }
+            ++mInvisibleObjIndex;
+            #endregion
         }
 
         /// <summary> 게임중 퍼즈 버튼을 눌렀을 때 하는 작업 </summary>
@@ -834,8 +825,9 @@ namespace SoundMax {
                 return;
 
             m_scoring.FinishGame();
+            m_audioPlayback.Stop();
             m_ended = true;
-            m_playing = false;
+            mPlaying = false;
 
             Debug.Log("Game end");
         }
