@@ -74,7 +74,7 @@ namespace SoundMax {
             if (GUI.Button(new Rect(buttonRect.x, buttonRect.y + Screen.height * 0.2f, buttonRect.width, buttonRect.height), "xross infection play") && !buttonDragging) {
                 if (IngameEngine.inst.mPlaying)
                     IngameEngine.inst.mForceEnd = true;
-                MusicData data = DataBase.inst.mDicMusic["xross_infection"].Find((x) => x.mDifficulty == Difficulty.Infinite);
+                MusicData data = DataBase.inst.mDicMusic["xross_infection"].Find((x) => x.mDifficulty == Difficulty.Extended);
                 //Scoring.inst.autoplayButtons = true;
                 Scoring.inst.autoplay = true;
                 KeyboardManager.inst.mIsLaserUseMouse = true;
