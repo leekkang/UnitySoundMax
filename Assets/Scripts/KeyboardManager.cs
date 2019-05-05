@@ -16,9 +16,6 @@ public class KeyboardManager : Singleton<KeyboardManager> {
     const float normalClickTime = .1f;
     const float doubleClickTime = .1f;
 
-    public float mMouseXSpeed = 2.0f; //마우스 움직임 민감도
-    public float mMouseYSpeed = 2.0f;
-
     class KeyInfo {
         public bool down;
         public bool stay;
@@ -62,15 +59,33 @@ public class KeyboardManager : Singleton<KeyboardManager> {
         for (int i = 0; i < maxKeyNum; i++)
             SaveInfo((InputCode)i);
 
-        SaveInfo(InputCode.P);     // 스타트 버튼
+        // 메인 UI용 체크
+        if (!IngameEngine.inst.mPlaying) {
+            for (int i = 0; i < mButtonInputCode.Length; i++) {
+                if (info[(int)mButtonInputCode[i], index].down) {
+                    if (i < 4) GuiManager.inst.OnClickBtnNormal();
+                    else GuiManager.inst.OnClickBtnFX();
+
+                    return;
+                }
+            }
+
+            if (info[(int)InputCode.P, index].down)
+                GuiManager.inst.OnClickBtnStart();
+
+            return;
+        }
 
         // 게임용 체크
-        if (!IngameEngine.inst.mPlaying)
-            return;
-
         for (int i = 0; i < mButtonInputCode.Length; i++) {
             if (info[(int)mButtonInputCode[i], index].down) {
                 Scoring.inst.OnButtonPressed(i);
+                // 퍼즈상태일때는 Gui가 반응하도록 구현
+                if (IngameEngine.inst.m_paused) {
+                    if (i < 4) GuiManager.inst.OnClickBtnNormal();
+                    else GuiManager.inst.OnClickBtnFX();
+                    return;
+                }
             }
             if (info[(int)mButtonInputCode[i], index].up) {
                 Scoring.inst.OnButtonReleased(i);
@@ -78,7 +93,10 @@ public class KeyboardManager : Singleton<KeyboardManager> {
         }
 
         if (info[(int)InputCode.P, index].down) {
-            IngameEngine.inst.OnClickPauseButton();
+            if (IngameEngine.inst.m_paused)
+                GuiManager.inst.OnClickBtnStart();
+            else 
+                IngameEngine.inst.OnClickPauseButton(false);
         }
 
         // 에디터 디버그용. 마우스 대신 사용

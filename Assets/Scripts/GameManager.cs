@@ -64,9 +64,9 @@ namespace SoundMax {
             if (GUI.Button(new Rect(buttonRect.x, buttonRect.y + Screen.height * 0.1f, buttonRect.width, buttonRect.height), "max burning play") && !buttonDragging) {
                 if (IngameEngine.inst.mPlaying)
                     IngameEngine.inst.mForceEnd = true;
-                MusicData data = DataBase.inst.mDicMusic["max_burning"].Find((x) => x.mDifficulty == Difficulty.Infinite);
+                MusicData data = DataBase.inst.mDicMusic["max_burning"].Find((x) => x.mDifficulty == Difficulty.Extended);
                 //Scoring.inst.autoplayButtons = true;
-                //Scoring.inst.autoplay = true;
+                Scoring.inst.autoplay = true;
                 KeyboardManager.inst.mIsLaserUseMouse = true;
                 IngameEngine.inst.StartGame(data, 5f);
             }
@@ -74,7 +74,7 @@ namespace SoundMax {
             if (GUI.Button(new Rect(buttonRect.x, buttonRect.y + Screen.height * 0.2f, buttonRect.width, buttonRect.height), "xross infection play") && !buttonDragging) {
                 if (IngameEngine.inst.mPlaying)
                     IngameEngine.inst.mForceEnd = true;
-                MusicData data = DataBase.inst.mDicMusic["xross_infection"].Find((x) => x.mDifficulty == Difficulty.Infinite);
+                MusicData data = DataBase.inst.mDicMusic["xross_infection"].Find((x) => x.mDifficulty == Difficulty.Extended);
                 //Scoring.inst.autoplayButtons = true;
                 Scoring.inst.autoplay = true;
                 KeyboardManager.inst.mIsLaserUseMouse = true;
@@ -82,14 +82,8 @@ namespace SoundMax {
             }
 
             if (GUI.Button(new Rect(buttonRect.x, buttonRect.y + Screen.height * 0.3f, buttonRect.width, buttonRect.height), "auto play bool") && !buttonDragging) {
-                Scoring.inst.autoplayButtons = !Scoring.inst.autoplayButtons;
-                //AudioSource source = GameObject.Find("FXSound").GetComponent<AudioSource>();
-                //DataBase.inst.LoadAudio("colorfulsky", AudioType.OGGVORBIS, (audio) => {
-                //    Debug.Log("audio sample : " + audio.samples);
-                //    Debug.Log("audio length : " + audio.length);
-                //    source.clip = audio;
-                //    source.Play();
-                //});
+
+                IngameEngine.inst.mForceEnd = true;
             }
         }
 #endif

@@ -66,6 +66,7 @@ namespace SoundMax {
         public int mIndex;      // 0 or 1 for left and right respectively
         public byte mFlags;      // special options
         public float[] mPoints = new float[2];
+        public int mOrder;    // Beatmap 생성 후 정렬시에만 사용
 
         public ParticleSystem mHitParticle;
         /// <summary>
@@ -817,7 +818,7 @@ namespace SoundMax {
                 for (int i = 0; i < 2; i++) {
                     TempLaserState state = laserStates[i];
                     char c = tick.mLaser[i];
-
+                    
                     // Function that creates a new segment out of the current state
                     System.Func<float, LaserData> CreateLaserSegment = delegate (float endPos) {
                         // Process existing segment
@@ -879,10 +880,12 @@ namespace SoundMax {
                         if (state.last != null) {
                             // Always fixup duration so they are connected by duration as well
                             obj.mPrev = state.last;
+                            obj.mOrder = obj.mPrev.mOrder + 1;
                             int actualPrevDuration = obj.mTime - obj.mPrev.mTime;
-                            if (obj.mPrev.mDuration != actualPrevDuration) {
-                                obj.mPrev.mDuration = actualPrevDuration;
-                            }
+                            // 슬램레이저의 duration을 0으로 만들어버린다. 왜?
+                            //if (obj.mPrev.mDuration != actualPrevDuration) {
+                            //    obj.mPrev.mDuration = actualPrevDuration;
+                            //}
                             obj.mPrev.mNext = obj;
 
                         }
@@ -922,7 +925,7 @@ namespace SoundMax {
                         int startTime = mapTime;
                         if (last != null && (last.mFlags & LaserData.mFlagInstant) != 0) {
                             // Move offset to be the same as last segment, as in ksh maps there is a 1 tick delay after laser slams
-                            startTime = last.mTime;
+                            startTime = last.mTime + 1;
                         }
                         laserStates[i] = new TempLaserState(startTime, 0, lastTimingPoint);
                         state = laserStates[i];
@@ -983,8 +986,8 @@ namespace SoundMax {
             // Re-sort collection to fix some inconsistencies caused by corrections after laser slams
             mListObjectState.Sort((l, r) => {
                 int ret = l.mTime.CompareTo(r.mTime);
-                if (ret == 0 && l.mType == ButtonType.Laser && r.mType == ButtonType.Laser) {
-                    ret = ((LaserData)r).mFlags.CompareTo(((LaserData)l).mFlags);
+                if (ret == 0 && l.mType == ButtonType.Laser && r.mType == ButtonType.Laser && ((LaserData)l).mIndex == ((LaserData)r).mIndex) {
+                    ret = ((LaserData)l).mOrder.CompareTo(((LaserData)r).mOrder);
                 }
                 return ret;
             });

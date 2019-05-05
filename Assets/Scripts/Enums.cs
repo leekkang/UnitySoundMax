@@ -58,9 +58,9 @@
         Zero = 0,
         Normal = 0x1,
         Bigger = 0x2,
-        Biggest = 0x3,
-        Manual = 0x4,
-        Keep = 0x8
+        Biggest = 0x4,
+        Manual = 0x8,
+        Keep = 0x10,
     }
 
     /// <summary> 카메라 회전 타입 </summary>

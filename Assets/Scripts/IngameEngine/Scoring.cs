@@ -166,7 +166,7 @@ namespace SoundMax {
         /// <summary> 유저가 움직이는 노브의 위치 </summary>
         float[] laserPositions = new float[2];
         /// <summary> 현재 시각에서 레이저의 위치 </summary>
-        float[] laserTargetPositions = new float[2];
+        public float[] laserTargetPositions = new float[2];
         ParticleSystem[] mLaserParticle = new ParticleSystem[2];
         // Current lasers are extended
         bool[] lasersAreExtend = new bool[2];
@@ -1104,6 +1104,7 @@ namespace SoundMax {
                 } else {
                     timeSinceLaserUsed[i] += deltaTime;
                     laserPositions[i] += m_laserInput[i];
+                    laserTargetPositions[i] = i;            // 카메라 회전 때문에 위치 초기화
                 }
 
                 if (autoplay || m_autoLaserTime[i] >= 0) {
@@ -1114,7 +1115,8 @@ namespace SoundMax {
                 laserPositions[i] = Mathf.Clamp(laserPositions[i], 0.0f, 1.0f);
                 m_autoLaserTime[i] -= deltaTime;
                 bool bHitLaser = false;
-                if (Math.Abs(laserPositions[i] - laserTargetPositions[i]) < laserDistanceLeniency && currentSegment != null) {
+                if (currentSegment != null && 
+                    Math.Abs(laserPositions[i] - laserTargetPositions[i]) < laserDistanceLeniency) {
                     m_SetHoldObject(currentSegment.GetRoot(), 6 + i);
                     bHitLaser = true;
 
@@ -1138,9 +1140,9 @@ namespace SoundMax {
                 // 레이저 노브를 움직임
                 IngameEngine.inst.mLaserNobeObject[i].Move(laserPositions[i], bHitLaser);
             }
-
+            
             // Interpolate laser output
-            m_UpdateLaserOutput(deltaTime);
+            //m_UpdateLaserOutput(deltaTime);
         }
 
         public void OnButtonPressed(int buttonCode) {

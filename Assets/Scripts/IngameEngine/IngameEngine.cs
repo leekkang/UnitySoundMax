@@ -22,8 +22,8 @@ namespace SoundMax {
 
         public bool mPlaying;
         public bool mForceEnd;
-        bool m_paused;
-        bool m_ended;
+        public bool m_paused;
+        public bool m_ended;
         public float mSpeed = 1f;
 
         // Map object approach speed, scaled by BPM
@@ -37,10 +37,13 @@ namespace SoundMax {
         bool m_usecMod = false;
         float m_modSpeed = 400;
 
+        Coroutine mCoPlay;
+
         Beatmap m_beatmap;
         Scoring m_scoring;
         PlaybackEngine m_playback;              // Beatmap playback manager (object and timing point selector)
         AudioEngine m_audioPlayback;            // Audio playback manager (music and FX))
+        MusicData mMusicData;
 
         int m_audioOffset = 0;                  // Applied audio offset
         int m_fpsTarget = 0;
@@ -67,7 +70,7 @@ namespace SoundMax {
         DisappearObject mComboDisappearScript;  // 트랙 가운데 뜨는 콤보의 알파 트윈
 
         // The camera watching the playfield
-        Camera m_camera;
+        CameraMotion m_camera;
 
         // Currently active timing point
         TimingPoint m_currentTiming;
@@ -82,14 +85,7 @@ namespace SoundMax {
         AudioSource[] m_clickSamples = new AudioSource[2];
         List<AudioSource> m_fxSamples = new List<AudioSource>();
 
-        // Roll intensity, default = 1
-        float m_rollIntensity = 14 / 360.0f;
-        bool m_manualTiltEnabled = false;
         GameFlags m_flags;
-        bool m_manualExit = false;
-
-        float m_shakeAmount = 3;
-        float m_shakeDuration = 0.083f;
 
         // pool
         public ParticleSystem[] mNormalHitEffect;
@@ -105,8 +101,8 @@ namespace SoundMax {
             m_audioPlayback = new AudioEngine();
             
             // 트랙 관련 게임 오브젝트
-            m_camera = transform.Find("IngameCamera").GetComponent<Camera>();
             mAudioRoot = transform.Find("Audio");
+            m_camera = transform.FindRecursive("CameraAnchor").GetComponent<CameraMotion>();
             mTrackAnchor = transform.FindRecursive("Anchor");
             mStaticTrack = mTrackAnchor.parent.Find("Track");
             mJudgeLine = transform.FindRecursive("JudgeLine");
@@ -159,6 +155,7 @@ namespace SoundMax {
         /// <param name="speed"> 게임 속도 </param>
         public void StartGame(MusicData data, float speed) {
             mSpeed = speed;
+            mMusicData = data;
             mJacketImage.mainTexture = data.mJacketImage;
             mDifficultyLabel.text = data.mDifficulty.ToString();
             mLevelLabel.text = data.mLevel.ToString();
@@ -166,6 +163,10 @@ namespace SoundMax {
             mSpeedLabel.text = mSpeed.ToString();
 
             StartCoroutine(CoLoadData(data));
+        }
+
+        public void Restart() {
+            StartCoroutine(CoLoadData(mMusicData));
         }
 
         IEnumerator CoLoadData(MusicData data) {
@@ -264,6 +265,8 @@ namespace SoundMax {
 
         IEnumerator CoPlayGame() {
             WaitForEndOfFrame waitFrame = new WaitForEndOfFrame();
+            yield return waitFrame;
+            GuiManager.inst.DeactivateAllPanel();
 
             while (!m_ended) {
                 Tick(Time.deltaTime);
@@ -335,6 +338,7 @@ namespace SoundMax {
 
             mIsHPOver70 = false;
             mHealthBar.color = mHealthUnder70;
+
             return true;
         }
 
@@ -424,6 +428,10 @@ namespace SoundMax {
             mListObjIndex = 0;
 
             // init track
+
+            // 트랙 세우기
+            //m_camera.transform.parent = mTrackAnchor.parent;
+            mTrackAnchor.parent.localRotation = Quaternion.Euler(Vector3.zero);
             Vector3 pos = Vector3.zero;
             mTrackAnchor.localPosition = pos;
 
@@ -640,6 +648,27 @@ namespace SoundMax {
             }
 
             Debug.Log("length : " + mListObj.Count);
+
+            // 트랙 눕히기
+            mTrackAnchor.parent.localRotation = Quaternion.Euler(new Vector3(68f, 0f, 0f));
+            //m_camera.transform.parent = transform;
+            m_camera.SetOriginPos();
+        }
+
+        /// <summary> Instantiate로 생성하고 저장하지 않은 오브젝트 전부 파괴 </summary>
+        void DestroyNoteObject() {
+            List<ObjectDataBase> listState = m_beatmap.mListObjectState;
+            for (int i = 0; i < listState.Count; i++) {
+                ObjectDataBase objBase = listState[i];
+                if (objBase.mNote != null)
+                    Destroy(objBase.mNote);
+                if (objBase.mType == ButtonType.Laser) {
+                    List<UISprite> spr = ((LaserData)objBase).mListNote;
+                    for (int j = 0; j < spr.Count; j++)
+                        Destroy(spr[j]);
+                    spr.Clear();
+                }
+            }
         }
 
         /// <summary>
@@ -717,7 +746,7 @@ namespace SoundMax {
 
             BeatmapSetting beatmapSettings = m_beatmap.mSetting;
 
-            // Update beatmap playback
+            // Update beatmap playbacka
             //Debug.Log("m_audioPlayback.GetPosition() : " + m_audioPlayback.GetPosition());
 
             int playbackPositionMs = m_audioPlayback.GetPosition() - m_audioOffset;
@@ -741,7 +770,8 @@ namespace SoundMax {
 
             /// #Scoring
             // Update music filter states
-            m_audioPlayback.SetLaserFilterInput(m_scoring.GetLaserOutput(), m_scoring.IsLaserHeld(0, false) || m_scoring.IsLaserHeld(1, false));
+            // TODO : 오디오 필터는 추후 구현
+            //m_audioPlayback.SetLaserFilterInput(m_scoring.GetLaserOutput(), m_scoring.IsLaserHeld(0, false) || m_scoring.IsLaserHeld(1, false));
             m_audioPlayback.Tick(deltaTime);
 
             // Link FX track to combo counter for now
@@ -789,6 +819,9 @@ namespace SoundMax {
                 FinishGame();
             }
 
+            // 카메라 회전
+            m_camera.GetComponent<CameraMotion>().Tick(deltaTime);
+
             // 시야 내에 들어올 오브젝트 액티브 활성화
             #region Visible Object Activity Control
             if (m_beatmap.mListObjectState.Count <= mInvisibleObjIndex)
@@ -810,13 +843,16 @@ namespace SoundMax {
         }
 
         /// <summary> 게임중 퍼즈 버튼을 눌렀을 때 하는 작업 </summary>
-        public void OnClickPauseButton() {
-            if (m_paused) {
+        /// <param name="release"> true이면 다시 게임 재개 </param>
+        public void OnClickPauseButton(bool release) {
+            if (release) {
+                GuiManager.inst.DeactivatePanel(PanelType.Ingame);
                 m_audioPlayback.Play();
             } else {
                 m_audioPlayback.Pause();
+                GuiManager.inst.ActivatePanel(PanelType.Ingame, true);
             }
-            m_paused = !m_paused;
+            m_paused = !release;
         }
 
         // Called when game is finished and the score screen should show up
@@ -824,7 +860,10 @@ namespace SoundMax {
             if (m_ended)
                 return;
 
+            StopAllCoroutines();
+            DestroyNoteObject();
             m_scoring.FinishGame();
+            m_camera.ResetVal();
             m_audioPlayback.Stop();
             m_ended = true;
             mPlaying = false;
@@ -832,26 +871,21 @@ namespace SoundMax {
             Debug.Log("Game end");
         }
 
-        void OnLaserSlamHit(LaserData obj) {
-            float slamSize = (obj.mPoints[1] - obj.mPoints[0]);
+        void OnLaserSlamHit(LaserData laser) {
+            float slamSize = (laser.mPoints[1] - laser.mPoints[0]);
             float direction = Math.Sign(slamSize);
             slamSize = Math.Abs(slamSize);
             // 카메라 쉐이크 구현
-            //CameraShake shake(m_shakeDuration, powf(slamSize, 0.5f) *m_shakeAmount * -direction);
-            //m_camera.AddCameraShake(shake);
+            m_camera.AddCameraShake(50f, 30f * slamSize);
             m_slamSample.Play();
-
-
-            if (obj.mSpin.mType != 0) {
+            
+            if (laser.mSpin.mType != 0) {
                 // 카메라 바운스 구현
-                //if (obj.mSpin.mType == SpinType.Bounce)
-                //    m_camera.SetXOffsetBounce(obj.GetDirection(), obj.spin.duration, obj.spin.amplitude, obj.spin.frequency, obj.spin.duration, m_playback);
-                //else m_camera.SetSpin(obj.GetDirection(), obj.spin.duration, obj.spin.type, m_playback);
+                m_camera.AddCameraSpin(laser);
             }
 
             // 레이저 슬램 파티클
-            ParticlePlay(ParticleType.Slam, new Vector3(-450f + obj.mPoints[1] * 900f, 0f, 0f));
-            //ParticlePlay(ParticleType.Slam, new Vector3(direction > 0 ? 450f : -450f, 0f, 0f));
+            ParticlePlay(ParticleType.Slam, new Vector3(-450f + laser.mPoints[1] * 900f, 0f, 0f));
         }
 
         /// <summary> 오버트랙 판정 오브젝트 출력 </summary>
@@ -978,17 +1012,13 @@ namespace SoundMax {
                 m_audioPlayback.SetLaserEffectMix(data.mFloatVal);
             } else if (key == EventKey.TrackRollBehaviour) {
                 //m_camera.rollKeep = (data.mRollVal & TrackRollBehaviour.Keep) == TrackRollBehaviour.Keep;
-                int i = (byte)data.mRollVal & 0x7;
-
-                m_manualTiltEnabled = false;
-                if (i == (byte)TrackRollBehaviour.Manual) {
+                //byte i = (byte)data.mRollVal & 0x7;
+                
+                Debug.Log("TrackRollBehaviour : " + data.mRollVal);
+                m_camera.SetTiltIntensity(data.mRollVal);
+                if (data.mRollVal == TrackRollBehaviour.Manual) {
                     // switch to manual tilt mode
-                    m_manualTiltEnabled = true;
-                } else if (i == 0)
-                    m_rollIntensity = 0;
-                else {
-                    //m_rollIntensity = m_rollIntensityBase + (float)(i - 1) * 0.0125f;
-                    m_rollIntensity = (14 * (1.0f + 0.5f * (i - 1))) / 360.0f;
+                } else {
                 }
             } else if (key == EventKey.SlamVolume) {
                 m_slamSample.volume = data.mFloatVal * 0.4f;

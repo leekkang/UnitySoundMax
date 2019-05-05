@@ -10,7 +10,7 @@ public class AudioEngine {
 
     AudioSource m_music;
     AudioSource m_fxtrack;
-    float mPausedTIme;
+    float mPausedTime;
     float mFxPausedTime;
     bool m_fxtrackEnabled = true;
 
@@ -97,16 +97,18 @@ public class AudioEngine {
 
     public void Stop() {
         m_music.Stop();
+        m_music.clip.UnloadAudioData();
         m_music.clip = null;
         if (m_fxtrack.clip != null) {
             m_fxtrack.Stop();
-            m_music.clip = null;
+            m_fxtrack.clip.UnloadAudioData();
+            m_fxtrack.clip = null;
         }
     }
 
     public void Pause() {
         m_music.Pause();
-        mPausedTIme = m_music.time;
+        mPausedTime = m_music.time;
         if (m_fxtrack.clip != null) {
             m_fxtrack.Pause();
             mFxPausedTime = m_fxtrack.time;
@@ -115,7 +117,7 @@ public class AudioEngine {
 
     // 혹시나 해서 넣어둠. 쓰진않는다.
     public void Resume() {
-        m_music.time = mPausedTIme;
+        m_music.time = mPausedTime;
         m_music.Play();
         if (m_fxtrack.clip != null) {
             m_fxtrack.time = mFxPausedTime;
