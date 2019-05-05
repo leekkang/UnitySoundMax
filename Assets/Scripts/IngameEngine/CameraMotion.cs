@@ -109,7 +109,7 @@ namespace SoundMax {
         }
 
         public void AddCameraSpin(LaserData laser) {
-            Debug.Log("AddCameraSpin : " + laser.mSpin.mType);
+            //Debug.Log("AddCameraSpin : " + laser.mSpin.mType);
             SpinBlock block = null;
             // TODO : 뭔지알아보고 구현할것
             if (laser.mSpin.mType == SpinType.Bounce) {

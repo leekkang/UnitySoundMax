@@ -12,7 +12,9 @@ namespace SoundMax {
         /// <summary> 트랙의 버튼홈 너비 </summary>
         public const float TRACK_NOTE_WIDTH = 180f;
         /// <summary> 리소스에 저장되어있는 버튼 높이 </summary>
-        public const float TRACK_NOTE_HEIGHT = 50f;
+        public const int TRACK_NOTE_HEIGHT = 50;
+        /// <summary> BPM에 따른 버튼 높이 증분값 </summary>
+        public const float NOTE_HEIGHT_INCREMENT_FROM_BPM = 10f;
         /// <summary> center를 기준으로 하는 트랙의 크기 </summary>
         public const float TRACK_WIDTH = 900f;
         /// <summary> Laser_Guide를 표시할 간격 </summary>
@@ -485,6 +487,7 @@ namespace SoundMax {
                 TimingPoint timing = m_playback.GetTimingPointAt(objBase.mTime, false);
                 float bpmPerLength = (float)timing.GetBPM() * TRACK_HEIGHT_INTERVAL * mSpeed;
                 float yPos = bpmPerLength * objBase.mTime;
+                int normalButtonHeight = (int)(bpmPerLength * NOTE_HEIGHT_INCREMENT_FROM_BPM);
 
                 if (objBase.mType == ButtonType.Single || objBase.mType == ButtonType.Hold) {
                     NormalButtonData btnNormal = (NormalButtonData)objBase;
@@ -509,6 +512,8 @@ namespace SoundMax {
                     if (objBase.mType == ButtonType.Hold) {
                         HoldButtonData btnHold = (HoldButtonData)objBase;
                         obj.GetComponent<UISprite>().height = (int)(TRACK_NOTE_HEIGHT + bpmPerLength * btnHold.mDuration);
+                    } else {
+                        obj.GetComponent<UISprite>().height = Math.Max(normalButtonHeight, TRACK_NOTE_HEIGHT);
                     }
                     objBase.mNote = obj.GetComponent<UISprite>();
 
@@ -1034,7 +1039,6 @@ namespace SoundMax {
                 //m_camera.rollKeep = (data.mRollVal & TrackRollBehaviour.Keep) == TrackRollBehaviour.Keep;
                 //byte i = (byte)data.mRollVal & 0x7;
                 
-                Debug.Log("TrackRollBehaviour : " + data.mRollVal);
                 m_camera.SetTiltIntensity(data.mRollVal);
                 if (data.mRollVal == TrackRollBehaviour.Manual) {
                     // switch to manual tilt mode
