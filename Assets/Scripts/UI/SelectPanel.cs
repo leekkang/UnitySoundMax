@@ -16,12 +16,15 @@ namespace SoundMax {
             mCursorSelect = transform.FindRecursive("CursorSelect");
             mBackPanel = new Transform[mMusicCount];
             Transform jacketParent = transform.FindRecursive("UIGrid");
-            for (int i = 0; i < mMusicCount; i++) {
-                mBackPanel[i] = jacketParent.Find("BackPanel" + i);
+            mBackPanel[0] = jacketParent.Find("BackPanel0");
+            for (int i = 1; i < mMusicCount; i++) {
+                mBackPanel[i] = Instantiate(mBackPanel[0], jacketParent);
+                mBackPanel[i].name = "BackPanel" + i;
             }
 
             mCurIndex = 0;
             mCursorSelect.SetParent(mBackPanel[mCurIndex], false);
+            mCursorSelect.localPosition = Vector3.zero;
             mCompleteLoad = false;
         }
 
@@ -47,6 +50,8 @@ namespace SoundMax {
                 if (!complete)
                     spr.mainTexture = data[0].mJacketImage;
             }
+
+            mCompleteLoad = true;
         }
 
         /// <summary> X축 마우스가 움직이면 해야할 일 </summary>
@@ -67,7 +72,7 @@ namespace SoundMax {
 
         /// <summary> 스타트 버튼을 눌렀을 때 해야 할 일 </summary>
         public override void OnClickBtnStart() {
-            MusicData data = DataBase.inst.mDicMusic[DataBase.inst.mMusicList[mCurIndex]].Find((x) => x.mDifficulty == Difficulty.Extended);
+            MusicData data = DataBase.inst.mDicMusic[DataBase.inst.mMusicList[mCurIndex]].Find((x) => x.mDifficulty == Difficulty.Exhausted);
             Scoring.inst.autoplay = true;
             KeyboardManager.inst.mIsLaserUseMouse = true;
             IngameEngine.inst.StartGame(data, 5f);

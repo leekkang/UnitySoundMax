@@ -28,6 +28,9 @@ namespace SoundMax {
 
         string m_score_text;
         private void OnGUI() {
+            // 막음. 필요할 때 리턴 지우고 사용
+            return;
+
             if (!DataBase.inst.mOpenComplete)
                 return;
 
@@ -55,7 +58,7 @@ namespace SoundMax {
             if (GUI.Button(buttonRect, "colorfulsky play") && !buttonDragging) {
                 if (IngameEngine.inst.mPlaying)
                     IngameEngine.inst.mForceEnd = true;
-                MusicData data = DataBase.inst.mDicMusic["colorfulsky"].Find((x) => x.mDifficulty == Difficulty.Challenge);
+                MusicData data = DataBase.inst.mDicMusic["colorfulsky"].Find((x) => x.mDifficulty == Difficulty.Advanced);
                 Scoring.inst.autoplayButtons = true;
                 KeyboardManager.inst.mIsLaserUseMouse = true;
                 IngameEngine.inst.StartGame(data, 2.0f);
@@ -64,7 +67,7 @@ namespace SoundMax {
             if (GUI.Button(new Rect(buttonRect.x, buttonRect.y + Screen.height * 0.1f, buttonRect.width, buttonRect.height), "max burning play") && !buttonDragging) {
                 if (IngameEngine.inst.mPlaying)
                     IngameEngine.inst.mForceEnd = true;
-                MusicData data = DataBase.inst.mDicMusic["max_burning"].Find((x) => x.mDifficulty == Difficulty.Extended);
+                MusicData data = DataBase.inst.mDicMusic["max_burning"].Find((x) => x.mDifficulty == Difficulty.Exhausted);
                 //Scoring.inst.autoplayButtons = true;
                 Scoring.inst.autoplay = true;
                 KeyboardManager.inst.mIsLaserUseMouse = true;
@@ -74,9 +77,9 @@ namespace SoundMax {
             if (GUI.Button(new Rect(buttonRect.x, buttonRect.y + Screen.height * 0.2f, buttonRect.width, buttonRect.height), "xross infection play") && !buttonDragging) {
                 if (IngameEngine.inst.mPlaying)
                     IngameEngine.inst.mForceEnd = true;
-                MusicData data = DataBase.inst.mDicMusic["xross_infection"].Find((x) => x.mDifficulty == Difficulty.Extended);
+                MusicData data = DataBase.inst.mDicMusic["xross_infection"].Find((x) => x.mDifficulty == Difficulty.Exhausted);
                 //Scoring.inst.autoplayButtons = true;
-                Scoring.inst.autoplay = true;
+                //Scoring.inst.autoplay = true;
                 KeyboardManager.inst.mIsLaserUseMouse = true;
                 IngameEngine.inst.StartGame(data, 5f);
             }

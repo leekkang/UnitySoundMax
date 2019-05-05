@@ -157,7 +157,8 @@ namespace SoundMax {
                 /// TODO: Investigate why this causes score to be too high
                 //hittableLaserEnter = (*m_currentTiming).beatDuration * 4.0;
                 //alertLaserThreshold = (*m_currentTiming).beatDuration * 6.0;
-                OnTimingPointChanged(m_currentTiming);
+                // TODO : 기능 모르겠으니 주석 처리
+                //OnTimingPointChanged(m_currentTiming);
             }
 
             // Advance lane toggle

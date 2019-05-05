@@ -1151,6 +1151,9 @@ namespace SoundMax {
                 return;
 
             if (buttonCode < 6) {
+                // 버튼 클릭 이펙트 출력
+                IngameEngine.inst.mNoteClickObject[buttonCode].SetActive(true);
+
                 int guardDelta = m_playback.GetLastTime() - m_buttonGuardTime[buttonCode];
                 if (guardDelta < m_bounceGuard && guardDelta >= 0) {
                     //Logf("Button %d press bounce guard hit at %dms", Logger.Info, buttonCode, m_playback.GetLastTime());
@@ -1177,6 +1180,9 @@ namespace SoundMax {
         }
         public void OnButtonReleased(int buttonCode) {
             if (buttonCode < 6) {
+                // 버튼 클릭 이펙트 감춤
+                IngameEngine.inst.mNoteClickObject[buttonCode].SetActive(false);
+
                 int guardDelta = m_playback.GetLastTime() - m_buttonGuardTime[(uint)buttonCode];
                 if (guardDelta < m_bounceGuard && guardDelta >= 0) {
                     //Logf("Button %d release bounce guard hit at %dms", Logger.Info, buttonCode, m_playback.GetLastTime());

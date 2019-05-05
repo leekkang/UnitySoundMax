@@ -65,8 +65,8 @@ MonoBehaviour:
     height: 1595
     borderLeft: 0
     borderRight: 0
-    borderTop: 0
-    borderBottom: 0
+    borderTop: 1
+    borderBottom: 1
     paddingLeft: 0
     paddingRight: 2
     paddingTop: 0

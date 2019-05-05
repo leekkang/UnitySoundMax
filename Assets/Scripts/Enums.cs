@@ -25,10 +25,10 @@
 
     /// <summary> 난이도 </summary>
     public enum Difficulty {
-        Light,
-        Challenge,
-        Extended,
-        Infinite
+        Novice,
+        Advanced,
+        Exhausted,
+        Infinity
     }
     
     /// <summary> 노트 생성 시 사용되는 플래그 </summary>

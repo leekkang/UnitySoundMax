@@ -8,7 +8,7 @@ using System.IO;
 namespace SoundMax {
     public class IngameEngine : Singleton<IngameEngine> {
         /// <summary> 트랙 노트 간격 조절용 </summary>
-        public const float TRACK_HEIGHT_INTERVAL = 0.007f;
+        public const float TRACK_HEIGHT_INTERVAL = 0.01f;
         /// <summary> 트랙의 버튼홈 너비 </summary>
         public const float TRACK_NOTE_WIDTH = 180f;
         /// <summary> 리소스에 저장되어있는 버튼 높이 </summary>
@@ -94,6 +94,7 @@ namespace SoundMax {
         public ParticleSystem[] mSlamHitEffect;
         public DisappearObject[] mLaserNobeObject = new DisappearObject[2];
         public DisappearObject[] mJudgeObject = new DisappearObject[8];         // 판정 오브젝트
+        public GameObject[] mNoteClickObject = new GameObject[6];           // 노트 누를 때 뒤에 나오는 하얀 이펙트
 
         public void Open() {
             m_beatmap = new Beatmap();
@@ -339,6 +340,9 @@ namespace SoundMax {
             mIsHPOver70 = false;
             mHealthBar.color = mHealthUnder70;
 
+            for (int i = 0; i < 6; i++)
+                mNoteClickObject[i].SetActive(false);
+
             return true;
         }
 
@@ -400,11 +404,11 @@ namespace SoundMax {
             // make judgement object
             GameObject judgeObject = Resources.Load("Prefab/ObjectJudgement") as GameObject;
             pos = new Vector3(0f, 152f, 0f);
-            Quaternion camera_angle = Quaternion.Euler(-65.5f, 0f, 0f);
+            Quaternion camera_angle = Quaternion.Euler(-68f, 0f, 0f);
             for (int i = 0; i < 8; i++) {
                 mJudgeObject[i] = Instantiate(judgeObject, mTrackerPanel).GetComponent<DisappearObject>();
                 mJudgeObject[i].transform.localPosition = pos;
-                mJudgeObject[i].transform.localRotation = m_camera.transform.localRotation;
+                mJudgeObject[i].transform.localRotation = camera_angle;
                 mJudgeObject[i].Open(0, 0.3f);
                 mJudgeObject[i].GetComponent<UISprite>().spriteName = "JudgementObject_" + i;
                 if (i < 4)
@@ -413,6 +417,18 @@ namespace SoundMax {
                     mJudgeObject[i].Move(0.3f + 0.4f * (i - 4));
                 else
                     mJudgeObject[i].Move(i - 6);
+            }
+
+            // make note click effect object
+            GameObject clickObject = Resources.Load("Prefab/NoteClickEff") as GameObject;
+            GameObject clickFxObject = Resources.Load("Prefab/NoteFXClickEff") as GameObject;
+            pos = Vector3.zero;
+            for (int i = 0; i < 6; i++) {
+                pos.x = GetButtonXPos(i);
+                mNoteClickObject[i] = Instantiate(i < 4 ? clickObject : clickFxObject, mTrackerPanel);
+                mNoteClickObject[i].transform.localPosition = pos;
+                mNoteClickObject[i].name = string.Format("NoteClickEffect_{0}", i);
+                mNoteClickObject[i].SetActive(false);
             }
         }
 
@@ -431,7 +447,7 @@ namespace SoundMax {
 
             // 트랙 세우기
             //m_camera.transform.parent = mTrackAnchor.parent;
-            mTrackAnchor.parent.localRotation = Quaternion.Euler(Vector3.zero);
+            //mTrackAnchor.parent.localRotation = Quaternion.Euler(Vector3.zero);
             Vector3 pos = Vector3.zero;
             mTrackAnchor.localPosition = pos;
 
@@ -513,7 +529,7 @@ namespace SoundMax {
                     bool b_right = btnLaser.mIndex == 1;
 
                     sprLaser.spriteName = b_right ? "Nobe_Right" : "Nobe_Left";
-                    sprLaser.depth = b_right ? sprLaser.depth : sprLaser.depth + 2;
+                    sprLaser.depth = b_right ? sprLaser.depth + 2 : sprLaser.depth + 0;
 
                     int laserSlamThreshold = (int)Math.Ceiling(timing.mBeatDuration / 8.0f);
                     // 가로로 누운 형태의 레이저. 
@@ -527,7 +543,7 @@ namespace SoundMax {
                         #region Start Corner Note
                         UISprite sprCorner = Instantiate(laserCorner, mTrackAnchor).GetComponent<UISprite>();
                         sprCorner.spriteName = b_right ? "Nobe_Right_Corner" : "Nobe_Left_Corner";
-                        sprCorner.depth = b_right ? sprCorner.depth + 1 : sprCorner.depth + 3;
+                        sprCorner.depth = b_right ? sprCorner.depth + 3 : sprCorner.depth + 1;
                         // 위치, 회전값 조절
                         pos.Set(xPos, yPos, 0f);
                         sprCorner.transform.localPosition = pos;
@@ -544,7 +560,7 @@ namespace SoundMax {
                             #region Additional Note
                             sprExtend = Instantiate(laserNote, mTrackAnchor).GetComponent<UISprite>();
                             sprExtend.spriteName = b_right ? "Nobe_Right" : "Nobe_Left";
-                            sprExtend.depth = b_right ? sprExtend.depth : sprExtend.depth + 2;
+                            sprExtend.depth = b_right ? sprExtend.depth + 2 : sprExtend.depth + 0;
                             // 위치 조절
                             sprExtend.pivot = UIWidget.Pivot.Center;
                             sprExtend.height = (int)TRACK_NOTE_WIDTH;
@@ -573,7 +589,7 @@ namespace SoundMax {
                         #region End Corner Note
                         sprCorner = Instantiate(laserCorner, mTrackAnchor).GetComponent<UISprite>();
                         sprCorner.spriteName = b_right ? "Nobe_Right_Corner" : "Nobe_Left_Corner";
-                        sprCorner.depth = b_right ? sprCorner.depth + 1 : sprCorner.depth + 3;
+                        sprCorner.depth = b_right ? sprCorner.depth + 3 : sprCorner.depth + 1;
                         // 위치, 회전값 조절
                         pos.Set(xPos, yPos, 0f);
                         sprCorner.transform.localPosition = pos;
@@ -588,7 +604,7 @@ namespace SoundMax {
                             #region Additional Note
                             sprExtend = Instantiate(laserNote, mTrackAnchor).GetComponent<UISprite>();
                             sprExtend.spriteName = b_right ? "Nobe_Right" : "Nobe_Left";
-                            sprExtend.depth = b_right ? sprExtend.depth : sprExtend.depth + 2;
+                            sprExtend.depth = b_right ? sprExtend.depth + 2 : sprExtend.depth + 0;
                             // 위치 조절
                             sprExtend.pivot = UIWidget.Pivot.Center;
                             sprExtend.height = (int)TRACK_NOTE_WIDTH;
@@ -609,7 +625,7 @@ namespace SoundMax {
                             height = (int)(height * Math.Sqrt(1 + tan * tan));
                         }
 
-                        sprLaser.height = height;
+                        sprLaser.height = height + 40;
 
                         // 가장자리 보간
                         if (width != 0) {
@@ -650,7 +666,7 @@ namespace SoundMax {
             Debug.Log("length : " + mListObj.Count);
 
             // 트랙 눕히기
-            mTrackAnchor.parent.localRotation = Quaternion.Euler(new Vector3(68f, 0f, 0f));
+            //mTrackAnchor.parent.localRotation = Quaternion.Euler(new Vector3(68f, 0f, 0f));
             //m_camera.transform.parent = transform;
             m_camera.SetOriginPos();
         }
@@ -868,6 +884,10 @@ namespace SoundMax {
             m_ended = true;
             mPlaying = false;
 
+            if (!m_paused) {
+                GuiManager.inst.ActivatePanel(PanelType.Select, true);
+            }
+
             Debug.Log("Game end");
         }
 
@@ -892,7 +912,7 @@ namespace SoundMax {
         public void PrintJudgement(int index, ScoreHitRating rate, float pos = 0f) {
             UISprite spr = mJudgeObject[index].GetComponent<UISprite>();
             spr.spriteName = rate == ScoreHitRating.Perfect ? "Judge_DMAX" :
-                             rate == ScoreHitRating.Good ? "Judge_DMAX" : "Judge_DMAX";
+                             rate == ScoreHitRating.Good ? "Judge_MAX" : "Judge_Miss";
             if (index < 6)
                 mJudgeObject[index].ResetTime();
             else
@@ -926,8 +946,8 @@ namespace SoundMax {
         /// <summary> 오버트랙 콤보 제거 </summary>
         void OnButtonMiss(int buttonIdx, bool hitEffect) {
             if (hitEffect) {
-                PrintJudgement(buttonIdx, ScoreHitRating.Miss);
             }
+            PrintJudgement(buttonIdx, ScoreHitRating.Miss);
 
             if (mComboText.gameObject.activeSelf) {
                 mComboTweenScale.ResetToBeginning();

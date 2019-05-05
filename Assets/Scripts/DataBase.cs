@@ -8,9 +8,13 @@ using UnityEngine.Networking;
 namespace SoundMax {
     public class DataBase : Singleton<DataBase> {
         public string[] mMusicList = {
-            "colorfulsky",
             "max_burning",
-            "xross_infection"
+            "xross_infection",
+            "dignity",
+            "dynasty",
+            "mei",
+            "gott",
+            "vallis_neria",
         };
 
         public bool mOpenComplete;
@@ -48,14 +52,14 @@ namespace SoundMax {
         }
 
         public string GetDifficultyPostfix(Difficulty difficulty) {
-            if (difficulty == Difficulty.Light)
-                return "lt";
-            else if (difficulty == Difficulty.Challenge)
-                return "ch";
-            else if (difficulty == Difficulty.Extended)
-                return "ex";
-            else if (difficulty == Difficulty.Infinite)
-                return "in";
+            if (difficulty == Difficulty.Novice)
+                return "nov";
+            else if (difficulty == Difficulty.Advanced)
+                return "adv";
+            else if (difficulty == Difficulty.Exhausted)
+                return "exh";
+            else if (difficulty == Difficulty.Infinity)
+                return "inf";
 
             return null;
         }
@@ -135,7 +139,7 @@ namespace SoundMax {
         IEnumerator CoLoadMusicList() {
             for (int i = 0; i < mMusicList.Length; i++) {
                 List<MusicData> dataList = new List<MusicData>();
-                for (Difficulty j = Difficulty.Light; j <= Difficulty.Infinite; j++) {
+                for (Difficulty j = Difficulty.Novice; j <= Difficulty.Infinity; j++) {
                     bool bComplete = false;
                     bool bSuccess = false;
                     MusicData data = new MusicData();
@@ -204,7 +208,7 @@ namespace SoundMax {
         public void Load(string musicName, Difficulty difficulty, System.Action<bool> afterLoad) {
             mPathName = musicName;
             mDifficulty = difficulty;
-            string ksh = string.Format("{0}{1}{0}_{2}.ksh", musicName, Path.DirectorySeparatorChar, DataBase.inst.GetDifficultyPostfix(difficulty));
+            string ksh = string.Format("{0}{1}{2}.ksh", musicName, Path.DirectorySeparatorChar, DataBase.inst.GetDifficultyPostfix(difficulty));
 
             mDicSettings.Clear();
             mListBlocks.Clear();
@@ -344,7 +348,7 @@ namespace SoundMax {
                     });
                 }
             } catch (Exception e) {
-                Debug.Log("exception : " + e.Message);
+                Debug.Log("exception : " + e.Message + ", ksh path : " + ksh);
                 afterLoad(false);
             }
         }
