@@ -19,8 +19,9 @@ namespace SoundMax {
         List<SpinBlock> mListCurSpins = new List<SpinBlock>();
         Vector3 mMovePos = new Vector3();
 
-        float mTiltIntensity;                // LASER_TILT_DEGREE 의 배율. TrackRollBehaviour 옵션에 의해 조절된다.
-        int mLastDegreeByLaser;              // 이전 프레임에 레이저에 의해 변경된 각도
+        float mTiltIntensity;                      // LASER_TILT_DEGREE 의 배율. TrackRollBehaviour 옵션에 의해 조절된다.
+        int[] mLastDegreeByLaser = new int[2];     // 이전 프레임에 레이저에 의해 변경된 각도
+        int[] mLastDestDegreeByLaser = new int[2];     // 레이저가 끝까지 가야 하는 각도
         float[] mLastLaserValue = new float[2];
 
         float mShakeDuration;
@@ -62,7 +63,7 @@ namespace SoundMax {
             if ((type & TrackRollBehaviour.Bigger) != 0) {
                 mTiltIntensity = 3f;
             } else if ((type & TrackRollBehaviour.Biggest) != 0) {
-                mTiltIntensity = 4f;
+                mTiltIntensity = 3.5f;
             } else if ((type & TrackRollBehaviour.Normal) != 0) {
                 mTiltIntensity = 1f;
             }
@@ -84,7 +85,7 @@ namespace SoundMax {
             // 계산된 각도를 카메라에 적용
             transform.localRotation = Quaternion.Euler(-87f, 0f, degree * .1f);
             //MoveCameraByDegree(NormalizeDegree(degree));
-
+            
             // 카메라 쉐이크 적용
             if (mShakeDuration > 0) {
                 mShakeDuration -= delta * 1000f;
@@ -133,33 +134,59 @@ namespace SoundMax {
         /// <summary> 레이저에 의해 변경되는 각도를 계산 </summary>
         int CalculateDegreeByLaser(float deltaTime) {
             int maxTiltDegree = (int)(LASER_TILT_DEGREE * mTiltIntensity);
+            float moveLimit = VELOCITY_DEGREE_PER_MS * mTiltIntensity * 50 * deltaTime;
+
             // 기본 레이저의 위치를 기반으로 각도 생성. 각도는 10을 곱해서 인트로 계산한다.
-            int cur_laser_degree = (int)(maxTiltDegree * (Scoring.inst.laserTargetPositions[0] + Scoring.inst.laserTargetPositions[1] - 1f));
+            int[] cur_laser_degree = { (int)(maxTiltDegree * Scoring.inst.laserTargetPositions[0]),
+                                       (int)(maxTiltDegree * (Scoring.inst.laserTargetPositions[1] - 1f)) };
 
-            // 멀어질때 빨라지고 되돌아올때 느려지게
-            float moveLimit = VELOCITY_DEGREE_PER_MS * 50 * deltaTime;
-            if (cur_laser_degree == 0) {
-                moveLimit *= .6f;
-            } else if (Math.Sign(cur_laser_degree) != Math.Sign(mLastDegreeByLaser)) {
-                if (mLastDegreeByLaser == 0)
-                    moveLimit *= 2f;
-                else if (Mathf.Abs(cur_laser_degree - mLastDegreeByLaser) > maxTiltDegree * 1.5f)
-                    moveLimit *= .3f;
-            }
-
-            mLastLaserValue[0] = Scoring.inst.laserTargetPositions[0];
-            mLastLaserValue[1] = Scoring.inst.laserTargetPositions[1];
-
-            // 이전 각도가 현재 목표 각도와 다를 경우 이전에 레이저에 의해 변경된 각도에 현재 각도를 추가로 더함
-            if (cur_laser_degree != mLastDegreeByLaser) {
-                if (cur_laser_degree > 0) {
-                    mLastDegreeByLaser = Math.Min(mLastDegreeByLaser + (int)Mathf.Round(moveLimit), cur_laser_degree);
+            // 왼쪽 레이저
+            float curLaserPoint = Scoring.inst.laserTargetPositions[0];
+            if (Scoring.inst.m_currentLaserSegments[0] == null) {
+                // 마지막 목표 지점과 현재 지점이 다른 경우 목표지점까지 가준다.
+                // 마지막 목표 지점과 현재 지점이 같은 경우 원점으로 서서히 되돌린다.
+                if (mLastDestDegreeByLaser[0] != mLastDegreeByLaser[0]) {
+                    cur_laser_degree[0] = mLastDestDegreeByLaser[0];
                 } else {
-                    mLastDegreeByLaser = Math.Max(mLastDegreeByLaser - (int)Mathf.Round(moveLimit), cur_laser_degree);
+                    moveLimit *= .4f;
+                    cur_laser_degree[0] = Math.Max(mLastDestDegreeByLaser[0] - (int)Mathf.Round(moveLimit), 0);
+                }
+
+                mLastDegreeByLaser[0] = Math.Min(mLastDegreeByLaser[0] + (int)Mathf.Round(moveLimit), cur_laser_degree[0]);
+                mLastDestDegreeByLaser[0] = Math.Min(mLastDestDegreeByLaser[0], mLastDegreeByLaser[0]);
+            } else {
+                mLastLaserValue[0] = curLaserPoint;
+                mLastDestDegreeByLaser[0] = cur_laser_degree[0];
+
+                if (cur_laser_degree[0] != mLastDegreeByLaser[0]) {
+                    mLastDegreeByLaser[0] = Math.Min(mLastDegreeByLaser[0] + (int)Mathf.Round(moveLimit), cur_laser_degree[0]);
                 }
             }
 
-            return (int)Mathf.Round(mLastDegreeByLaser * .1f);
+            // 오른쪽 레이저
+            curLaserPoint = Scoring.inst.laserTargetPositions[1];
+            if (Scoring.inst.m_currentLaserSegments[1] == null) {
+                // 마지막 목표 지점과 현재 지점이 다른 경우 목표지점까지 가준다.
+                // 마지막 목표 지점과 현재 지점이 같은 경우 원점으로 서서히 되돌린다.
+                if (mLastDestDegreeByLaser[1] != mLastDegreeByLaser[1]) {
+                    cur_laser_degree[1] = mLastDestDegreeByLaser[1];
+                } else {
+                    moveLimit *= .4f;
+                    cur_laser_degree[1] = Math.Min(mLastDestDegreeByLaser[1] + (int)Mathf.Round(moveLimit), 0);
+                }
+
+                mLastDegreeByLaser[1] = Math.Max(mLastDegreeByLaser[1] - (int)Mathf.Round(moveLimit), cur_laser_degree[1]);
+                mLastDestDegreeByLaser[1] = Math.Max(mLastDestDegreeByLaser[1], mLastDegreeByLaser[1]);
+            } else {
+                mLastLaserValue[1] = curLaserPoint;
+                mLastDestDegreeByLaser[1] = cur_laser_degree[1];
+
+                if (cur_laser_degree[1] != mLastDegreeByLaser[1]) {
+                    mLastDegreeByLaser[1] = Math.Max(mLastDegreeByLaser[1] - (int)Mathf.Round(moveLimit), cur_laser_degree[1]);
+                }
+            }
+
+            return (int)Mathf.Round((mLastDegreeByLaser[0] + mLastDegreeByLaser[1]) * .1f);
         }
 
         /// <summary>

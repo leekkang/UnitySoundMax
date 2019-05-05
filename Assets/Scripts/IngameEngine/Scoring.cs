@@ -206,7 +206,7 @@ namespace SoundMax {
 
         // Laser objects currently in range
         //	used to sample target laser positions
-        LaserData[] m_currentLaserSegments = new LaserData[2];
+        public LaserData[] m_currentLaserSegments = new LaserData[2];
         // Queue for the above list
         List<LaserData> m_laserSegmentQueue = new List<LaserData>();
 
