@@ -4,6 +4,12 @@ using UnityEngine;
 
 namespace SoundMax {
     public class PanelBase : MonoBehaviour {
+        public bool mInitialized;
+
+        /// <summary> 해당 패널의 초기화에 필요한 정보를 로드하는 함수 </summary>
+        public virtual void Init() {
+            mInitialized = true;
+        }
 
         /// <summary> X축 마우스 움직임을 체크하는 함수 </summary>
         /// <param name="positiveDirection"> 양의 방향이면 true, 음의 방향이면 false </param>

@@ -43,6 +43,8 @@ namespace SoundMax {
                     mCurPanelType = (PanelType)panel.Key;
                 }
             }
+
+            mDicPanel[(int)mCurPanelType].Init();
         }
 
         /// <summary> 키보드 매니저에서 노멀 버튼이 눌렸다고 알려줌 </summary>
@@ -114,6 +116,9 @@ namespace SoundMax {
         public void ActivatePanel(PanelType type, bool HideOthers) {
             foreach (var panel in mDicPanel) {
                 if (panel.Key == (int)type) {
+                    if (!panel.Value.mInitialized)
+                        panel.Value.Init();
+
                     panel.Value.gameObject.SetActive(true);
                 } else if (HideOthers) {
                     panel.Value.gameObject.SetActive(false);
@@ -135,6 +140,14 @@ namespace SoundMax {
             }
 
             mCurPanelType = PanelType.None;
+        }
+
+        public PanelBase GetPanel(PanelType type) {
+            PanelBase pb = mDicPanel[(int)type];
+            if (!pb.mInitialized)
+                pb.Init();
+
+            return pb;
         }
     }
 }

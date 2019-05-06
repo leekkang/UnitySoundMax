@@ -10,8 +10,11 @@ namespace SoundMax {
         int mMusicCount;
         int mCurIndex;
         bool mCompleteLoad;
+        
+        /// <summary> 해당 패널의 초기화에 필요한 정보를 로드하는 함수 </summary>
+        public override void Init() {
+            base.Init();
 
-        void Start() {
             mMusicCount = DataBase.inst.mMusicList.Length;
             mCursorSelect = transform.FindRecursive("CursorSelect");
             mBackPanel = new Transform[mMusicCount];
@@ -72,10 +75,9 @@ namespace SoundMax {
 
         /// <summary> 스타트 버튼을 눌렀을 때 해야 할 일 </summary>
         public override void OnClickBtnStart() {
-            List<MusicData> data = DataBase.inst.mDicMusic[DataBase.inst.mMusicList[mCurIndex]];
-            Scoring.inst.autoplay = true;
-            KeyboardManager.inst.mIsLaserUseMouse = true;
-            IngameEngine.inst.StartGame(data[data.Count - 1], 5f);
+            OptionPanel opt = (OptionPanel)GuiManager.inst.GetPanel(PanelType.Option);
+            opt.UpdateView(DataBase.inst.mDicMusic[DataBase.inst.mMusicList[mCurIndex]]);
+            GuiManager.inst.ActivatePanel(PanelType.Option, false);
         }
 
         /// <summary> 일반 버튼을 눌렀을 때 해야 할 일 </summary>

@@ -18,7 +18,7 @@ namespace SoundMax {
         /// <summary> center를 기준으로 하는 트랙의 크기 </summary>
         public const float TRACK_WIDTH = 900f;
         /// <summary> Laser_Guide를 표시할 간격 </summary>
-        public const float LASER_START_INTERVAL = 10000f;
+        public const float LASER_START_INTERVAL = 1000f;
         /// <summary> 오브젝트를 렌더링 할 시간 간격. 현재시간 + 변수 이내에 있는 오브젝트만 setactive(true) 가 된다. </summary>
         public const float OBJECT_ACTIVE_INTERVAL = 10000f;
 
@@ -39,13 +39,12 @@ namespace SoundMax {
         bool m_usecMod = false;
         float m_modSpeed = 400;
 
-        Coroutine mCoPlay;
+        MusicData mMusicData;
 
         Beatmap m_beatmap;
         Scoring m_scoring;
         PlaybackEngine m_playback;              // Beatmap playback manager (object and timing point selector)
         AudioEngine m_audioPlayback;            // Audio playback manager (music and FX))
-        MusicData mMusicData;
 
         int m_audioOffset = 0;                  // Applied audio offset
         int m_fpsTarget = 0;
@@ -576,7 +575,8 @@ namespace SoundMax {
                             #endregion
 
                             // 스타트 노트
-                            // 해당 레이저가 루트이고 마지막 레이저로부터 20초가 지났을때 밑에 laserStart를 깔아놓는다.
+                            // 해당 레이저가 루트이고 마지막 레이저로부터 10초가 지났을때 밑에 laserStart를 깔아놓는다.
+                            // 10 -> 1초로 수정
                             #region Additional Start Note
                             if (mLastLaserEndTime[btnLaser.mIndex] == 0f || btnLaser.mTime >= mLastLaserEndTime[btnLaser.mIndex] + LASER_START_INTERVAL) {
                                 sprExtend = Instantiate(laserStart, mTrackAnchor).GetComponent<UISprite>();
@@ -638,7 +638,8 @@ namespace SoundMax {
                             sprLaser.height += (int)(TRACK_NOTE_WIDTH * 0.5f);
                         }
 
-                        // 해당 레이저가 루트이고 마지막 레이저로부터 20초가 지났을때 밑에 laserStart를 깔아놓는다.
+                        // 해당 레이저가 루트이고 마지막 레이저로부터 10초가 지났을때 밑에 laserStart를 깔아놓는다.
+                        // 10초 -> 1초로 수정
                         if (btnLaser.mPrev == null && ( mLastLaserEndTime[btnLaser.mIndex] == 0f ||
                                                         btnLaser.mTime >= mLastLaserEndTime[btnLaser.mIndex] + LASER_START_INTERVAL)) {
                             UISprite sprExtend = Instantiate(laserStart, mTrackAnchor).GetComponent<UISprite>();

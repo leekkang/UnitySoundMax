@@ -9,7 +9,10 @@ namespace SoundMax {
         Transform mExit;
         int mCursorIndex;
 
-        void Start() {
+        /// <summary> 해당 패널의 초기화에 필요한 정보를 로드하는 함수 </summary>
+        public override void Init() {
+            base.Init();
+
             mCursorMain = transform.Find("CursorMain"); //panel_main의 오브젝트를 받아옴
             mStart = transform.Find("StartBtn");
             mExit = transform.Find("ExitBtn");

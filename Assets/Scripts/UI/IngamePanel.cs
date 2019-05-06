@@ -7,8 +7,11 @@ namespace SoundMax {
         Transform mCursor;
         List<Transform> mListButton = new List<Transform>();
         int mCursorIndex;
+        
+        /// <summary> 해당 패널의 초기화에 필요한 정보를 로드하는 함수 </summary>
+        public override void Init() {
+            base.Init();
 
-        void Start() {
             mCursor = transform.Find("CursorIngame");
             mListButton.Add(transform.Find("Continue"));
             mListButton.Add(transform.Find("Restart"));

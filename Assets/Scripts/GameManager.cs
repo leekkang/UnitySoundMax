@@ -12,6 +12,9 @@ namespace SoundMax {
             DataBase.inst.Open();
 
             StartCoroutine(CoLoadMain());
+
+            Scoring.inst.autoplay = true;
+            KeyboardManager.inst.mIsLaserUseMouse = true;
         }
 
         IEnumerator CoLoadMain() {
