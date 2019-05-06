@@ -353,10 +353,10 @@ namespace SoundMax {
         /// </summary>
         void CreatePoolObject() {
             // make effect and judge object pool
-            mNormalHitEffect = new ParticleSystem[15];
+            mNormalHitEffect = new ParticleSystem[30];
             GameObject eff = Resources.Load("Prefab/EffectNormalHit") as GameObject;
             Vector3 pos = new Vector3(-2000f, 0f, 0f);
-            for (int i = 0; i < 15; i++) {
+            for (int i = 0; i < 30; i++) {
                 ParticleSystem particle = Instantiate(eff, mJudgeLine).GetComponent<ParticleSystem>();
                 particle.name = string.Format("EffectNormalHit_{0}", i);
                 particle.transform.position = pos;
@@ -382,9 +382,9 @@ namespace SoundMax {
                 particle.gameObject.SetActive(false);
                 mLaserHitEffect[i] = particle;
             }
-            mSlamHitEffect = new ParticleSystem[10];
+            mSlamHitEffect = new ParticleSystem[30];
             eff = Resources.Load("Prefab/EffectSlam") as GameObject;
-            for (int i = 0; i < 10; i++) {
+            for (int i = 0; i < 30; i++) {
                 ParticleSystem particle = Instantiate(eff, mJudgeLine).GetComponent<ParticleSystem>();
                 particle.name = string.Format("EffectSlam_{0}", i);
                 particle.transform.position = pos;

@@ -15,6 +15,16 @@ namespace SoundMax {
             "mei",
             "gott",
             "vallis_neria",
+            "fiat_lux",
+            "hyena",
+            "im_so_happy",
+            "innocent_tempest",
+            "ix",
+            "quietus_ray",
+            "seed",
+            "trueblue",
+            "vision",
+            "world_vertex"
         };
 
         public bool mOpenComplete;

@@ -72,10 +72,10 @@ namespace SoundMax {
 
         /// <summary> 스타트 버튼을 눌렀을 때 해야 할 일 </summary>
         public override void OnClickBtnStart() {
-            MusicData data = DataBase.inst.mDicMusic[DataBase.inst.mMusicList[mCurIndex]].Find((x) => x.mDifficulty == Difficulty.Exhausted);
+            List<MusicData> data = DataBase.inst.mDicMusic[DataBase.inst.mMusicList[mCurIndex]];
             Scoring.inst.autoplay = true;
             KeyboardManager.inst.mIsLaserUseMouse = true;
-            IngameEngine.inst.StartGame(data, 5f);
+            IngameEngine.inst.StartGame(data[data.Count - 1], 5f);
         }
 
         /// <summary> 일반 버튼을 눌렀을 때 해야 할 일 </summary>
