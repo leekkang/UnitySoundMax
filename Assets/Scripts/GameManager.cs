@@ -21,11 +21,11 @@ namespace SoundMax {
             Debug.Log("Loading for Initialize ...");
             yield return new WaitUntil(() => DataBase.inst.mOpenComplete);
             Debug.Log("Initialize Done!");
+            ((MainPanel)GuiManager.inst.GetPanel(PanelType.Main)).ActivateButton();
         }
 
 #if DEVELOPMENT_BUILD || UNITY_EDITOR
         Rect buttonRect = new Rect(0, 0, Screen.width * 0.5f, Screen.height * 0.1f);
-        Rect scoreRect = new Rect(Screen.width * 0.5f, Screen.height * 0.1f, Screen.width * 0.5f, Screen.height * 0.1f);
         bool buttonPressed = false;
         bool buttonDragging = false;
 

@@ -1368,6 +1368,7 @@ GameObject:
   m_Component:
   - component: {fileID: 461721369}
   - component: {fileID: 461721370}
+  - component: {fileID: 461721371}
   m_Layer: 5
   m_Name: UIGrid
   m_TagString: Untagged
@@ -1407,11 +1408,24 @@ MonoBehaviour:
   pivot: 1
   maxPerLine: 3
   cellWidth: 300
-  cellHeight: 300
+  cellHeight: 350
   animateSmoothly: 0
   hideInactive: 0
   keepWithinPanel: 1
   sorted: 0
+--- !u!114 &461721371
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 461721368}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d1306d5f7603d764288ef2e4c121aa7f, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  mScrollBar: {fileID: 571693851}
 --- !u!1001 &468072688
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -1592,10 +1606,8 @@ GameObject:
   m_Component:
   - component: {fileID: 571693848}
   - component: {fileID: 571693851}
-  - component: {fileID: 571693850}
-  - component: {fileID: 571693849}
   m_Layer: 5
-  m_Name: Scroll Bar
+  m_Name: ScrollBar
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -1617,72 +1629,6 @@ Transform:
   m_Father: {fileID: 668572441}
   m_RootOrder: 5
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!54 &571693849
-Rigidbody:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 571693847}
-  serializedVersion: 2
-  m_Mass: 1
-  m_Drag: 0
-  m_AngularDrag: 0.05
-  m_UseGravity: 0
-  m_IsKinematic: 1
-  m_Interpolate: 0
-  m_Constraints: 0
-  m_CollisionDetection: 0
---- !u!114 &571693850
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 571693847}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: ae942c9068183dc40a9d01f648273726, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  leftAnchor:
-    target: {fileID: 0}
-    relative: 0
-    absolute: 0
-  rightAnchor:
-    target: {fileID: 0}
-    relative: 1
-    absolute: 0
-  bottomAnchor:
-    target: {fileID: 0}
-    relative: 0
-    absolute: 0
-  topAnchor:
-    target: {fileID: 0}
-    relative: 1
-    absolute: 0
-  updateAnchors: 1
-  showInPanelTool: 1
-  generateNormals: 0
-  generateUV2: 0
-  shadowMode: 0
-  widgetsAreStatic: 0
-  cullWhileDragging: 1
-  alwaysOnScreen: 0
-  anchorOffset: 0
-  softBorderPadding: 1
-  renderQueue: 0
-  startingRenderQueue: 3009
-  mClipTexture: {fileID: 0}
-  mAlpha: 1
-  mClipping: 0
-  mClipRange: {x: 0, y: 0, z: 300, w: 200}
-  mClipSoftness: {x: 4, y: 4}
-  mDepth: 2
-  mSortingOrder: 0
-  mSortingLayerName: 
-  mClipOffset: {x: 0, y: 0}
-  useSortingOrder: 0
 --- !u!114 &571693851
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -1698,15 +1644,19 @@ MonoBehaviour:
   thumb: {fileID: 0}
   mBG: {fileID: 1111887487}
   mFG: {fileID: 1278035886}
-  mValue: 0.09090911
+  mValue: 0.5
   mFill: 3
   numberOfSteps: 0
-  onChange: []
+  onChange:
+  - mTarget: {fileID: 1490204817}
+    mMethodName: OnScrollBar
+    mParameters: []
+    oneShot: 0
   foreground: {fileID: 0}
   rawValue: 1
   direction: 2
   mInverted: 0
-  mSize: 0.9956
+  mSize: 0.992
   mScroll: 0
   mDir: 2
 --- !u!1 &668572440
@@ -1786,7 +1736,7 @@ MonoBehaviour:
   anchorOffset: 0
   softBorderPadding: 1
   renderQueue: 0
-  startingRenderQueue: 3005
+  startingRenderQueue: 3000
   mClipTexture: {fileID: 0}
   mAlpha: 1
   mClipping: 0
@@ -3559,7 +3509,7 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1278035883}
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 499, y: 234, z: 0}
+  m_LocalPosition: {x: 499, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children: []
   m_Father: {fileID: 571693848}
@@ -3576,8 +3526,8 @@ BoxCollider:
   m_IsTrigger: 1
   m_Enabled: 1
   serializedVersion: 2
-  m_Size: {x: 35, y: 497.844, z: 0}
-  m_Center: {x: 0, y: 0.8820038, z: 0}
+  m_Size: {x: 35, y: 992.07996, z: 0}
+  m_Center: {x: 0, y: 0, z: 0}
 --- !u!114 &1278035886
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -3610,13 +3560,13 @@ MonoBehaviour:
   mColor: {r: 1, g: 1, b: 1, a: 1}
   mPivot: 4
   mWidth: 35
-  mHeight: 500
+  mHeight: 1000
   mDepth: 3
   mMat: {fileID: 0}
   autoResizeBoxCollider: 1
   hideIfOffScreen: 0
   keepAspectRatio: 0
-  aspectRatio: 0.07
+  aspectRatio: 0.035
   mType: 1
   mFillDirection: 4
   mFillAmount: 1
@@ -4345,7 +4295,7 @@ GameObject:
   - component: {fileID: 1490204817}
   - component: {fileID: 1490204818}
   m_Layer: 5
-  m_Name: Scroll View
+  m_Name: ScrollView
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -4359,7 +4309,7 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1490204815}
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: 0, y: 346, z: 0}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children:
   - {fileID: 461721369}
@@ -4451,16 +4401,16 @@ MonoBehaviour:
   anchorOffset: 0
   softBorderPadding: 1
   renderQueue: 0
-  startingRenderQueue: 3018
+  startingRenderQueue: 3010
   mClipTexture: {fileID: 0}
   mAlpha: 1
   mClipping: 3
   mClipRange: {x: 0, y: 0, z: 1000, w: 1000}
-  mClipSoftness: {x: 4, y: 4}
+  mClipSoftness: {x: 0, y: 8}
   mDepth: 2
   mSortingOrder: 0
   mSortingLayerName: 
-  mClipOffset: {x: 0, y: -346}
+  mClipOffset: {x: 0, y: 0}
   useSortingOrder: 0
 --- !u!1 &1503277948
 GameObject:
@@ -4645,8 +4595,8 @@ MonoBehaviour:
   updateAnchors: 1
   mColor: {r: 1, g: 1, b: 1, a: 1}
   mPivot: 4
-  mWidth: 300
-  mHeight: 300
+  mWidth: 320
+  mHeight: 320
   mDepth: 1
   mMat: {fileID: 0}
   autoResizeBoxCollider: 0

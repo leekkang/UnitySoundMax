@@ -6,24 +6,29 @@ namespace SoundMax {
     public class SelectPanel : PanelBase {
         Transform mCursorSelect;
         Transform[] mBackPanel;
+        GridScrollView mGridScrollView;
 
         int mMusicCount;
         int mCurIndex;
         bool mCompleteLoad;
-        
+
         /// <summary> 해당 패널의 초기화에 필요한 정보를 로드하는 함수 </summary>
         public override void Init() {
             base.Init();
 
             mMusicCount = DataBase.inst.mMusicList.Length;
             mCursorSelect = transform.FindRecursive("CursorSelect");
+            mGridScrollView = transform.FindRecursive("UIGrid").GetComponent<GridScrollView>();
+            
             mBackPanel = new Transform[mMusicCount];
-            Transform jacketParent = transform.FindRecursive("UIGrid");
+            Transform jacketParent = mGridScrollView.transform;
             mBackPanel[0] = jacketParent.Find("BackPanel0");
             for (int i = 1; i < mMusicCount; i++) {
                 mBackPanel[i] = Instantiate(mBackPanel[0], jacketParent);
                 mBackPanel[i].name = "BackPanel" + i;
             }
+
+            mGridScrollView.Init(mMusicCount);
 
             mCurIndex = 0;
             mCursorSelect.SetParent(mBackPanel[mCurIndex], false);
@@ -62,9 +67,11 @@ namespace SoundMax {
             if (positiveDirection) {
                 mCurIndex = ++mCurIndex % mMusicCount;
                 mCursorSelect.SetParent(mBackPanel[mCurIndex], false);
+                mGridScrollView.MoveForward(mCurIndex);
             } else {
                 mCurIndex = (--mCurIndex + mMusicCount) % mMusicCount; // 음수처리
                 mCursorSelect.SetParent(mBackPanel[mCurIndex], false);
+                mGridScrollView.MoveBackward(mCurIndex);
             }
         }
 

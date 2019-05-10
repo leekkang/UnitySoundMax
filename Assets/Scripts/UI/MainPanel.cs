@@ -16,6 +16,15 @@ namespace SoundMax {
             mCursorMain = transform.Find("CursorMain"); //panel_main의 오브젝트를 받아옴
             mStart = transform.Find("StartBtn");
             mExit = transform.Find("ExitBtn");
+            mCursorMain.gameObject.SetActive(false);
+            mStart.gameObject.SetActive(false);
+            mExit.gameObject.SetActive(false);
+        }
+
+        public void ActivateButton() {
+            mCursorMain.gameObject.SetActive(true);
+            mStart.gameObject.SetActive(true);
+            mExit.gameObject.SetActive(true);
 
             mCursorMain.position = mStart.position; //초기 커서의 위치를 start에 고정
             mCursorIndex = 0;
@@ -40,7 +49,7 @@ namespace SoundMax {
 
         /// <summary> 스타트 버튼을 눌렀을 때 해야 할 일 </summary>
         public override void OnClickBtnStart() {
-            if (mCursorIndex == 0)
+            if (mCursorIndex == 0 && DataBase.inst.mOpenComplete)
                 GuiManager.inst.ActivatePanel(PanelType.Select, true);
             else if (mCursorIndex == 1)
                 Application.Quit();

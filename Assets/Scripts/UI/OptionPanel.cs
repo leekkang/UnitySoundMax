@@ -66,6 +66,7 @@ namespace SoundMax {
             mLabelCalculated.text = Mathf.Round(mCurSpeed * mBpm).ToString();
             mLabelLevel.text = musicList[mCursorDiffIndex].mLevel.ToString();
             mTrCursor.localPosition = mTrSpeed.localPosition;
+            mTrCursorDiff.localPosition = mListDifficulty[mCursorDiffIndex].localPosition;
         }
 
         /// <summary> X축 마우스가 움직이면 해야할 일 </summary>
