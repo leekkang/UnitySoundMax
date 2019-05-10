@@ -15,6 +15,8 @@ namespace SoundMax {
         public const int TRACK_NOTE_HEIGHT = 50;
         /// <summary> BPM에 따른 버튼 높이 증분값 </summary>
         public const float NOTE_HEIGHT_INCREMENT_FROM_BPM = 10f;
+        /// <summary> 가로로 누운 레이저의 너비 증분값 </summary>
+        public const float LASER_NOTE_WIDTH_INCREMENT = 2f;
         /// <summary> center를 기준으로 하는 트랙의 크기 </summary>
         public const float TRACK_WIDTH = 900f;
         /// <summary> Laser_Guide를 표시할 간격 </summary>
@@ -543,6 +545,10 @@ namespace SoundMax {
                         sprLaser.transform.localRotation = Quaternion.Euler(0f, 0f, -dir * 90f);
                         sprLaser.height = (int)(track_width * Math.Abs(btnLaser.mPoints[1] - btnLaser.mPoints[0]));
 
+                        // 잘 보이게 너비를 늘려준다
+                        //sprLaser.pivot = dir > 0 ? UIWidget.Pivot.BottomRight : UIWidget.Pivot.BottomLeft;
+                        sprLaser.width = (int)(sprLaser.width * LASER_NOTE_WIDTH_INCREMENT);
+
                         // 레이저 시작부분에 laserCorner 오브젝트를 생성한다.
                         #region Start Corner Note
                         UISprite sprCorner = Instantiate(laserCorner, mTrackAnchor).GetComponent<UISprite>();
@@ -553,6 +559,12 @@ namespace SoundMax {
                         sprCorner.transform.localPosition = pos;
                         // 왼쪽에서 시작할 때 (오른쪽에서 시작은 디폴트라 필요없음)
                         if (dir > 0) sprCorner.transform.localRotation = Quaternion.Euler(0f, 0f, 90f);
+
+                        // 잘 보이게 너비를 늘려준다
+                        if (dir > 0)
+                            sprCorner.width = (int)(sprCorner.width * LASER_NOTE_WIDTH_INCREMENT);
+                        else
+                            sprCorner.height = (int)(sprCorner.height * LASER_NOTE_WIDTH_INCREMENT);
 
                         btnLaser.mListNote.Add(sprCorner);
                         #endregion
@@ -567,8 +579,8 @@ namespace SoundMax {
                             sprExtend.depth = b_right ? sprExtend.depth + 2 : sprExtend.depth + 0;
                             // 위치 조절
                             sprExtend.pivot = UIWidget.Pivot.Center;
-                            sprExtend.height = (int)TRACK_NOTE_WIDTH;
-                            pos.Set(xPos, yPos - TRACK_NOTE_WIDTH, 0f);
+                            sprExtend.height = (int)(TRACK_NOTE_WIDTH * LASER_NOTE_WIDTH_INCREMENT);
+                            pos.Set(xPos, yPos - sprExtend.height, 0f);
                             sprExtend.transform.localPosition = pos;
 
                             btnLaser.mListNote.Add(sprExtend);
@@ -576,13 +588,14 @@ namespace SoundMax {
 
                             // 스타트 노트
                             // 해당 레이저가 루트이고 마지막 레이저로부터 10초가 지났을때 밑에 laserStart를 깔아놓는다.
-                            // 10 -> 1초로 수정
+                            // 10초 -> 1초로 수정
                             #region Additional Start Note
                             if (mLastLaserEndTime[btnLaser.mIndex] == 0f || btnLaser.mTime >= mLastLaserEndTime[btnLaser.mIndex] + LASER_START_INTERVAL) {
                                 sprExtend = Instantiate(laserStart, mTrackAnchor).GetComponent<UISprite>();
                                 sprExtend.spriteName = b_right ? "Nobe_Guide_R" : "Nobe_Guide_L";
-                                pos.Set(xPos, yPos - TRACK_NOTE_WIDTH * 1.5f, 0f);
+                                pos.Set(xPos, yPos - TRACK_NOTE_WIDTH * 1.5f * LASER_NOTE_WIDTH_INCREMENT, 0f);
                                 sprExtend.transform.localPosition = pos;
+                                sprExtend.depth += 3;
 
                                 btnLaser.mListNote.Add(sprExtend);
                             }
@@ -600,6 +613,12 @@ namespace SoundMax {
                         sprCorner.transform.localPosition = pos;
                         sprCorner.transform.localRotation = Quaternion.Euler(0f, 0f, dir > 0 ? - 90f : 180f);
 
+                        // 잘 보이게 너비를 늘려준다
+                        if (dir > 0)
+                            sprCorner.width = (int)(sprCorner.width * LASER_NOTE_WIDTH_INCREMENT);
+                        else
+                            sprCorner.height = (int)(sprCorner.height * LASER_NOTE_WIDTH_INCREMENT);
+
                         btnLaser.mListNote.Add(sprCorner);
                         #endregion
 
@@ -612,8 +631,8 @@ namespace SoundMax {
                             sprExtend.depth = b_right ? sprExtend.depth + 2 : sprExtend.depth + 0;
                             // 위치 조절
                             sprExtend.pivot = UIWidget.Pivot.Center;
-                            sprExtend.height = (int)TRACK_NOTE_WIDTH;
-                            pos.Set(xPos, yPos + TRACK_NOTE_WIDTH, 0f);
+                            sprExtend.height = (int)(TRACK_NOTE_WIDTH * LASER_NOTE_WIDTH_INCREMENT);
+                            pos.Set(xPos, yPos + sprExtend.height, 0f);
                             sprExtend.transform.localPosition = pos;
 
                             btnLaser.mListNote.Add(sprExtend);
@@ -646,6 +665,7 @@ namespace SoundMax {
                             sprExtend.spriteName = b_right ? "Nobe_Guide_R" : "Nobe_Guide_L";
                             pos.Set(xPos, yPos, 0f);
                             sprExtend.transform.localPosition = pos;
+                            sprExtend.depth += 3;
 
                             btnLaser.mListNote.Add(sprExtend);
                         }
