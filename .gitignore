@@ -27,6 +27,9 @@ ExportedObj/
 # Unity3D Generated File On Crash Reports
 sysinfo.txt
 
+# 3rd Party Folder
+
+[Aa]ssets/3rdParty/
 
 # StreamingAssetFolder (for ksh song file. if need to upload other files, temporary remove or comment out below line)
 
