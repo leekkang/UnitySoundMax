@@ -65,7 +65,9 @@ namespace SoundMax {
             if (restart) {
                 IngameEngine.inst.Restart();
             } else {
-                GuiManager.inst.ActivatePanel(PanelType.Select, true);
+                ResultPanel result = (ResultPanel)GuiManager.inst.GetPanel(PanelType.Result);
+                result.UpdateView();
+                GuiManager.inst.ActivatePanel(PanelType.Result, true);
             }
         }
     }

@@ -56,13 +56,16 @@ namespace SoundMax {
     }
 
     public class MapTotals {
-        // Number of single notes
+        /// <summary> 싱글 노트 개수 </summary>
         public int numSingles;
-        // Number of laser/hold ticks
+        /// <summary> 홀드, 레이저 노트 개수 </summary>
         public int numTicks;
-        // The maximum possible score a Map can give
-        // The score is calculated per 2 (2 = critical, 1 = near)
-        // Hold buttons, lasers, etc. give 2 points per tick
+
+        /// <summary> 
+        /// 얻을 수 있는 스코어 개수
+        /// The score is calculated per 2 (2 = critical, 1 = near)
+        /// Hold buttons, lasers, etc. give 2 points per tick
+        /// </summary>
         public int maxScore;
     }
 
@@ -71,11 +74,12 @@ namespace SoundMax {
         public int time;
         public int delta;
         public ScoreHitRating rating;
+
         // Hold state
         // This is the amount of gotten ticks in a hold sequence
-        public uint hold = 0;
+        public uint hold;
         // This is the amount of total ticks in this hold sequence
-        public uint holdMax = 0;
+        public uint holdMax;
         // If at least one hold tick has been missed
         public bool hasMissed = false;
 
@@ -116,50 +120,50 @@ namespace SoundMax {
         public readonly int perfectHitTime = 42;
         public readonly float idleLaserSpeed = 1f;
 
-        // Map total infos
-        MapTotals mapTotals;
-        // Maximum accumulated score of object that have been hit or missed
-        // used to calculate accuracy up to a give point
-        uint currentMaxScore = 0;
-        // The actual amount of gotten score
-        uint currentHitScore = 0;
+        /// <summary> 오토 플레이 모드 </summary>
+        public bool autoplay = false;
+        /// <summary> 레이저 노트 제외 오토 플레이 모드 </summary>
+        public bool autoplayButtons = false;
 
-        // Amount of gauge to gain on a tick
-        float tickGaugeGain = 0.0f;
-        // Hits per type in order:
-        //	0 = Miss
-        //	1 = Good
-        //	2 = Perfect
-        uint[] categorizedHits = new uint[3];
+        /// <summary>
+        /// 판정 개수 
+        /// 0 = Miss, 1 = Good, 2 = Perfect
+        /// </summary>
+        public uint[] categorizedHits = new uint[3];
 
-        // Early and Late count:
-        // 0 = Early
-        // 1 = Late
-        uint[] timedHits = new uint[2];
-
-        // Amount of gauge to gain on a short note
-        float shortGaugeGain = 0.0f;
-
-        // Current gauge 0 to 1
+        /// <summary> 현재 게이지 양, 0 ~ 1 사이 </summary>
         public float currentGauge = 0.0f;
 
-        // Current combo
+        /// <summary> 현재 콤보 </summary>
         public int currentComboCounter;
 
-        // Combo state (0 = regular, 1 = full combo, 2 = perfect)
-        byte comboState = 2;
-
-        // Highest combo in current run
+        /// <summary> 최고 달성 콤보 </summary>
         public int maxComboCounter;
 
-        // The timings of hit objects, sorted by time hit
-        // these are used for debugging
-        List<HitStat> hitStats = new List<HitStat>();
+        /// <summary>
+        /// 현재 퍼펙트 중인지, 풀콤보 중인지 확인하는 변수
+        /// 0 = regular, 1 = full combo, 2 = perfect
+        /// </summary>
+        public int comboState = 2;
 
-        // Autoplay mode
-        public bool autoplay = false;
-        // Autoplay but for buttons
-        public bool autoplayButtons = false;
+        /// <summary> 전체 노트, 게이지, 콤보 정보 </summary>
+        MapTotals mapTotals;
+        /// <summary> 현재 얻은 스코어 양(계산전) </summary>
+        int currentHitScore = 0;
+
+        /// <summary>
+        /// 늦게 치거나, 일찍 친 노트의 개수
+        /// 0 = Early,  = Late
+        /// </summary>
+        uint[] timedHits = new uint[2];
+        
+        /// <summary> 일반 노트가 한번에 얻는 게이지 양 </summary>
+        float shortGaugeGain;
+        /// <summary> 홀드, 레이저 버튼이 얻는 틱당 게이지 량 </summary>
+        float tickGaugeGain;
+        
+        /// <summary> 시간에 따른 히트 스테이터스를 저장하는 리스트. 디버그에 사용 </summary>
+        List<HitStat> hitStats = new List<HitStat>();
 
         /// <summary> 레이저 노트 자동 보간 허용 범위 </summary>
         float laserDistanceLeniency = 1.0f / 12.0f;
@@ -167,6 +171,7 @@ namespace SoundMax {
         float[] laserPositions = new float[2];
         /// <summary> 현재 시각에서 레이저의 위치 </summary>
         public float[] laserTargetPositions = new float[2];
+        /// <summary> 레이저 파티클 </summary>
         ParticleSystem[] mLaserParticle = new ParticleSystem[2];
         // Current lasers are extended
         bool[] lasersAreExtend = new bool[2];
@@ -250,55 +255,6 @@ namespace SoundMax {
         //	(New Score)
         public System.Action<int> OnScoreChanged;
 
-
-        string CalculateGrade(uint score) {
-            if (score >= 9900000) // S
-                return "S";
-            if (score >= 9800000) // AAA+
-                return "AAA+";
-            if (score >= 9700000) // AAA
-                return "AAA";
-            if (score >= 9500000) // AA+
-                return "AA+";
-            if (score >= 9300000) // AA
-                return "AA";
-            if (score >= 9000000) // A+
-                return "A+";
-            if (score >= 8700000) // A
-                return "A";
-            if (score >= 7500000) // B
-                return "B";
-            if (score >= 6500000) // C
-                return "C";
-            return "D"; // D
-        }
-
-        byte CalculateBadge(ScoreIndex score) {
-            if (score.score == 10000000) //Perfect
-                return 5;
-            if (score.miss == 0) //Full Combo
-                return 4;
-            if (((GameFlags)score.gameflags & GameFlags.Hard) != GameFlags.None && score.gauge > 0) //Hard Clear
-                return 3;
-            if (((GameFlags)score.gameflags & GameFlags.Hard) == GameFlags.None && score.gauge >= 0.70) //Normal Clear
-                return 2;
-
-            return 1; //Failed
-        }
-
-        byte CalculateBestBadge(List<ScoreIndex> scores) {
-            if (scores.Count < 1)
-                return 0;
-            byte top = 1;
-            foreach (ScoreIndex score in scores) {
-                byte temp = CalculateBadge(score);
-                if (temp > top) {
-                    top = temp;
-                }
-            }
-            return top;
-        }
-
         public void SetPlayback(PlaybackEngine playback) {
             m_playback = playback;
             //m_playback.OnFXBegin.Add(this, &m_OnFXBegin);
@@ -312,7 +268,6 @@ namespace SoundMax {
 
         public void Reset() {
             // Reset score/combo counters
-            currentMaxScore = 0;
             currentHitScore = 0;
             currentComboCounter = 0;
             maxComboCounter = 0;
@@ -887,7 +842,7 @@ namespace SoundMax {
 
                     currentGauge += shortGaugeGain / 3.0f;
                 }
-                m_AddScore((uint)stat.rating);
+                m_AddScore((int)stat.rating);
             } else if (tick.HasFlag(TickFlags.Hold)) {
                 HoldButtonData hold = (HoldButtonData)tick.obj;
                 if (hold.mTime + hold.mDuration > m_playback.m_playbackTime) // Only List active hold object if object hasn't passed yet
@@ -966,7 +921,7 @@ namespace SoundMax {
             }
         }
 
-        void m_AddScore(uint score) {
+        void m_AddScore(int score) {
             //assert(score > 0 && score <= 2);
             if (score == 1 && comboState == 2)
                 comboState = 1;
@@ -1228,28 +1183,75 @@ namespace SoundMax {
             return ret;
         }
 
-        int CalculateCurrentScore() {
+        public int CalculateCurrentScore() {
             return CalculateScore(currentHitScore);
         }
 
-        int CalculateScore(uint hitScore) {
+        int CalculateScore(int hitScore) {
             return (int)(((double)hitScore / mapTotals.maxScore) * 10000000f);
         }
 
-        uint CalculateCurrentGrade() {
-            uint value = (uint)((double)CalculateCurrentScore() * 0.9f + currentGauge * 1000000.0);
-            if (value > 9800000) // AAA
-                return 0;
-            if (value > 9400000) // AA
-                return 1;
-            if (value > 8900000) // A
-                return 2;
-            if (value > 8000000) // B
-                return 3;
-            if (value > 7000000) // C
-                return 4;
-            return 5; // D
+        public string CalculateGrade(int score) {
+            if (score >= 9900000) // S
+                return "S";
+            //if (score >= 9800000) // AAA+
+            //    return "AAA+";
+            //if (score >= 9700000) // AAA
+            //    return "AAA";
+            //if (score >= 9500000) // AA+
+            //    return "AA+";
+            //if (score >= 9300000) // AA
+            //    return "AA";
+            //if (score >= 9000000) // A+
+            //    return "A+";
+            if (score >= 8700000) // A
+                return "A";
+            if (score >= 7500000) // B
+                return "B";
+            if (score >= 6500000) // C
+                return "C";
+            return "F"; // F
         }
 
+        //uint CalculateCurrentGrade() {
+        //    uint value = (uint)((double)CalculateCurrentScore() * 0.9f + currentGauge * 1000000.0);
+        //    if (value > 9800000) // AAA
+        //        return 0;
+        //    if (value > 9400000) // AA
+        //        return 1;
+        //    if (value > 8900000) // A
+        //        return 2;
+        //    if (value > 8000000) // B
+        //        return 3;
+        //    if (value > 7000000) // C
+        //        return 4;
+        //    return 5; // F
+        //}
+
+        byte CalculateBadge(ScoreIndex score) {
+            if (score.score == 10000000) //Perfect
+                return 5;
+            if (score.miss == 0) //Full Combo
+                return 4;
+            if (((GameFlags)score.gameflags & GameFlags.Hard) != GameFlags.None && score.gauge > 0) //Hard Clear
+                return 3;
+            if (((GameFlags)score.gameflags & GameFlags.Hard) == GameFlags.None && score.gauge >= 0.70) //Normal Clear
+                return 2;
+
+            return 1; //Failed
+        }
+
+        byte CalculateBestBadge(List<ScoreIndex> scores) {
+            if (scores.Count < 1)
+                return 0;
+            byte top = 1;
+            foreach (ScoreIndex score in scores) {
+                byte temp = CalculateBadge(score);
+                if (temp > top) {
+                    top = temp;
+                }
+            }
+            return top;
+        }
     }
 }

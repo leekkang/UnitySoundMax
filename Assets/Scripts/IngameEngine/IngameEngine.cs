@@ -41,7 +41,7 @@ namespace SoundMax {
         bool m_usecMod = false;
         float m_modSpeed = 400;
 
-        MusicData mMusicData;
+        public MusicData mMusicData;
 
         Beatmap m_beatmap;
         Scoring m_scoring;
@@ -58,19 +58,23 @@ namespace SoundMax {
 
         UITexture mJacketImage;                 // 좌측 상단 앨범 재킷
         UILabel mDifficultyLabel;               // 좌측 상단 난이도
-        UILabel mLevelLabel;                    // 좌측 상단 곡 레벨
-        UILabel mBpmLabel;                      // 좌측 상단 곡 bpm
-        UILabel mSpeedLabel;                    // 좌측 상단 곡 스피드
-        UILabel mScoreLabel;                    // 우측 상단 스코어 보드
-        UILabel mBoardComboLabel;               // 우측 상단 콤보 보드
-        UISprite mHealthBar;                    // 우측의 체력 게이지
+        UILabel mLabelLevel;                    // 좌측 상단 곡 레벨
+        UILabel mLabelBpm;                      // 좌측 상단 곡 bpm
+        UILabel mLabelSpeed;                    // 좌측 상단 곡 스피드
+        UILabel mLabelScore;                    // 우측 상단 스코어 보드
+        UILabel mLabelBoardCombo;               // 우측 상단 콤보 보드
+        UISprite mSprHealthBar;                 // 우측의 체력 게이지
         bool mIsHPOver70;                       // 컬러값을 바꿔야 하는지 확인
-        Color mHealthUnder70 = new Color(118f / 255f, 1f, 1f, 1f);  // 체력 70% 미만일 때의 컬러값
-        Color mHealthOver70 = Color.white;      // 체력 70% 이상일 때의 컬러값
+        public Color mHealthUnder70 = new Color(118f / 255f, 1f, 1f, 1f);  // 체력 70% 미만일 때의 컬러값
+        public Color mHealthOver70 = Color.white;      // 체력 70% 이상일 때의 컬러값
 
-        UILabel mComboText;                     // 트랙 가운데 뜨는 콤보 텍스트
+        UILabel mLabelCombo;                     // 트랙 가운데 뜨는 콤보 텍스트
         TweenScale mComboTweenScale;            // 트랙 가운데 뜨는 콤보의 스케일 트윈
         DisappearObject mComboDisappearScript;  // 트랙 가운데 뜨는 콤보의 알파 트윈
+
+        // 결과창 뜰 때 꺼줘야 하는 오브젝트
+        public GameObject mSprMusicInfo;
+        public GameObject mSprScoreBoard;
 
         // The camera watching the playfield
         CameraMotion m_camera;
@@ -113,21 +117,25 @@ namespace SoundMax {
             mTrackerPanel = mJudgeLine.Find("TrackerPanel");
 
             // 오버트랙 이미지 관련
-            mComboText = transform.FindRecursive("ComboText").GetComponent<UILabel>();
-            mComboTweenScale = mComboText.GetComponent<TweenScale>();
-            mComboDisappearScript = mComboText.GetComponent<DisappearObject>();
+            mLabelCombo = transform.FindRecursive("ComboText").GetComponent<UILabel>();
+            mComboTweenScale = mLabelCombo.GetComponent<TweenScale>();
+            mComboDisappearScript = mLabelCombo.GetComponent<DisappearObject>();
             mComboDisappearScript.Open(1f, 0.3f);
 
             // 백그라운드 이미지 관련
-            mScoreLabel = transform.FindRecursive("ScoreLabel").GetComponent<UILabel>();
-            mBoardComboLabel = mScoreLabel.transform.parent.Find("ComboLabel").GetComponent<UILabel>();
-            mHealthBar = transform.FindRecursive("HPRemain").GetComponent<UISprite>();
+            Transform scoreBoard = transform.FindRecursive("Scoreboard");
+            mLabelScore = scoreBoard.Find("ScoreLabel").GetComponent<UILabel>();
+            mLabelBoardCombo = scoreBoard.Find("ComboLabel").GetComponent<UILabel>();
+            mSprHealthBar = transform.FindRecursive("HPRemain").GetComponent<UISprite>();
             Transform musicInfo = transform.FindRecursive("MusicInfo");
             mJacketImage = musicInfo.Find("JacketImage").GetComponent<UITexture>();
             mDifficultyLabel = musicInfo.Find("MusicDifficulty").GetComponent<UILabel>();
-            mLevelLabel = musicInfo.Find("MusicLevel").GetComponent<UILabel>();
-            mBpmLabel = musicInfo.Find("MusicBpm").GetComponent<UILabel>();
-            mSpeedLabel = musicInfo.Find("MusicSpeed").GetComponent<UILabel>();
+            mLabelLevel = musicInfo.Find("MusicLevel").GetComponent<UILabel>();
+            mLabelBpm = musicInfo.Find("MusicBpm").GetComponent<UILabel>();
+            mLabelSpeed = musicInfo.Find("MusicSpeed").GetComponent<UILabel>();
+
+            mSprMusicInfo = musicInfo.gameObject;
+            mSprScoreBoard = scoreBoard.gameObject;
 
             // 샘플 오디오 로드
             m_slamSample = mAudioRoot.Find("SlamSound").GetComponent<AudioSource>();
@@ -152,6 +160,12 @@ namespace SoundMax {
             CreatePoolObject();
         }
 
+        /// <summary> 곡 정보, 스코어보드 ui의 상태를 변경하는 함수 </summary>
+        public void SetUIActivity(bool active) {
+            mSprMusicInfo.SetActive(active);
+            mSprScoreBoard.SetActive(active);
+        }
+
         /// <summary>
         /// 해당 데이터로 게임을 실행한다.
         /// </summary>
@@ -162,14 +176,16 @@ namespace SoundMax {
             mMusicData = data;
             mJacketImage.mainTexture = data.mJacketImage;
             mDifficultyLabel.text = data.mDifficulty.ToString();
-            mLevelLabel.text = data.mLevel.ToString();
-            mBpmLabel.text = data.mBpm.ToString();
-            mSpeedLabel.text = mSpeed.ToString();
+            mLabelLevel.text = data.mLevel.ToString();
+            mLabelBpm.text = data.mBpm.ToString();
+            mLabelSpeed.text = mSpeed.ToString();
 
+            SetUIActivity(true);
             StartCoroutine(CoLoadData(data));
         }
 
         public void Restart() {
+            SetUIActivity(true);
             StartCoroutine(CoLoadData(mMusicData));
         }
 
@@ -341,7 +357,7 @@ namespace SoundMax {
             m_playback.hittableObjectLeave = m_scoring.goodHitTime;
 
             mIsHPOver70 = false;
-            mHealthBar.color = mHealthUnder70;
+            mSprHealthBar.color = mHealthUnder70;
 
             for (int i = 0; i < 6; i++)
                 mNoteClickObject[i].SetActive(false);
@@ -788,9 +804,6 @@ namespace SoundMax {
 
             BeatmapSetting beatmapSettings = m_beatmap.mSetting;
 
-            // Update beatmap playbacka
-            //Debug.Log("m_audioPlayback.GetPosition() : " + m_audioPlayback.GetPosition());
-
             int playbackPositionMs = m_audioPlayback.GetPosition() - m_audioOffset;
             m_playback.UpdateTime(playbackPositionMs);
 
@@ -840,14 +853,14 @@ namespace SoundMax {
             m_lastMapTime = playbackPositionMs;
 
             // 게이지 수정
-            if (mHealthBar.fillAmount != m_scoring.currentGauge) {
-                mHealthBar.fillAmount = m_scoring.currentGauge;
-                if (mIsHPOver70 && mHealthBar.fillAmount < 0.7f) {
+            if (mSprHealthBar.fillAmount != m_scoring.currentGauge) {
+                mSprHealthBar.fillAmount = m_scoring.currentGauge;
+                if (mIsHPOver70 && mSprHealthBar.fillAmount < 0.7f) {
                     mIsHPOver70 = false;
-                    mHealthBar.color = mHealthUnder70;
-                } else if (!mIsHPOver70 && mHealthBar.fillAmount >= 0.7f) {
+                    mSprHealthBar.color = mHealthUnder70;
+                } else if (!mIsHPOver70 && mSprHealthBar.fillAmount >= 0.7f) {
                     mIsHPOver70 = true;
-                    mHealthBar.color = mHealthOver70;
+                    mSprHealthBar.color = mHealthOver70;
                 }
             }
 
@@ -911,7 +924,9 @@ namespace SoundMax {
             mPlaying = false;
 
             if (!m_paused) {
-                GuiManager.inst.ActivatePanel(PanelType.Select, true);
+                ResultPanel result = (ResultPanel)GuiManager.inst.GetPanel(PanelType.Result);
+                result.UpdateView();
+                GuiManager.inst.ActivatePanel(PanelType.Result, true);
             }
 
             Debug.Log("Game end");
@@ -975,9 +990,9 @@ namespace SoundMax {
             }
             PrintJudgement(buttonIdx, ScoreHitRating.Miss);
 
-            if (mComboText.gameObject.activeSelf) {
+            if (mLabelCombo.gameObject.activeSelf) {
                 mComboTweenScale.ResetToBeginning();
-                mComboText.gameObject.SetActive(false);
+                mLabelCombo.gameObject.SetActive(false);
             }
         }
         
@@ -986,11 +1001,11 @@ namespace SoundMax {
             if (newCombo == 0)
                 return;
             
-            mBoardComboLabel.text = m_scoring.maxComboCounter.ToString();
-            mComboText.text = newCombo.ToString();
+            mLabelBoardCombo.text = m_scoring.maxComboCounter.ToString();
+            mLabelCombo.text = newCombo.ToString();
             mComboDisappearScript.ResetTime();
-            if (!mComboText.gameObject.activeSelf) {
-                mComboText.gameObject.SetActive(true);
+            if (!mLabelCombo.gameObject.activeSelf) {
+                mLabelCombo.gameObject.SetActive(true);
             } else {
                 mComboTweenScale.ResetToBeginning();
                 mComboTweenScale.PlayForward();
@@ -1000,7 +1015,7 @@ namespace SoundMax {
         /// <summary> 스코어 라벨 변경 </summary>
         void OnScoreChanged(int newScore) {
             //Debug.Log("OnScoreChanged : " + newScore);
-            mScoreLabel.text = newScore.ToString();
+            mLabelScore.text = newScore.ToString();
         }
 
         // These functions control if FX button DSP's are muted or not
