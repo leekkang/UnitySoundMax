@@ -257,7 +257,6 @@ namespace SoundMax {
 
         public void SetPlayback(PlaybackEngine playback) {
             m_playback = playback;
-            //m_playback.OnFXBegin.Add(this, &m_OnFXBegin);
             m_playback.OnObjectEntered = m_OnObjectEntered;
             m_playback.OnObjectLeaved = m_OnObjectLeaved;
         }
@@ -610,11 +609,6 @@ namespace SoundMax {
                 ticks.Last().flags |= TickFlags.End;
 
             return ticks;
-        }
-
-        void m_OnFXBegin(HoldButtonData obj) {
-            if (autoplay || autoplayButtons)
-                m_SetHoldObject(obj, obj.mIndex);
         }
 
         void m_OnObjectEntered(ObjectDataBase obj) {

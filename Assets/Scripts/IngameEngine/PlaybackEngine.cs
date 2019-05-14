@@ -200,10 +200,15 @@ namespace SoundMax {
             }
 
             // Check for lasers within the alert time
-            index = GetSelectHitObjectIndex(m_playbackTime + alertLaserThreshold, false);
+            index = GetSelectHitObjectIndex(m_playbackTime + alertLaserThreshold, true);
             if (index != -1 && index != mCurAlertIndex) {
+                // alert 대상을 줄이기 위해서 추가. criteria, m_playbackTime + alertLaserThreshold 사이의 시간을 가지는 오브젝트만 고려대상이 된다.
+                float criteria = m_playbackTime + alertLaserThreshold - 500f;
                 for (int i = mCurAlertIndex; i < index; i++) {
                     ObjectDataBase obj = m_objects[i];
+                    if (obj.mTime < criteria)
+                        continue;
+
                     if (obj.mType == ButtonType.Laser) {
                         LaserData laser = (LaserData)obj;
                         if (laser.mPrev == null)
@@ -557,22 +562,17 @@ namespace SoundMax {
             return Math.Min(objStart, m_laneTogglePoints.Count - 1);
         }
 
-        ObjectDataBase GetHitObjectAt(int time, bool allowReset) {
-            int index = GetSelectHitObjectIndex(time, allowReset);
-            if (index == -1)
-                return null;
-
-            return m_objects[index];
-        }
-
-        int GetSelectHitObjectIndex(int time, bool allowReset) {
-            int objStart = mCurObjIndex;
+        /// <summary>
+        /// 해당 시간 이후에 첫번째로 오는 오브젝트의 인덱스를 리턴.
+        /// 현재 시간 ~ <paramref name="time"/> 시간 사이의 오브젝트를 파악하기 위해 사용하는 함수
+        /// </summary>
+        /// <param name="time"></param>
+        /// <param name="isAlert"> 레이저 알람 체크용으로 사용하는지 확인 </param>
+        /// <returns></returns>
+        int GetSelectHitObjectIndex(int time, bool isAlert) {
+            int objStart = isAlert ? mCurAlertIndex : mCurObjIndex;
             if (objStart >= m_objects.Count - 1)
                 return m_objects.Count - 1;
-
-            // Start at front of array if current object lies ahead of given input time
-            if (m_objects[objStart].mTime > time && allowReset)
-                objStart = 0;
 
             // Keep advancing the start pointer while the next object's starting time lies before the input time
             for (; objStart < m_objects.Count; objStart++) {

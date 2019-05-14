@@ -7226,7 +7226,7 @@ PrefabInstance:
     - target: {fileID: 5684962751430210407, guid: 01802979971836a40add9c4869b47fb5,
         type: 3}
       propertyPath: m_LocalPosition.y
-      value: -2
+      value: 72
       objectReference: {fileID: 0}
     - target: {fileID: 5684962751430210407, guid: 01802979971836a40add9c4869b47fb5,
         type: 3}
@@ -7273,6 +7273,16 @@ PrefabInstance:
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: 5684962751430210407, guid: 01802979971836a40add9c4869b47fb5,
+        type: 3}
+      propertyPath: m_LocalScale.x
+      value: 0.8
+      objectReference: {fileID: 0}
+    - target: {fileID: 5684962751430210407, guid: 01802979971836a40add9c4869b47fb5,
+        type: 3}
+      propertyPath: m_LocalScale.y
+      value: 0.8
+      objectReference: {fileID: 0}
     - target: {fileID: 5684962751430210406, guid: 01802979971836a40add9c4869b47fb5,
         type: 3}
       propertyPath: mWidth
@@ -7301,7 +7311,7 @@ GameObject:
   - component: {fileID: 1852239193}
   - component: {fileID: 1852239194}
   m_Layer: 11
-  m_Name: Panel
+  m_Name: OverTrackPanel
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -7515,6 +7525,9 @@ MonoBehaviour:
   mLaserHitEffect: []
   mSlamHitEffect: []
   mLaserNobeObject:
+  - {fileID: 0}
+  - {fileID: 0}
+  mLaserAlertObject:
   - {fileID: 0}
   - {fileID: 0}
   mJudgeObject:

@@ -17,10 +17,12 @@ namespace SoundMax {
         public const float NOTE_HEIGHT_INCREMENT_FROM_BPM = 10f;
         /// <summary> 가로로 누운 레이저의 너비 증분값 </summary>
         public const float LASER_NOTE_WIDTH_INCREMENT = 2f;
-        /// <summary> center를 기준으로 하는 트랙의 크기 </summary>
+        /// <summary> center를 기준으로 하는 트랙의 너비 </summary>
         public const float TRACK_WIDTH = 900f;
-        /// <summary> Laser_Guide를 표시할 간격 </summary>
+        /// <summary> Laser_Guide를 표시할 시간 간격 </summary>
         public const float LASER_START_INTERVAL = 1000f;
+        /// <summary> 레이저가 끝난 뒤부터 Laser_Alert를 출력하기까지의 시간 간격. 단위는 sec </summary>
+        public const float LASER_ALERT_INTERVAL = 3f;
         /// <summary> 오브젝트를 렌더링 할 시간 간격. 현재시간 + 변수 이내에 있는 오브젝트만 setactive(true) 가 된다. </summary>
         public const float OBJECT_ACTIVE_INTERVAL = 10000f;
 
@@ -79,9 +81,9 @@ namespace SoundMax {
         // The camera watching the playfield
         CameraMotion m_camera;
 
-        // Currently active timing point
+        // 현재 곡의 bpm 정보를 가지는 타이밍 포인트 클래스. 변속곡이 아니면 변하지 않는다.
         TimingPoint m_currentTiming;
-        // Currently visible gameplay objects
+
         int mInvisibleObjIndex;                  // 현재 카메라에 보이지 않는 첫번째 오브젝트의 인덱스
         int m_lastMapTime;                       // 현재 오디오 재생 시간
 
@@ -100,8 +102,9 @@ namespace SoundMax {
         public ParticleSystem[] mLaserHitEffect;
         public ParticleSystem[] mSlamHitEffect;
         public DisappearObject[] mLaserNobeObject = new DisappearObject[2];
+        public DisappearObject[] mLaserAlertObject = new DisappearObject[2];    // 레이저 노트가 내려오는 것을 알려주는 오브젝트
         public DisappearObject[] mJudgeObject = new DisappearObject[8];         // 판정 오브젝트
-        public GameObject[] mNoteClickObject = new GameObject[6];           // 노트 누를 때 뒤에 나오는 하얀 이펙트
+        public GameObject[] mNoteClickObject = new GameObject[6];               // 노트 누를 때 뒤에 나오는 하얀 이펙트
 
         public void Open() {
             m_beatmap = new Beatmap();
@@ -362,6 +365,9 @@ namespace SoundMax {
             for (int i = 0; i < 6; i++)
                 mNoteClickObject[i].SetActive(false);
 
+            mLaserAlertObject[0].gameObject.SetActive(false);
+            mLaserAlertObject[1].gameObject.SetActive(false);
+
             return true;
         }
 
@@ -420,9 +426,26 @@ namespace SoundMax {
             mLaserNobeObject[1].GetComponent<UISprite>().spriteName = "Nobe_Tracker_R";
             mLaserNobeObject[1].Move(1, false);
 
+            // make laser alert object
+            nobeObject = Resources.Load("Prefab/ObjectLaserAlert") as GameObject;
+            Transform overTrack = transform.FindRecursive("OverTrackPanel");
+            pos.Set(-420f, -240f, 0f);
+            mLaserAlertObject[0] = Instantiate(nobeObject, overTrack).GetComponent<DisappearObject>();
+            mLaserAlertObject[0].transform.localPosition = pos;
+            mLaserAlertObject[0].Open(1.3f, 0.3f);
+            mLaserAlertObject[0].GetComponent<UISprite>().spriteName = "Nobe_Tracker_L";
+            mLaserAlertObject[0].ResetTime();
+
+            pos = new Vector3(420f, -240f, 0f);
+            mLaserAlertObject[1] = Instantiate(nobeObject, overTrack).GetComponent<DisappearObject>();
+            mLaserAlertObject[1].transform.localPosition = pos;
+            mLaserAlertObject[1].Open(1.3f, 0.3f);
+            mLaserAlertObject[1].GetComponent<UISprite>().spriteName = "Nobe_Tracker_R";
+            mLaserAlertObject[1].ResetTime();
+
             // make judgement object
             GameObject judgeObject = Resources.Load("Prefab/ObjectJudgement") as GameObject;
-            pos = new Vector3(0f, 152f, 0f);
+            pos.Set(0f, 152f, 0f);
             Quaternion camera_angle = Quaternion.Euler(-68f, 0f, 0f);
             for (int i = 0; i < 8; i++) {
                 mJudgeObject[i] = Instantiate(judgeObject, mTrackerPanel).GetComponent<DisappearObject>();
@@ -1098,14 +1121,16 @@ namespace SoundMax {
             int index = obj.mIndex - 4;
             m_audioPlayback.ClearEffect(index, obj);
         }
+        /// <summary>
+        /// 레이저 노트가 내려오는 것을 알려주기 위한 함수. 알림 시간은 <see cref="PlaybackEngine.alertLaserThreshold"/> 를 따른다.
+        /// </summary>
+        /// <param name="obj"></param>
         void OnLaserAlertEntered(LaserData obj) {
-            if (m_scoring.timeSinceLaserUsed[obj.mIndex] > 3.0f) {
-                //m_track.SendLaserAlert(obj.mIndex);
-                //lua_getglobal(m_lua, "laser_alert");
-                //lua_pushboolean(m_lua, object.index == 1);
-                //if (lua_pcall(m_lua, 1, 0, 0) != 0) {
-                //    Logf("Lua error on calling laser_alert: %s", Logger.Error, lua_tostring(m_lua, -1));
-                //}
+            // 레이저가 끝나고 LASER_ALERT_INTERVAL 초가 지나면 오브젝트 출력
+            if (m_scoring.timeSinceLaserUsed[obj.mIndex] > LASER_ALERT_INTERVAL) {
+                if (!mLaserAlertObject[obj.mIndex].gameObject.activeSelf)
+                    mLaserAlertObject[obj.mIndex].gameObject.SetActive(true);
+                mLaserAlertObject[obj.mIndex].ResetTime();
             }
         }
     }
