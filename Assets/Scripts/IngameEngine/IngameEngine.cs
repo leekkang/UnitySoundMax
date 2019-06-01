@@ -1001,6 +1001,7 @@ namespace SoundMax {
                 ResultPanel result = (ResultPanel)GuiManager.inst.GetPanel(PanelType.Result);
                 result.UpdateView();
                 GuiManager.inst.ActivatePanel(PanelType.Result, true);
+                result.StartPlay();
             }
 
             Debug.Log("Game end");

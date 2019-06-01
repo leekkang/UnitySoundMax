@@ -14,7 +14,6 @@ namespace SoundMax {
 
             StartCoroutine(CoLoadMain(mainPanel));
 
-            Scoring.inst.autoplay = true;
             KeyboardManager.inst.mIsLaserUseMouse = true;
         }
 

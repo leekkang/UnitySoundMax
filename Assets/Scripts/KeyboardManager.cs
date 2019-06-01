@@ -73,6 +73,12 @@ public class KeyboardManager : Singleton<KeyboardManager> {
             if (info[(int)InputCode.V, index].down)
                 GuiManager.inst.OnClickBtnStart();
 
+            // 오토플레이 전환
+            if (info[(int)InputCode.C, index].down) {
+                Scoring.inst.autoplay = !Scoring.inst.autoplay;
+                Debug.Log("autoplay : " + Scoring.inst.autoplay);
+            }
+
             return;
         }
 
