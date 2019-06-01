@@ -6,10 +6,7 @@ using System.Linq;
 
 namespace SoundMax {
     public class PlaybackEngine {
-        int keepObjectDuration = 1000;
-
         public int hittableObjectEnter = 500;
-        int hittableLaserEnter = 1000;
         public int hittableObjectLeave = 500;
         int alertLaserThreshold = 1500;
         int audioOffset = 0;
@@ -47,10 +44,7 @@ namespace SoundMax {
         int mCurAlertIndex;
         int mCurLaneTogglePointIndex;
         int mCurZoomPointIndex;
-        ObjectDataBase m_currentObj;
-        ObjectDataBase m_currentLaserObj;
-        ObjectDataBase m_currentAlertObj;
-        ZoomControlPoint m_currentZoomPoint;
+        //ZoomControlPoint m_currentZoomPoint;
 
         ZoomControlPoint[] m_zoomStartPoints = new ZoomControlPoint[4];
         ZoomControlPoint[] m_zoomEndPoints = new ZoomControlPoint[4];
@@ -89,12 +83,9 @@ namespace SoundMax {
             mCurAlertIndex = 0;
             mCurZoomPointIndex = m_zoomPoints.Count == 0 ? -1 : 0;
             mCurTimingIndex = 0;
-
-            m_currentObj = m_objects[0];
-            m_currentAlertObj = m_objects[0];
-            m_currentLaserObj = m_objects[0];
+            
             m_currentTiming = m_timingPoints[0];
-            m_currentZoomPoint = m_zoomPoints.Count == 0 ? null : m_zoomPoints[0];
+            //m_currentZoomPoint = m_zoomPoints.Count == 0 ? null : m_zoomPoints[0];
             for (int i = 0; i < m_zoomPoints.Count; i++) {
                 if (m_zoomPoints[i].time != int.MinValue) //Not a starting point.
                     break;
@@ -114,7 +105,7 @@ namespace SoundMax {
         }
 
         public void UpdateTime(int newTime) {
-            int delta = newTime - m_playbackTime;
+            //int delta = newTime - m_playbackTime;
             if (newTime < m_playbackTime) {
                 // Don't allow backtracking
                 //Logf("New time was before last time %ull . %ull", Logger.Warning, m_playbackTime, newTime);
@@ -134,8 +125,8 @@ namespace SoundMax {
             }
 
             // Count bars
-            int beatID = 0;
-            uint nBeats = CountBeats(m_playbackTime - delta, delta, ref beatID);
+            //int beatID = 0;
+            //uint nBeats = CountBeats(m_playbackTime - delta, delta, ref beatID);
             TimingPoint tp = GetCurrentTimingPoint();
             double effectiveTime = ((double)newTime - tp.mTime); // Time with offset applied
             m_barTime = (float)(effectiveTime / (tp.mBeatDuration * tp.mNumerator)) % 1f;
@@ -168,7 +159,6 @@ namespace SoundMax {
                         OnObjectEntered(obj);
                     }
                 }
-                m_currentObj = m_objects[index];
                 mCurObjIndex = index;
             }
 
@@ -182,7 +172,6 @@ namespace SoundMax {
                         OnObjectEntered(obj);
                     }
                 }
-                m_currentLaserObj = m_objects[index];
                 mCurLaserIndex = index;
             }
 
@@ -202,31 +191,30 @@ namespace SoundMax {
                             OnLaserAlertEntered(laser);
                     }
                 }
-                m_currentAlertObj = m_objects[index];
                 mCurAlertIndex = index;
             }
 
             // Advance zoom points
-            if (m_currentZoomPoint != null) {
-                index = GetSelectZoomObjectIndex(m_playbackTime);
-                for (int i = mCurZoomPointIndex; i < index; i++) {
-                    ZoomControlPoint obj = m_zoomPoints[i];
-                    // Set this point as new start point
-                    int idx = obj.index;
-                    m_zoomStartPoints[idx] = obj;
+            //if (m_currentZoomPoint != null) {
+            //    index = GetSelectZoomObjectIndex(m_playbackTime);
+            //    for (int i = mCurZoomPointIndex; i < index; i++) {
+            //        ZoomControlPoint obj = m_zoomPoints[i];
+            //        // Set this point as new start point
+            //        int idx = obj.index;
+            //        m_zoomStartPoints[idx] = obj;
 
-                    // Set next point
-                    m_zoomEndPoints[idx] = null;
-                    for (int j = index + 1; j < m_zoomPoints.Count; j++) {
-                        if (m_zoomPoints[j].index == idx) {
-                            m_zoomEndPoints[idx] = m_zoomPoints[j];
-                            break;
-                        }
-                    }
-                }
-                m_currentZoomPoint = m_zoomPoints[index];
-                mCurZoomPointIndex = index;
-            }
+            //        // Set next point
+            //        m_zoomEndPoints[idx] = null;
+            //        for (int j = index + 1; j < m_zoomPoints.Count; j++) {
+            //            if (m_zoomPoints[j].index == idx) {
+            //                m_zoomEndPoints[idx] = m_zoomPoints[j];
+            //                break;
+            //            }
+            //        }
+            //    }
+            //    m_currentZoomPoint = m_zoomPoints[index];
+            //    mCurZoomPointIndex = index;
+            //}
 
             // Check passed hittable objects
             int objectPassTime = m_playbackTime - hittableObjectLeave;
@@ -302,10 +290,10 @@ namespace SoundMax {
 
         /// <summary> 범위 내의 모든 홀드 오브젝트와 일반 오브젝트를 리턴 </summary>
         List<ObjectDataBase> GetObjectsInRange(int range) {
-            int earlyVisiblity = 200;
-            TimingPoint tp = GetCurrentTimingPoint();
+            //int earlyVisiblity = 200;
+            //TimingPoint tp = GetCurrentTimingPoint();
+            //int begin = m_playbackTime - earlyVisiblity;
             int end = m_playbackTime + range;
-            int begin = m_playbackTime - earlyVisiblity;
             List<ObjectDataBase> ret = new List<ObjectDataBase>();
 
             // Add hold objects

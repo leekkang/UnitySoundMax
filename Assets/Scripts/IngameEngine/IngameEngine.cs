@@ -35,11 +35,7 @@ namespace SoundMax {
         // Map object approach speed, scaled by BPM
         float m_hispeed = 1.0f;
 
-        // Current lane toggle status
-        bool m_hideLane = false;
-
         // Use m-mod and what m-mod speed
-        bool m_usemMod = false;
         bool m_usecMod = false;
         float m_modSpeed = 400;
 
@@ -51,7 +47,6 @@ namespace SoundMax {
         AudioEngine m_audioPlayback;            // Audio playback manager (music and FX))
 
         int m_audioOffset = 0;                  // Applied audio offset
-        int m_fpsTarget = 0;
 
         Transform mTrackAnchor;                 // 움직이는 트랙 오브젝트
         Transform mStaticTrack;                 // 움직이지 않는 트랙 오브젝트
@@ -195,10 +190,7 @@ namespace SoundMax {
         IEnumerator CoLoadData(MusicData data) {
             m_beatmap.Load(data, false);
             m_scoring = Scoring.inst;
-
-            BeatmapSetting mapSettings = m_beatmap.mSetting;
             
-            int firstObjectTime = m_beatmap.mListObjectState[0].mTime;
             int idx = m_beatmap.mListObjectState.Count - 1;
             while (m_beatmap.mListObjectState[idx].mType == ButtonType.Event &&
                     m_beatmap.mListObjectState[idx] != m_beatmap.mListObjectState[0]) {
@@ -289,6 +281,15 @@ namespace SoundMax {
         IEnumerator CoPlayGame() {
             WaitForEndOfFrame waitFrame = new WaitForEndOfFrame();
             yield return waitFrame;
+
+            if (GuiManager.inst.mCurPanelType != PanelType.Ingame)
+                GuiManager.inst.ActivatePanel(PanelType.Ingame, true);
+            IngamePanel ingamePanel = (IngamePanel)GuiManager.inst.GetPanel(PanelType.Ingame);
+
+            bool bWait = false;
+            ingamePanel.UpdateView(true, () => bWait = true);
+            yield return new WaitUntil(() => bWait);
+
             GuiManager.inst.DeactivateAllPanel();
 
             while (!m_ended) {
@@ -327,7 +328,7 @@ namespace SoundMax {
             mForceEnd = false;
 
             // Playback and timing
-            m_playback.SetBeatmap(m_beatmap);
+            m_playback.SetBeatmap(m_beatmap); 
             m_playback.OnEventChanged = OnEventChanged;
             m_playback.OnFXBegin = OnFXBegin;
             m_playback.OnFXEnd = OnFXEnd;
@@ -335,6 +336,7 @@ namespace SoundMax {
             m_playback.Reset(0);
 
             // Set camera start position
+            //m_camera.ResetVal();
             //m_camera.pLaneZoom = m_playback.GetZoom(0);
             //m_camera.pLanePitch = m_playback.GetZoom(1);
             //m_camera.pLaneOffset = m_playback.GetZoom(2);
@@ -359,10 +361,13 @@ namespace SoundMax {
             m_playback.hittableObjectLeave = m_scoring.goodHitTime;
 
             mIsHPOver70 = false;
+            mSprHealthBar.fillAmount = 0;
             mSprHealthBar.color = mHealthUnder70;
 
             for (int i = 0; i < 6; i++)
                 mNoteClickObject[i].SetActive(false);
+
+            ResetPoolObject();
 
             mLaserAlertObject[0].gameObject.SetActive(false);
             mLaserAlertObject[1].gameObject.SetActive(false);
@@ -370,9 +375,7 @@ namespace SoundMax {
             return true;
         }
 
-        /// <summary>
-        /// 인게임에서 계속 사용되는 오브젝트들을 생성 및 초기화
-        /// </summary>
+        /// <summary> 인게임에서 계속 사용되는 오브젝트들을 생성 및 초기화 </summary>
         void CreatePoolObject() {
             // make effect and judge object pool
             mNormalHitEffect = new ParticleSystem[30];
@@ -469,6 +472,51 @@ namespace SoundMax {
                 mNoteClickObject[i] = Instantiate(i < 4 ? clickObject : clickFxObject, mTrackerPanel);
                 mNoteClickObject[i].transform.localPosition = pos;
                 mNoteClickObject[i].name = string.Format("NoteClickEffect_{0}", i);
+                mNoteClickObject[i].SetActive(false);
+            }
+        }
+        /// <summary> Reset all pooled sprite object </summary>
+        void ResetPoolObject() {
+            Vector3 pos = new Vector3(-2000f, 0f, 0f);
+            for (int i = 0; i < mNormalHitEffect.Length; i++) {
+                mNormalHitEffect[i].transform.position = pos;
+            }
+            for (int i = 0; i < mHoldHitEffect.Length; i++) {
+                ParticleSystem particle = mHoldHitEffect[i];
+                particle.transform.position = pos;
+                particle.Stop();
+                particle.gameObject.SetActive(false);
+            }
+            for (int i = 0; i < mLaserHitEffect.Length; i++) {
+                ParticleSystem particle = mLaserHitEffect[i];
+                particle.transform.position = pos;
+                particle.Stop();
+                particle.gameObject.SetActive(false);
+            }
+            for (int i = 0; i < mSlamHitEffect.Length; i++) {
+                mSlamHitEffect[i].transform.position = pos;
+            }
+
+            // make laser nobe object
+            mLaserNobeObject[0].Move(0, false);
+            mLaserNobeObject[1].Move(1, false);
+
+            // make laser alert object
+            mLaserAlertObject[0].ResetTime();
+            mLaserAlertObject[1].ResetTime();
+
+            // make judgement object
+            for (int i = 0; i < 8; i++) {
+                if (i < 4)
+                    mJudgeObject[i].Move(0.2f * (1 + i));
+                else if (i < 6)
+                    mJudgeObject[i].Move(0.3f + 0.4f * (i - 4));
+                else
+                    mJudgeObject[i].Move(i - 6);
+            }
+
+            // make note click effect object
+            for (int i = 0; i < 6; i++) {
                 mNoteClickObject[i].SetActive(false);
             }
         }
@@ -919,14 +967,21 @@ namespace SoundMax {
         /// <summary> 게임중 퍼즈 버튼을 눌렀을 때 하는 작업 </summary>
         /// <param name="release"> true이면 다시 게임 재개 </param>
         public void OnClickPauseButton(bool release) {
+            IngamePanel ingamePanel = (IngamePanel)GuiManager.inst.GetPanel(PanelType.Ingame);
             if (release) {
-                GuiManager.inst.DeactivatePanel(PanelType.Ingame);
-                m_audioPlayback.Play();
+                ingamePanel.UpdateView(true, () => {
+                    GuiManager.inst.DeactivatePanel(PanelType.Ingame);
+                    m_audioPlayback.Play();
+                    m_paused = !release;
+                });
+                //GuiManager.inst.DeactivatePanel(PanelType.Ingame);
+                //m_audioPlayback.Play();
             } else {
                 m_audioPlayback.Pause();
+                ingamePanel.UpdateView(false, null);
                 GuiManager.inst.ActivatePanel(PanelType.Ingame, true);
+                m_paused = !release;
             }
-            m_paused = !release;
         }
 
         // Called when game is finished and the score screen should show up

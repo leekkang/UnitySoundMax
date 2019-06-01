@@ -199,7 +199,7 @@ namespace SoundMax {
         int[] m_buttonGuardTime = new int[6];
         // 레이저 노트 최초 진입 시 마커 자동 도우미 시간
         float m_assistLevel = .5f;
-        float m_assistSlamBoost = 1.5f;
+        float m_assistSlamBoost = 1f;
         float m_assistPunish = 1.5f;
         float m_assistTime = 0.0f;
         // Offet to use for calculating judge (ms)
@@ -621,7 +621,7 @@ namespace SoundMax {
 
                 m_ticks[bt.mIndex].Add(t);
             } else if (obj.mType == ButtonType.Hold) {
-                TimingPoint tp = m_playback.GetTimingPointAt(obj.mTime);
+                //TimingPoint tp = m_playback.GetTimingPointAt(obj.mTime);
                 HoldButtonData hold = (HoldButtonData)obj;
 
                 // Add all hold ticks
@@ -849,7 +849,6 @@ namespace SoundMax {
                 IngameEngine.inst.PrintJudgement(index, stat.rating);
             } else if (tick.HasFlag(TickFlags.Laser)) {
                 LaserData laser = (LaserData)tick.obj;
-                LaserData rootObject = ((LaserData)tick.obj).GetRoot();
                 if (tick.HasFlag(TickFlags.Slam)) {
                     OnLaserSlamHit(laser);
                     // List laser pointer position after hitting slam
@@ -1120,11 +1119,10 @@ namespace SoundMax {
             } else if (buttonCode > 6) {
                 // TODO : 레이저는 마우스로만 움직일 수 있도록 수정
                 // 현재 작업으로는 여기 들어오는 경우가 없음
-                ObjectDataBase obj = null;
                 if (buttonCode == 6)
-                    obj = m_ConsumeTick(6); // Laser L
+                    m_ConsumeTick(6); // Laser L
                 else
-                    obj = m_ConsumeTick(7); // Laser R
+                    m_ConsumeTick(7); // Laser R
             }
         }
         public void OnButtonReleased(int buttonCode) {
@@ -1153,7 +1151,7 @@ namespace SoundMax {
             //assert(m_playback);
             for (int i = 0; i < map.mListObjectState.Count; i++) {
                 ObjectDataBase obj = map.mListObjectState[i];
-                TimingPoint tp = m_playback.GetTimingPointAt(obj.mTime);
+                //TimingPoint tp = m_playback.GetTimingPointAt(obj.mTime);
                 if (obj.mType == ButtonType.Single) {
                     ret.maxScore += (int)ScoreHitRating.Perfect;
                     ret.numSingles += 1;

@@ -26,9 +26,29 @@ namespace SoundMax {
         Dictionary<int, PanelBase> mDicPanel = new Dictionary<int, PanelBase>();
 
         /// <summary> 현재 가장 위에 올라와있는 패널 </summary>
-        PanelType mCurPanelType;
+        public PanelType mCurPanelType;
+
+        #region Loading
+
+        /// <summary> 현재 패널 이동 중 로딩 스프라이트가 떠있는 상태인지 확인 </summary>
+        public bool mLoading;
+        GameObject mLoadingPanel;
+        TweenPosition mTweenFirst;
+        TweenPosition mTweenSecond;
+        GameObject mLoadingSprite;
+        UILabel mLoadingInfo1;
+        UILabel mLoadingInfo2;
+
+        #endregion
 
         public void Open() {
+            mLoadingPanel = transform.Find("LoadingPanel").gameObject;
+            mTweenFirst = mLoadingPanel.transform.Find("TweenFirst").GetComponent<TweenPosition>();
+            mTweenSecond = mLoadingPanel.transform.Find("TweenSecond").GetComponent<TweenPosition>();
+            mLoadingSprite = mLoadingPanel.transform.FindRecursive("Background").gameObject;
+            mLoadingInfo1 = mLoadingPanel.transform.FindRecursive("Info1").GetComponent<UILabel>();
+            mLoadingInfo2 = mLoadingPanel.transform.FindRecursive("Info2").GetComponent<UILabel>();
+
             mDicPanel.Add((int)PanelType.Main, transform.Find("MainPanel").GetComponent<PanelBase>());
             mDicPanel.Add((int)PanelType.Select, transform.Find("SelectPanel").GetComponent<PanelBase>());
             mDicPanel.Add((int)PanelType.Option, transform.Find("OptionPanel").GetComponent<PanelBase>());
@@ -71,6 +91,9 @@ namespace SoundMax {
         }
 
         void ControlXAxis() {
+            if (mLoading)
+                return;
+
             float xMove = Input.GetAxis("Mouse X");
             if (xMove == 0)
                 return;
@@ -91,6 +114,9 @@ namespace SoundMax {
         }
 
         void ControlYAxis() {
+            if (mLoading)
+                return;
+
             float yMove = Input.GetAxis("Mouse Y");
             if (yMove == 0)
                 return;
@@ -148,6 +174,30 @@ namespace SoundMax {
                 pb.Init();
 
             return pb;
+        }
+
+        public void PlayLoading(string info1, string info2) {
+            mLoading = true;
+            mLoadingInfo1.text = info1;
+            mLoadingInfo2.text = info2;
+            StartCoroutine(CoPlayLoading());
+        }
+
+        IEnumerator CoPlayLoading() {
+            mLoadingSprite.transform.SetParent(mTweenFirst.transform, false);
+            mTweenFirst.PlayForward();
+            yield return new WaitForSeconds(mTweenFirst.duration);
+
+            mLoadingSprite.transform.SetParent(mTweenSecond.transform, false);
+            mTweenSecond.PlayForward();
+            yield return new WaitForSeconds(mTweenSecond.duration);
+
+            mTweenFirst.ResetToBeginning();
+            mLoadingSprite.transform.SetParent(mTweenFirst.transform, false);
+            mTweenSecond.ResetToBeginning();
+
+            yield return new WaitForSeconds(.1f);
+            mLoading = false;
         }
     }
 }

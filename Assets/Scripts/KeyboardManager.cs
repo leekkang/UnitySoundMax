@@ -70,7 +70,7 @@ public class KeyboardManager : Singleton<KeyboardManager> {
                 }
             }
 
-            if (info[(int)InputCode.P, index].down)
+            if (info[(int)InputCode.V, index].down)
                 GuiManager.inst.OnClickBtnStart();
 
             return;
@@ -92,7 +92,7 @@ public class KeyboardManager : Singleton<KeyboardManager> {
             }
         }
 
-        if (info[(int)InputCode.P, index].down) {
+        if (info[(int)InputCode.V, index].down) {
             if (IngameEngine.inst.m_paused)
                 GuiManager.inst.OnClickBtnStart();
             else 

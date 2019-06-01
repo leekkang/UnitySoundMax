@@ -24,8 +24,7 @@ public class AudioEngine {
     DSP[] m_buttonDSPs = new DSP[2];
     HoldButtonData[] m_currentHoldEffects = new HoldButtonData[2];
     float[] m_effectMix = new float[2];
-
-    float PlaybackSpeed = 1.0f;
+    
     List<DSP> mMusicDSPs = new List<DSP>();
     List<DSP> mFxDSPs = new List<DSP>();
 
@@ -150,7 +149,7 @@ public class AudioEngine {
         m_currentHoldEffects[index] = obj;
 
         // For Time based effects
-        TimingPoint timingPoint = playback.GetTimingPointAt(obj.mTime);
+        //TimingPoint timingPoint = playback.GetTimingPointAt(obj.mTime);
         // Duration of a single bar
         //double barDelay = timingPoint.mNumerator * timingPoint.mBeatDuration;
 
@@ -254,7 +253,7 @@ public class AudioEngine {
 
         // Mix float biquad filters, these are applied manualy by changing the filter parameters (gain,q,freq,etc.)
         float mix = m_laserEffectMix;
-        double noteDuration = m_playback.GetCurrentTimingPoint().GetWholeNoteLength();
+        //double noteDuration = m_playback.GetCurrentTimingPoint().GetWholeNoteLength();
         //int actualLength = m_laserEffect.mDuration.SampleDuration(input, noteDuration);
 
         if (input < 0.1f)

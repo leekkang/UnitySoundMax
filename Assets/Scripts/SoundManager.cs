@@ -108,12 +108,12 @@ namespace SoundMax {
         public virtual DSP CreateDSP(AudioEngine playback) {
             DSP ret = new DSP();
 
-            TimingPoint tp = playback.m_playback.GetCurrentTimingPoint();
-            double noteDuration = tp.GetWholeNoteLength();
+            //TimingPoint tp = playback.m_playback.GetCurrentTimingPoint();
+            //double noteDuration = tp.GetWholeNoteLength();
 
-            float filterInput = playback.GetLaserFilterInput();
-            int actualLength = mDuration.SampleDuration(filterInput, noteDuration);
-            int maxLength = Mathf.Max(mDuration.SampleDuration(0, noteDuration), mDuration.SampleDuration(1, noteDuration));
+            //float filterInput = playback.GetLaserFilterInput();
+            //int actualLength = mDuration.SampleDuration(filterInput, noteDuration);
+            //int maxLength = Mathf.Max(mDuration.SampleDuration(0, noteDuration), mDuration.SampleDuration(1, noteDuration));
             //switch (mType) {
             //    case EffectType.Bitcrusher: {
             //        BitCrusherDSP* bcDSP = new BitCrusherDSP();
@@ -219,8 +219,8 @@ namespace SoundMax {
         }
 
         public void SetParams(DSP dsp, AudioEngine playback, HoldButtonData obj) {
-            TimingPoint tp = playback.m_playback.GetCurrentTimingPoint();
-            double noteDuration = tp.GetWholeNoteLength();
+            //TimingPoint tp = playback.m_playback.GetCurrentTimingPoint();
+            //double noteDuration = tp.GetWholeNoteLength();
 
             //switch (mType) {
             //    case EffectType.Bitcrush:
