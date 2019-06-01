@@ -69,18 +69,24 @@ namespace SoundMax {
 
         /// <summary> 키보드 매니저에서 노멀 버튼이 눌렸다고 알려줌 </summary>
         public void OnClickBtnNormal() {
+            if (mLoading)
+                return;
             if (mCurPanelType != PanelType.None)
                 mDicPanel[(int)mCurPanelType].OnClickBtnNormal();
         }
 
         /// <summary> 키보드 매니저에서 FX 버튼이 눌렸다고 알려줌 </summary>
         public void OnClickBtnFX() {
+            if (mLoading)
+                return;
             if (mCurPanelType != PanelType.None)
                 mDicPanel[(int)mCurPanelType].OnClickBtnFX();
         }
 
         /// <summary> 키보드 매니저에서 스타트 버튼이 눌렸다고 알려줌 </summary>
         public void OnClickBtnStart() {
+            if (mLoading)
+                return;
             if (mCurPanelType != PanelType.None)
                 mDicPanel[(int)mCurPanelType].OnClickBtnStart();
         }

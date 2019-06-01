@@ -82,25 +82,19 @@ namespace SoundMax {
 
         /// <summary> 스타트 버튼을 눌렀을 때 해야 할 일 </summary>
         public override void OnClickBtnStart() {
-
+            if (mCursorIndex == 0) {
+                IngameEngine.inst.OnClickPauseButton(true);
+            } else {
+                StartCoroutine(CoEndIngame(mCursorIndex == 1));
+            }
         }
 
         /// <summary> 일반 버튼을 눌렀을 때 해야 할 일 </summary>
         public override void OnClickBtnNormal() {
-            if (mCursorIndex == 0) {
-                IngameEngine.inst.OnClickPauseButton(true);
-            } else {
-                StartCoroutine(CoEndIngame(mCursorIndex == 1));
-            }
         }
 
         /// <summary> FX 버튼을 눌렀을 때 해야 할 일 </summary>
         public override void OnClickBtnFX() {
-            if (mCursorIndex == 0) {
-                IngameEngine.inst.OnClickPauseButton(true);
-            } else {
-                StartCoroutine(CoEndIngame(mCursorIndex == 1));
-            }
         }
 
         IEnumerator CoEndIngame(bool restart) {

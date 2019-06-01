@@ -167,7 +167,7 @@ namespace SoundMax {
 
         /// <summary> FX 버튼을 눌렀을 때 해야 할 일 </summary>
         public override void OnClickBtnFX() {
-
+            GuiManager.inst.ActivatePanel(PanelType.Main, true);
         }
     }
 }
