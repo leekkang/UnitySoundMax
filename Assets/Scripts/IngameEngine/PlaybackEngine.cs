@@ -30,7 +30,6 @@ namespace SoundMax {
 
         // Called when a new timing point becomes active
         public System.Action<TimingPoint> OnTimingPointChanged;
-        public System.Action<LaneHideTogglePoint> OnLaneToggleChanged;
         public System.Action<EventKey, EventData> OnEventChanged;
 
 
@@ -39,7 +38,6 @@ namespace SoundMax {
         List<ChartStop> m_chartStops;
         List<ObjectDataBase> m_objects;
         List<ZoomControlPoint> m_zoomPoints;
-        List<LaneHideTogglePoint> m_laneTogglePoints;
         bool m_initialEffectStateSent = false;
 
         public TimingPoint m_currentTiming;
@@ -52,7 +50,6 @@ namespace SoundMax {
         ObjectDataBase m_currentObj;
         ObjectDataBase m_currentLaserObj;
         ObjectDataBase m_currentAlertObj;
-        LaneHideTogglePoint m_currentLaneTogglePoint;
         ZoomControlPoint m_currentZoomPoint;
 
         ZoomControlPoint[] m_zoomStartPoints = new ZoomControlPoint[4];
@@ -79,7 +76,6 @@ namespace SoundMax {
             m_chartStops = m_beatmap.mListChartStop;
             m_objects = m_beatmap.mListObjectState;
             m_zoomPoints = m_beatmap.mListZoomPoint;
-            m_laneTogglePoints = m_beatmap.mListLaneTogglePoint;
 
             if (m_objects.Count == 0)
                 return false;
@@ -91,7 +87,6 @@ namespace SoundMax {
             mCurObjIndex = 0;
             mCurLaserIndex = 0;
             mCurAlertIndex = 0;
-            mCurLaneTogglePointIndex = m_laneTogglePoints.Count == 0 ? -1 : 0;
             mCurZoomPointIndex = m_zoomPoints.Count == 0 ? -1 : 0;
             mCurTimingIndex = 0;
 
@@ -106,7 +101,6 @@ namespace SoundMax {
 
                 m_zoomStartPoints[m_zoomPoints[i].index] = m_zoomPoints[i];
             }
-            m_currentLaneTogglePoint = m_laneTogglePoints.Count == 0 ? null : m_laneTogglePoints[0];
 
             //hittableLaserEnter = (*m_currentTiming).beatDuration * 4.0;
             //alertLaserThreshold = (*m_currentTiming).beatDuration * 6.0;
@@ -159,13 +153,6 @@ namespace SoundMax {
                 //alertLaserThreshold = (*m_currentTiming).beatDuration * 6.0;
                 // TODO : 기능 모르겠으니 주석 처리
                 //OnTimingPointChanged(m_currentTiming);
-            }
-
-            // Advance lane toggle
-            LaneHideTogglePoint laneToggleEnd = GetLaneTogglePointAt(m_playbackTime, false);
-            if (laneToggleEnd != null && laneToggleEnd != m_currentLaneTogglePoint) {
-                m_currentLaneTogglePoint = laneToggleEnd;
-                OnLaneToggleChanged(m_currentLaneTogglePoint);
             }
 
             // Advance objects
@@ -534,32 +521,6 @@ namespace SoundMax {
                     stops.Add(cs);
             }
             return stops;
-        }
-
-        LaneHideTogglePoint GetLaneTogglePointAt(int time, bool allowReset) {
-            int index = GetSelectLaneTogglePointIndex(time, allowReset);
-            if (index == -1)
-                return null;
-
-            return m_laneTogglePoints[index];
-        }
-
-        int GetSelectLaneTogglePointIndex(int time, bool allowReset) {
-            int objStart = mCurLaneTogglePointIndex;
-            if (objStart >= m_laneTogglePoints.Count - 1)
-                return m_laneTogglePoints.Count - 1;
-
-            // Start at front of array if current object lies ahead of given input time
-            if (m_laneTogglePoints[objStart].time > time && allowReset)
-                objStart = 0;
-
-            // Keep advancing the start pointer while the next object's starting time lies before the input time
-            for (; objStart < m_laneTogglePoints.Count; objStart++) {
-                if (m_laneTogglePoints[objStart].time > time)
-                    break;
-            }
-
-            return Math.Min(objStart, m_laneTogglePoints.Count - 1);
         }
 
         /// <summary>

@@ -7,6 +7,8 @@ namespace SoundMax {
         Transform mCursorMain; //오브젝트를 사용하기 위한 변수
         Transform mStart;
         Transform mExit;
+        UILabel mLoading;
+        UILabel mMusicLoading;
         int mCursorIndex;
 
         /// <summary> 해당 패널의 초기화에 필요한 정보를 로드하는 함수 </summary>
@@ -16,12 +18,35 @@ namespace SoundMax {
             mCursorMain = transform.Find("CursorMain"); //panel_main의 오브젝트를 받아옴
             mStart = transform.Find("StartBtn");
             mExit = transform.Find("ExitBtn");
+            mLoading = transform.Find("Loading").GetComponent<UILabel>();
+            mMusicLoading = mLoading.transform.Find("music").GetComponent<UILabel>();
             mCursorMain.gameObject.SetActive(false);
             mStart.gameObject.SetActive(false);
             mExit.gameObject.SetActive(false);
         }
 
+        public void Loading() {
+            mLoading.gameObject.SetActive(true);
+            StartCoroutine(CoLoading());
+        }
+
+        IEnumerator CoLoading() {
+            while (!DataBase.inst.mOpenComplete) {
+                mLoading.text = "Loading.";
+                yield return new WaitForSeconds(.3f);
+                mLoading.text = "Loading..";
+                yield return new WaitForSeconds(.3f);
+                mLoading.text = "Loading...";
+                yield return new WaitForSeconds(.3f);
+            }
+        }
+        public void SetLoadMusic(string music) {
+            mMusicLoading.text = music;
+        }
+
         public void ActivateButton() {
+            mLoading.gameObject.SetActive(false);
+
             mCursorMain.gameObject.SetActive(true);
             mStart.gameObject.SetActive(true);
             mExit.gameObject.SetActive(true);

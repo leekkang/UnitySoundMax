@@ -48,17 +48,18 @@ namespace SoundMax {
 
             // score, status
             int score = Scoring.inst.CalculateCurrentScore();
+
             mLabelScore.text = score.ToString();
-            mLabelDmaxNum.text = Scoring.inst.categorizedHits[2].ToString();
-            mLabelMaxNum.text = Scoring.inst.categorizedHits[1].ToString();
-            mLabelMissNum.text = Scoring.inst.categorizedHits[0].ToString();
+            mLabelDmaxNum.text = ((int)Scoring.inst.categorizedHits[2]).ToString();
+            mLabelMaxNum.text = ((int)Scoring.inst.categorizedHits[1]).ToString();
+            mLabelMissNum.text = ((int)Scoring.inst.categorizedHits[0]).ToString();
 
             // rank, result
+            string rank = Scoring.inst.CalculateGrade(score);
             if (IngameEngine.inst.mForceEnd) {
                 mSprRank.spriteName = "Rank_F";
                 mSprResult.spriteName = "Result_Destroyed";
             } else {
-                string rank = Scoring.inst.CalculateGrade(score);
                 mSprRank.spriteName = "Rank_" + rank;
                 mSprResult.spriteName = rank == "F" ? "Result_Destroyed" :
                                         Scoring.inst.comboState == 2 ? "Result_Perfect" :
@@ -68,6 +69,23 @@ namespace SoundMax {
             // guage
             mSprGuage.fillAmount = Scoring.inst.currentGauge;
             mSprGuage.color = mSprGuage.fillAmount < 0.7f ? IngameEngine.inst.mHealthUnder70 : IngameEngine.inst.mHealthOver70;
+            
+            // user data
+            int musicIndex = ((SelectPanel)GuiManager.inst.GetPanel(PanelType.Select)).mCurIndex;
+            MusicSaveData tmpData = DataBase.inst.mUserData.GetMusicData(DataBase.inst.mMusicList[musicIndex]);
+            MusicDifficultySaveData savedData = tmpData.mListPlayData[(int)data.mDifficulty];
+            // save hiscore status
+            if (savedData.mScore < score) {
+                savedData.mScore = score;
+                savedData.mDmaxNum = (int)Scoring.inst.categorizedHits[2];
+                savedData.mMaxNum = (int)Scoring.inst.categorizedHits[1];
+                savedData.mMissNum = (int)Scoring.inst.categorizedHits[0];
+
+                savedData.mGuage = Scoring.inst.currentGauge;
+                savedData.mClearStatus = rank == "F" ? 1 :
+                                         Scoring.inst.comboState == 0 ? 2 :
+                                         Scoring.inst.comboState == 1 ? 3 : 4;
+            }
         }
 
         /// <summary> X축 마우스가 움직이면 해야할 일 </summary>
@@ -82,6 +100,8 @@ namespace SoundMax {
 
         /// <summary> 스타트 버튼을 눌렀을 때 해야 할 일 </summary>
         public override void OnClickBtnStart() {
+            SelectPanel sel = (SelectPanel)GuiManager.inst.GetPanel(PanelType.Select);
+            sel.UpdateMusicMetaData();
             GuiManager.inst.ActivatePanel(PanelType.Select, true);
         }
 
@@ -91,6 +111,8 @@ namespace SoundMax {
 
         /// <summary> FX 버튼을 눌렀을 때 해야 할 일 </summary>
         public override void OnClickBtnFX() {
+            SelectPanel sel = (SelectPanel)GuiManager.inst.GetPanel(PanelType.Select);
+            sel.UpdateMusicMetaData();
             GuiManager.inst.ActivatePanel(PanelType.Select, true);
         }
     }

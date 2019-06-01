@@ -7,14 +7,47 @@ namespace SoundMax {
         Transform mCursorSelect;
         Transform[] mBackPanel;
         GridScrollView mGridScrollView;
-
+        
         int mMusicCount;
-        int mCurIndex;
         bool mCompleteLoad;
+        public int mCurIndex { get; private set; }
+
+        #region Music Information
+
+        UITexture mAlbumJacket;
+        UILabel mTitle;
+        UILabel mArtist;
+        UILabel mEffector;
+        UILabel mIllustrator;
+        UILabel mBpm;
+        UILabel mHiScore;
+        UILabel mLevelNovice;
+        UILabel mLevelAdvanced;
+        UILabel mLevelExhausted;
+        UILabel mLevelInfinite;
+        UISprite mClearStatus;
+        GameObject mObjDifficultyInf;
+
+        #endregion
 
         /// <summary> 해당 패널의 초기화에 필요한 정보를 로드하는 함수 </summary>
         public override void Init() {
             base.Init();
+
+            Transform parent = transform.Find("Upside");
+            mAlbumJacket = parent.Find("AlbumArt").GetComponent<UITexture>();
+            mTitle = parent.Find("MusicTitle").GetComponent<UILabel>();
+            mArtist = parent.Find("Artist").GetComponent<UILabel>();
+            mEffector = parent.Find("Effector").GetComponent<UILabel>();
+            mIllustrator = parent.Find("illustrator").GetComponent<UILabel>();
+            mBpm = parent.Find("BPM").GetComponent<UILabel>();
+            mHiScore = parent.Find("HI_Score").GetComponent<UILabel>();
+            mClearStatus = parent.Find("ClearStatus").GetComponent<UISprite>();
+            mLevelNovice = parent.Find("Difficulty_NOV").GetComponentInChildren<UILabel>(true);
+            mLevelAdvanced = parent.Find("Difficulty_ADV").GetComponentInChildren<UILabel>(true);
+            mLevelExhausted = parent.Find("Difficulty_EXH").GetComponentInChildren<UILabel>(true);
+            mObjDifficultyInf = parent.Find("Difficulty_INF").gameObject;
+            mLevelInfinite = mObjDifficultyInf.GetComponentInChildren<UILabel>(true);
 
             mMusicCount = DataBase.inst.mMusicList.Length;
             mCursorSelect = transform.FindRecursive("CursorSelect");
@@ -31,8 +64,9 @@ namespace SoundMax {
             mGridScrollView.Init(mMusicCount);
 
             mCurIndex = 0;
+            SetMusicInformation();
             mCursorSelect.SetParent(mBackPanel[mCurIndex], false);
-            mCursorSelect.localPosition = Vector3.zero;
+            mCursorSelect.localPosition = new Vector3(0f, 15f, 0f);
             mCompleteLoad = false;
         }
 
@@ -62,6 +96,42 @@ namespace SoundMax {
             mCompleteLoad = true;
         }
 
+        /// <summary> Upside 오브젝트의 정보 갱신 </summary>
+        void SetMusicInformation() {
+            string music = DataBase.inst.mMusicList[mCurIndex];
+            List<MusicData> listMusicData = DataBase.inst.mDicMusic[music];
+
+            mLevelNovice.text = string.Format("{0:02}", listMusicData[(int)Difficulty.Novice].mLevel.ToString());
+            mLevelAdvanced.text = string.Format("{0:02}", listMusicData[(int)Difficulty.Advanced].mLevel.ToString());
+            mLevelExhausted.text = string.Format("{0:02}", listMusicData[(int)Difficulty.Exhausted].mLevel.ToString());
+            bool bExistInf = listMusicData.Count > (int)Difficulty.Infinity;
+            mLevelInfinite.text = bExistInf ? string.Format("{0:02}", listMusicData[(int)Difficulty.Infinity].mLevel.ToString()) : "00";
+
+            UpdateMusicMetaData();
+        }
+
+        /// <summary> 곡의 메타데이터 갱신. 유저데이터 포함 </summary>
+        public void UpdateMusicMetaData() {
+            string music = DataBase.inst.mMusicList[mCurIndex];
+            MusicSaveData savedData = DataBase.inst.mUserData.GetMusicData(music);
+            MusicData musicData = DataBase.inst.mDicMusic[music][savedData.mDifficulty];
+
+            mAlbumJacket.mainTexture = musicData.mJacketImage;
+            mTitle.text = musicData.mTitle;
+            mArtist.text = musicData.mArtist;
+            mEffector.text = musicData.mEffector;
+            mIllustrator.text = musicData.mIllustrator;
+            mBpm.text = musicData.mBpm.ToString();
+
+            MusicDifficultySaveData diffData = savedData.mListPlayData[savedData.mDifficulty];
+            mHiScore.text = diffData.mScore.ToString();
+            int clearStatus = diffData.mClearStatus;
+            mClearStatus.spriteName = clearStatus == 4 ? "Result_Perfect" :
+                                      clearStatus == 3 ? "Result_Allcombo" :
+                                      clearStatus == 2 ? "Result_Clear" :
+                                      clearStatus == 1 ? "Result_Destroyed" : "";
+        }
+
         /// <summary> X축 마우스가 움직이면 해야할 일 </summary>
         public override void CursorXMoveProcess(bool positiveDirection) {
             if (positiveDirection) {
@@ -73,6 +143,8 @@ namespace SoundMax {
                 mCursorSelect.SetParent(mBackPanel[mCurIndex], false);
                 mGridScrollView.MoveBackward(mCurIndex);
             }
+
+            SetMusicInformation();
         }
 
         /// <summary> Y축 마우스가 움직이면 해야할 일 </summary>
@@ -83,7 +155,7 @@ namespace SoundMax {
         /// <summary> 스타트 버튼을 눌렀을 때 해야 할 일 </summary>
         public override void OnClickBtnStart() {
             OptionPanel opt = (OptionPanel)GuiManager.inst.GetPanel(PanelType.Option);
-            opt.UpdateView(DataBase.inst.mDicMusic[DataBase.inst.mMusicList[mCurIndex]]);
+            opt.UpdateView(DataBase.inst.mMusicList[mCurIndex]);
             GuiManager.inst.ActivatePanel(PanelType.Option, false);
         }
 

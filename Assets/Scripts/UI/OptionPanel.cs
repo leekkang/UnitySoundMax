@@ -17,13 +17,15 @@ namespace SoundMax {
         UILabel mLabelCalculated;
         UILabel mLabelLevel;
 
+        string mMusic;
+
         Transform mTrCursor;
         int mCursorIndex;
         Transform mTrCursorDiff;
         int mCursorDiffIndex;
         int mMaxDiffIndex;
 
-        float mCurSpeed;
+        int mCurSpeedIndex;
         int mBpm;
 
         /// <summary> 해당 패널의 초기화에 필요한 정보를 로드하는 함수 </summary>
@@ -45,28 +47,41 @@ namespace SoundMax {
 
             mTrCursor = transform.Find("CursorP");
             mTrCursorDiff = mTrDifficulty.Find("CursorDiff");
-
-            mCurSpeed = 1.0f;
         }
 
-        public void UpdateView(List<MusicData> musicList) {
-            mCurMusicList = musicList;
-            mCursorIndex = 0;
-            mCursorDiffIndex = 0;
+        public void UpdateView(string music) {
+            mMusic = music;
+            mCurMusicList = DataBase.inst.mDicMusic[music];
 
-            mMaxDiffIndex = musicList.Count - 1;
+            mCursorIndex = 0;
+            mBpm = mCurMusicList[0].mBpm;
+            mLabelBpm.text = mBpm.ToString();
+            mLableTitle.text = mCurMusicList[0].mTitle;
+            mMaxDiffIndex = mCurMusicList.Count - 1;
             for (int i = 0; i < 4; i++) {
-                mListDifficulty[i].gameObject.SetActive(i < musicList.Count);
+                mListDifficulty[i].gameObject.SetActive(i < mCurMusicList.Count);
             }
 
-            mBpm = musicList[0].mBpm;
-            mLabelBpm.text = mBpm.ToString();
-            mLableTitle.text = musicList[0].mTitle;
+            // load user data
+            MusicSaveData savedData = DataBase.inst.mUserData.GetMusicData(mMusic);
+            mCursorDiffIndex = savedData.mDifficulty;
+            mCurSpeedIndex = savedData.mSpeed;
 
-            mLabelCalculated.text = Mathf.Round(mCurSpeed * mBpm).ToString();
-            mLabelLevel.text = musicList[mCursorDiffIndex].mLevel.ToString();
+            mSprSpeed.spriteName = "Speed_" + (int)Mathf.Round(GetSpeed(mCurSpeedIndex) * 100);
+            mLabelCalculated.text = Mathf.Round(GetSpeed(mCurSpeedIndex) * mBpm).ToString();
+            mLabelLevel.text = mCurMusicList[mCursorDiffIndex].mLevel.ToString();
             mTrCursor.localPosition = mTrSpeed.localPosition;
             mTrCursorDiff.localPosition = mListDifficulty[mCursorDiffIndex].localPosition;
+        }
+
+        float GetSpeed(int index) {
+            return 1f + index * 0.25f;
+        }
+
+        void SetUserData() {
+            MusicSaveData savedData = DataBase.inst.mUserData.GetMusicData(mMusic);
+            savedData.mDifficulty = mCursorDiffIndex;
+            savedData.mSpeed = mCurSpeedIndex;
         }
 
         /// <summary> X축 마우스가 움직이면 해야할 일 </summary>
@@ -83,15 +98,15 @@ namespace SoundMax {
         /// <summary> Y축 마우스가 움직이면 해야할 일 </summary>
         public override void CursorYMoveProcess(bool positiveDirection) {
             if (mCursorIndex == 0) {
-                float prev = mCurSpeed;
+                int prev = mCurSpeedIndex;
                 if (positiveDirection)
-                    mCurSpeed = Mathf.Max(mCurSpeed - .25f, 1f);
+                    mCurSpeedIndex = Mathf.Max(--mCurSpeedIndex, 0);
                 else
-                    mCurSpeed = Mathf.Min(mCurSpeed + .25f, 5f);
+                    mCurSpeedIndex = Mathf.Min(++mCurSpeedIndex, 16);
 
-                if (mCurSpeed != prev) {
-                    mSprSpeed.spriteName = "Speed_" + (int)Mathf.Round(mCurSpeed * 100);
-                    mLabelCalculated.text = Mathf.Round(mCurSpeed * mBpm).ToString();
+                if (mCurSpeedIndex != prev) {
+                    mSprSpeed.spriteName = "Speed_" + (int)Mathf.Round(GetSpeed(mCurSpeedIndex) * 100);
+                    mLabelCalculated.text = Mathf.Round(GetSpeed(mCurSpeedIndex) * mBpm).ToString();
                 }
             } else if (mCursorIndex == 1) {
                 if (positiveDirection)
@@ -109,7 +124,8 @@ namespace SoundMax {
             if (mCursorIndex != 2)
                 return;
 
-            IngameEngine.inst.StartGame(mCurMusicList[mCursorDiffIndex], mCurSpeed);
+            SetUserData();
+            IngameEngine.inst.StartGame(mCurMusicList[mCursorDiffIndex], GetSpeed(mCurSpeedIndex));
         }
 
         /// <summary> 일반 버튼을 눌렀을 때 해야 할 일 </summary>
@@ -119,6 +135,9 @@ namespace SoundMax {
 
         /// <summary> FX 버튼을 눌렀을 때 해야 할 일 </summary>
         public override void OnClickBtnFX() {
+            SelectPanel sel = (SelectPanel)GuiManager.inst.GetPanel(PanelType.Select);
+            SetUserData();
+            sel.UpdateMusicMetaData();
             GuiManager.inst.ActivatePanel(PanelType.Select, true);
         }
     }

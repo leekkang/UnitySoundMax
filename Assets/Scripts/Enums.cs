@@ -25,7 +25,7 @@
 
     /// <summary> 난이도 </summary>
     public enum Difficulty {
-        Novice,
+        Novice = 0,
         Advanced,
         Exhausted,
         Infinity

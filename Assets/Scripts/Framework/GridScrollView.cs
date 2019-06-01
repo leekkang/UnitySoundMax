@@ -25,6 +25,7 @@ public class GridScrollView : MonoBehaviour {
     int mMaxMoveSize;
     /// <summary> 현재 스크롤뷰가 움직인 거리 </summary>
     int mCurMoveSize;
+    Vector3 mOriginPos;
     Vector2 mTmpPos;
 
 
@@ -52,6 +53,7 @@ public class GridScrollView : MonoBehaviour {
 
         mCurMoveSize = 0;
         mViewPivot = false;
+        mOriginPos = mScrollView.transform.localPosition;
         mTmpPos = Vector2.zero;
     }
 
@@ -91,13 +93,13 @@ public class GridScrollView : MonoBehaviour {
             mTmpPos.y = -mCurMoveSize;
             mScrollView.clipOffset = mTmpPos;
             mTmpPos.y = mCurMoveSize;
-            mScrollView.transform.localPosition = mTmpPos;
         } else if (mGrid.arrangement == UIGrid.Arrangement.Vertical) {
             mTmpPos.x = -mCurMoveSize;
             mScrollView.clipOffset = mTmpPos;
             mTmpPos.x = mCurMoveSize;
-            mScrollView.transform.localPosition = mTmpPos;
         }
+        Vector3 tmp = new Vector3(mTmpPos.x, mTmpPos.y, 0f);
+        mScrollView.transform.localPosition = mOriginPos + tmp;
         //mScrollView.GetComponent<UIScrollView>().OnScrollBar();
     }
 }

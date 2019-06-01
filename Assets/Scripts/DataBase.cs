@@ -33,8 +33,9 @@ namespace SoundMax {
         public DefaultEffectSettings mEffectSetting;
 
         public Dictionary<string, List<MusicData>> mDicMusic = new Dictionary<string, List<MusicData>>();
+        public UserData mUserData = new UserData();
 
-        public void Open() {
+        public void Open(System.Action<string> actOnLoading) {
             mOpenComplete = false;
             mDefaultJacket = Resources.Load("Default_Jacket") as Texture;
 
@@ -47,7 +48,11 @@ namespace SoundMax {
 
             mEffectSetting = new DefaultEffectSettings();
 
-            StartCoroutine(CoLoadMusicList());
+            // load user save data
+            UserData userData = SaveDataAdapter.LoadData("user") as UserData;
+            if (userData != null)
+                mUserData = userData;
+            StartCoroutine(CoLoadMusicList(actOnLoading));
             //LoadAudio("colorfulsky", AudioType.OGGVORBIS, (audio) => { Debug.Log("load complete"); });
         }
 
@@ -146,8 +151,9 @@ namespace SoundMax {
             }
         }
 
-        IEnumerator CoLoadMusicList() {
+        IEnumerator CoLoadMusicList(System.Action<string> actOnLoading) {
             for (int i = 0; i < mMusicList.Length; i++) {
+                actOnLoading(mMusicList[i]);
                 List<MusicData> dataList = new List<MusicData>();
                 for (Difficulty j = Difficulty.Novice; j <= Difficulty.Infinity; j++) {
                     bool bComplete = false;
@@ -200,11 +206,15 @@ namespace SoundMax {
     }
     public class MusicData {
         const string BLOCK_SEPARATOR = "--";
-        public string mTitle;
         public string mPathName;
+        public Difficulty mDifficulty;
+
+        public string mTitle;
+        public string mArtist;
+        public string mEffector;
+        public string mIllustrator;
         public int mBpm;
         public int mLevel;
-        public Difficulty mDifficulty;
         public bool mDefaultJacketImage;
         public Texture mJacketImage;
 
@@ -247,6 +257,12 @@ namespace SoundMax {
                                 mBpm = int.Parse(splitted[1]);
                             else if (splitted[0] == "title")
                                 mTitle = splitted[1];
+                            else if (splitted[0] == "artist")
+                                mArtist = splitted[1];
+                            else if (splitted[0] == "effect")
+                                mEffector = splitted[1];
+                            else if (splitted[0] == "illustrator")
+                                mIllustrator = splitted[1];
                             else if (splitted[0] == "level")
                                 mLevel = int.Parse(splitted[1]);
                             else if (splitted[0] == "jacket")

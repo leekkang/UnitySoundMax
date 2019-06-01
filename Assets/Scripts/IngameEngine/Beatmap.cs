@@ -881,7 +881,7 @@ namespace SoundMax {
                             // Always fixup duration so they are connected by duration as well
                             obj.mPrev = state.last;
                             obj.mOrder = obj.mPrev.mOrder + 1;
-                            int actualPrevDuration = obj.mTime - obj.mPrev.mTime;
+                            //int actualPrevDuration = obj.mTime - obj.mPrev.mTime;
                             // 슬램레이저의 duration을 0으로 만들어버린다. 왜?
                             //if (obj.mPrev.mDuration != actualPrevDuration) {
                             //    obj.mPrev.mDuration = actualPrevDuration;
@@ -954,8 +954,8 @@ namespace SoundMax {
                             } else {
                                 state.spinDuration = int.Parse(add);
                                 // TODO : ??? 필요한건가?
-                                if (state.spinType == '(' || state.spinType == ')')
-                                    state.spinDuration = state.spinDuration;
+                                //if (state.spinType == '(' || state.spinType == ')')
+                                //    state.spinDuration = state.spinDuration;
                             }
                         }
                     }

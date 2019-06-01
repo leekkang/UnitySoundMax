@@ -9,19 +9,26 @@ namespace SoundMax {
             SoundManager.inst.Open();
             KeyboardManager.inst.Open();
             IngameEngine.inst.Open();
-            DataBase.inst.Open();
+            MainPanel mainPanel = (MainPanel)GuiManager.inst.GetPanel(PanelType.Main);
+            DataBase.inst.Open(mainPanel.SetLoadMusic);
 
-            StartCoroutine(CoLoadMain());
+            StartCoroutine(CoLoadMain(mainPanel));
 
             Scoring.inst.autoplay = true;
             KeyboardManager.inst.mIsLaserUseMouse = true;
         }
 
-        IEnumerator CoLoadMain() {
+        IEnumerator CoLoadMain(MainPanel mainPanel) {
+            mainPanel.Loading();
             Debug.Log("Loading for Initialize ...");
             yield return new WaitUntil(() => DataBase.inst.mOpenComplete);
             Debug.Log("Initialize Done!");
-            ((MainPanel)GuiManager.inst.GetPanel(PanelType.Main)).ActivateButton();
+            mainPanel.ActivateButton();
+        }
+
+        public void OnApplicationQuit() {
+            if (DataBase.inst.mOpenComplete)
+                SaveDataAdapter.SaveData(DataBase.inst.mUserData, "user");
         }
 
 #if DEVELOPMENT_BUILD || UNITY_EDITOR

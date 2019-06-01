@@ -329,7 +329,6 @@ namespace SoundMax {
             // Playback and timing
             m_playback.SetBeatmap(m_beatmap);
             m_playback.OnEventChanged = OnEventChanged;
-            m_playback.OnLaneToggleChanged = OnLaneToggleChanged;
             m_playback.OnFXBegin = OnFXBegin;
             m_playback.OnFXEnd = OnFXEnd;
             m_playback.OnLaserAlertEntered = OnLaserAlertEntered;
@@ -683,7 +682,6 @@ namespace SoundMax {
                         int height = (int)(bpmPerLength * btnLaser.mDuration);
                         if (width != 0) {
                             double tan = (double)width / height;
-                            double aatan = Math.Atan(tan) * Mathf.Rad2Deg;
                             sprLaser.transform.localRotation = Quaternion.Euler(0f, 0f, -dir * (float)(Math.Atan(tan) * Mathf.Rad2Deg));
                             height = (int)(height * Math.Sqrt(1 + tan * tan));
                         }
@@ -824,9 +822,7 @@ namespace SoundMax {
                 m_audioPlayback.Play();
                 mPlaying = true;
             }
-
-            BeatmapSetting beatmapSettings = m_beatmap.mSetting;
-
+            
             int playbackPositionMs = m_audioPlayback.GetPosition() - m_audioOffset;
             m_playback.UpdateTime(playbackPositionMs);
 
@@ -957,7 +953,6 @@ namespace SoundMax {
 
         void OnLaserSlamHit(LaserData laser) {
             float slamSize = (laser.mPoints[1] - laser.mPoints[0]);
-            float direction = Math.Sign(slamSize);
             slamSize = Math.Abs(slamSize);
             // 카메라 쉐이크 구현
             m_camera.AddCameraShake(50f, 30f * slamSize);
@@ -1080,13 +1075,6 @@ namespace SoundMax {
 
         void OnTimingPointChanged(TimingPoint tp) {
             m_hispeed = m_modSpeed / (float)tp.GetBPM();
-        }
-
-        void OnLaneToggleChanged(LaneHideTogglePoint tp) {
-            // Calculate how long the transition should be in seconds
-            double duration = m_currentTiming.mBeatDuration * 4.0f * (tp.duration / 192.0f) * 0.001f;
-            //m_track.SetLaneHide(!m_hideLane, duration);
-            m_hideLane = !m_hideLane;
         }
 
         void OnEventChanged(EventKey key, EventData data) {
