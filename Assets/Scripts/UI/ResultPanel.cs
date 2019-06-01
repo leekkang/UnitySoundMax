@@ -149,9 +149,11 @@ namespace SoundMax {
             // rank, result
             TweenScale rankScale = mSprRank.GetComponent<TweenScale>();
             mSprRank.gameObject.SetActive(true);
+            rankScale.PlayForward();
             yield return new WaitForSeconds(rankScale.duration);
             TweenAlpha resultAlpha = mSprResult.GetComponent<TweenAlpha>();
             mSprResult.gameObject.SetActive(true);
+            resultAlpha.PlayForward();
             yield return new WaitForSeconds(resultAlpha.duration);
 
             mTweening = false;
