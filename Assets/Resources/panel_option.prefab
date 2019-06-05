@@ -45,11 +45,11 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   material: {fileID: 2100000, guid: ced84254cd81af949bc5bb229b70609a, type: 2}
   mSprites:
-  - name: Difficulty_Advanced
-    x: 643
-    y: 61
-    width: 642
-    height: 135
+  - name: Difficulty_ADVANCE
+    x: 366
+    y: 165
+    width: 316
+    height: 63
     borderLeft: 0
     borderRight: 0
     borderTop: 0
@@ -58,11 +58,11 @@ MonoBehaviour:
     paddingRight: 0
     paddingTop: 0
     paddingBottom: 0
-  - name: Difficulty_Exausted
+  - name: Difficulty_Cursor
     x: 0
-    y: 61
-    width: 642
-    height: 135
+    y: 12
+    width: 282
+    height: 45
     borderLeft: 0
     borderRight: 0
     borderTop: 0
@@ -71,11 +71,11 @@ MonoBehaviour:
     paddingRight: 0
     paddingTop: 0
     paddingBottom: 0
-  - name: Difficulty_Infinity
-    x: 1929
-    y: 48
-    width: 642
-    height: 135
+  - name: Difficulty_EXAUST
+    x: 683
+    y: 155
+    width: 316
+    height: 63
     borderLeft: 0
     borderRight: 0
     borderTop: 0
@@ -84,11 +84,11 @@ MonoBehaviour:
     paddingRight: 0
     paddingTop: 0
     paddingBottom: 0
-  - name: Difficulty_Novice
-    x: 1286
-    y: 48
-    width: 642
-    height: 135
+  - name: Difficulty_INFINITY
+    x: 1000
+    y: 155
+    width: 316
+    height: 63
     borderLeft: 0
     borderRight: 0
     borderTop: 0
@@ -97,11 +97,11 @@ MonoBehaviour:
     paddingRight: 0
     paddingTop: 0
     paddingBottom: 0
-  - name: Option_Speed_Calculated
-    x: 2773
-    y: 1676
-    width: 642
-    height: 372
+  - name: Difficulty_NOVICE
+    x: 366
+    y: 101
+    width: 316
+    height: 63
     borderLeft: 0
     borderRight: 0
     borderTop: 0
@@ -110,11 +110,11 @@ MonoBehaviour:
     paddingRight: 0
     paddingTop: 0
     paddingBottom: 0
-  - name: Option_Start
-    x: 3416
-    y: 1155
-    width: 392
-    height: 520
+  - name: Mode_Cursor_Center
+    x: 1081
+    y: 561
+    width: 441
+    height: 463
     borderLeft: 0
     borderRight: 0
     borderTop: 0
@@ -123,37 +123,50 @@ MonoBehaviour:
     paddingRight: 0
     paddingTop: 0
     paddingBottom: 0
-  - name: Pannel_Option
+  - name: Mode_Cursor_Left
+    x: 1523
+    y: 590
+    width: 301
+    height: 434
+    borderLeft: 0
+    borderRight: 0
+    borderTop: 0
+    borderBottom: 0
+    paddingLeft: 0
+    paddingRight: 0
+    paddingTop: 1
+    paddingBottom: 0
+  - name: Mode_Cursor_Right
+    x: 1523
+    y: 155
+    width: 301
+    height: 434
+    borderLeft: 0
+    borderRight: 0
+    borderTop: 0
+    borderBottom: 0
+    paddingLeft: 0
+    paddingRight: 0
+    paddingTop: 0
+    paddingBottom: 0
+  - name: Mode_Select_BackPannel
     x: 0
-    y: 570
-    width: 1000
-    height: 560
+    y: 400
+    width: 1080
+    height: 624
     borderLeft: 0
     borderRight: 0
     borderTop: 0
     borderBottom: 0
     paddingLeft: 0
     paddingRight: 0
-    paddingTop: 0
-    paddingBottom: 0
-  - name: select_cursor_edge
-    x: 0
-    y: 1131
-    width: 843
-    height: 917
-    borderLeft: 0
-    borderRight: 0
-    borderTop: 0
-    borderBottom: 0
-    paddingLeft: 1
-    paddingRight: 1
     paddingTop: 1
     paddingBottom: 1
   - name: Speed_100
-    x: 2287
-    y: 930
-    width: 642
-    height: 372
+    x: 915
+    y: 219
+    width: 182
+    height: 170
     borderLeft: 0
     borderRight: 0
     borderTop: 0
@@ -163,10 +176,10 @@ MonoBehaviour:
     paddingTop: 0
     paddingBottom: 0
   - name: Speed_125
-    x: 1929
-    y: 557
-    width: 642
-    height: 372
+    x: 732
+    y: 229
+    width: 182
+    height: 170
     borderLeft: 0
     borderRight: 0
     borderTop: 0
@@ -176,10 +189,10 @@ MonoBehaviour:
     paddingTop: 0
     paddingBottom: 0
   - name: Speed_150
-    x: 3416
-    y: 1676
-    width: 642
-    height: 372
+    x: 549
+    y: 229
+    width: 182
+    height: 170
     borderLeft: 0
     borderRight: 0
     borderTop: 0
@@ -189,10 +202,10 @@ MonoBehaviour:
     paddingTop: 0
     paddingBottom: 0
   - name: Speed_175
-    x: 1929
-    y: 184
-    width: 642
-    height: 372
+    x: 183
+    y: 58
+    width: 182
+    height: 170
     borderLeft: 0
     borderRight: 0
     borderTop: 0
@@ -202,10 +215,10 @@ MonoBehaviour:
     paddingTop: 0
     paddingBottom: 0
   - name: Speed_200
-    x: 2773
-    y: 1303
-    width: 642
-    height: 372
+    x: 1281
+    y: 219
+    width: 182
+    height: 170
     borderLeft: 0
     borderRight: 0
     borderTop: 0
@@ -215,10 +228,10 @@ MonoBehaviour:
     paddingTop: 0
     paddingBottom: 0
   - name: Speed_225
-    x: 1286
-    y: 184
-    width: 642
-    height: 372
+    x: 1098
+    y: 219
+    width: 182
+    height: 170
     borderLeft: 0
     borderRight: 0
     borderTop: 0
@@ -228,10 +241,10 @@ MonoBehaviour:
     paddingTop: 0
     paddingBottom: 0
   - name: Speed_250
-    x: 844
-    y: 1676
-    width: 642
-    height: 372
+    x: 1825
+    y: 341
+    width: 182
+    height: 170
     borderLeft: 0
     borderRight: 0
     borderTop: 0
@@ -241,10 +254,10 @@ MonoBehaviour:
     paddingTop: 0
     paddingBottom: 0
   - name: Speed_275
-    x: 844
-    y: 1303
-    width: 642
-    height: 372
+    x: 1825
+    y: 170
+    width: 182
+    height: 170
     borderLeft: 0
     borderRight: 0
     borderTop: 0
@@ -254,10 +267,10 @@ MonoBehaviour:
     paddingTop: 0
     paddingBottom: 0
   - name: Speed_300
-    x: 1001
-    y: 930
-    width: 642
-    height: 372
+    x: 1825
+    y: 512
+    width: 182
+    height: 170
     borderLeft: 0
     borderRight: 0
     borderTop: 0
@@ -267,10 +280,10 @@ MonoBehaviour:
     paddingTop: 0
     paddingBottom: 0
   - name: Speed_325
-    x: 0
-    y: 197
-    width: 642
-    height: 372
+    x: 1825
+    y: 854
+    width: 182
+    height: 170
     borderLeft: 0
     borderRight: 0
     borderTop: 0
@@ -280,10 +293,10 @@ MonoBehaviour:
     paddingTop: 0
     paddingBottom: 0
   - name: Speed_350
-    x: 643
-    y: 197
-    width: 642
-    height: 372
+    x: 1825
+    y: 683
+    width: 182
+    height: 170
     borderLeft: 0
     borderRight: 0
     borderTop: 0
@@ -293,10 +306,10 @@ MonoBehaviour:
     paddingTop: 0
     paddingBottom: 0
   - name: Speed_375
-    x: 1644
-    y: 930
-    width: 642
-    height: 372
+    x: 1081
+    y: 390
+    width: 182
+    height: 170
     borderLeft: 0
     borderRight: 0
     borderTop: 0
@@ -306,10 +319,10 @@ MonoBehaviour:
     paddingTop: 0
     paddingBottom: 0
   - name: Speed_400
-    x: 2130
-    y: 1676
-    width: 642
-    height: 372
+    x: 0
+    y: 229
+    width: 182
+    height: 170
     borderLeft: 0
     borderRight: 0
     borderTop: 0
@@ -319,10 +332,10 @@ MonoBehaviour:
     paddingTop: 0
     paddingBottom: 0
   - name: Speed_425
-    x: 2130
-    y: 1303
-    width: 642
-    height: 372
+    x: 1264
+    y: 390
+    width: 182
+    height: 170
     borderLeft: 0
     borderRight: 0
     borderTop: 0
@@ -332,10 +345,10 @@ MonoBehaviour:
     paddingTop: 0
     paddingBottom: 0
   - name: Speed_450
-    x: 1487
-    y: 1676
-    width: 642
-    height: 372
+    x: 0
+    y: 58
+    width: 182
+    height: 170
     borderLeft: 0
     borderRight: 0
     borderTop: 0
@@ -345,10 +358,10 @@ MonoBehaviour:
     paddingTop: 0
     paddingBottom: 0
   - name: Speed_475
-    x: 1487
-    y: 1303
-    width: 642
-    height: 372
+    x: 366
+    y: 229
+    width: 182
+    height: 170
     borderLeft: 0
     borderRight: 0
     borderTop: 0
@@ -358,10 +371,23 @@ MonoBehaviour:
     paddingTop: 0
     paddingBottom: 0
   - name: Speed_500
-    x: 1286
-    y: 557
-    width: 642
-    height: 372
+    x: 183
+    y: 229
+    width: 182
+    height: 170
+    borderLeft: 0
+    borderRight: 0
+    borderTop: 0
+    borderBottom: 0
+    paddingLeft: 0
+    paddingRight: 0
+    paddingTop: 0
+    paddingBottom: 0
+  - name: Speed_Calculated
+    x: 1825
+    y: 2
+    width: 182
+    height: 167
     borderLeft: 0
     borderRight: 0
     borderTop: 0

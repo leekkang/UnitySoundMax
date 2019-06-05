@@ -86,16 +86,16 @@ MonoBehaviour:
     paddingBottom: 1
   - name: UpsidePannel
     x: 838
-    y: 506
+    y: 503
     width: 945
-    height: 624
+    height: 627
     borderLeft: 0
     borderRight: 0
     borderTop: 0
     borderBottom: 0
     paddingLeft: 0
     paddingRight: 0
-    paddingTop: 0
+    paddingTop: 1
     paddingBottom: 0
   - name: UpsidePannel_Difficulty_ADV
     x: 1706
@@ -124,8 +124,8 @@ MonoBehaviour:
     paddingTop: 0
     paddingBottom: 0
   - name: UpsidePannel_Difficulty_INF
-    x: 1706
-    y: 1889
+    x: 1578
+    y: 1729
     width: 127
     height: 159
     borderLeft: 0
@@ -137,8 +137,8 @@ MonoBehaviour:
     paddingTop: 0
     paddingBottom: 0
   - name: UpsidePannel_Difficulty_NOV
-    x: 1578
-    y: 1729
+    x: 1706
+    y: 1889
     width: 127
     height: 159
     borderLeft: 0
