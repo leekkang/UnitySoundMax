@@ -63,7 +63,7 @@ namespace SoundMax {
 
         /// <summary> 
         /// 얻을 수 있는 스코어 개수
-        /// The score is calculated per 2 (2 = critical, 1 = near)
+        /// The score is calculated per 2 (2 = perfect, 1 = good)
         /// Hold buttons, lasers, etc. give 2 points per tick
         /// </summary>
         public int maxScore;
@@ -103,7 +103,7 @@ namespace SoundMax {
         /// 판정 개수 
         /// 0 = Miss, 1 = Good, 2 = Perfect
         /// </summary>
-        public uint[] categorizedHits = new uint[3];
+        public int[] categorizedHits = new int[3];
 
         /// <summary> 현재 게이지 양, 0 ~ 1 사이 </summary>
         public float currentGauge = 0.0f;

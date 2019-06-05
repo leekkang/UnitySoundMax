@@ -10,17 +10,18 @@ namespace SoundMax {
         Transform mTrDifficulty;
         Transform[] mListDifficulty;
         Transform mTrStart;
-
-        UILabel mLableTitle;
-        UILabel mLabelBpm;
+        
         UISprite mSprSpeed;
         UILabel mLabelCalculated;
         UILabel mLabelLevel;
 
         string mMusic;
 
-        Transform mTrCursor;
+        GameObject mSpeedCursor;
+        GameObject mDiffCursor;
+        GameObject mStartCursor;
         int mCursorIndex;
+
         Transform mTrCursorDiff;
         int mCursorDiffIndex;
         int mMaxDiffIndex;
@@ -38,14 +39,14 @@ namespace SoundMax {
             mListDifficulty = new Transform[4];
             for (int i = 0; i < 4; i++)
                 mListDifficulty[i] = mTrDifficulty.Find("difficulty" + i);
-
-            mLableTitle = transform.Find("title").GetComponent<UILabel>();
-            mLabelBpm = transform.Find("bpm").GetComponent<UILabel>();
+            
             mSprSpeed = mTrSpeed.Find("speed").GetComponent<UISprite>();
             mLabelCalculated = mTrSpeed.FindRecursive("Label").GetComponent<UILabel>();
             mLabelLevel = mTrStart.Find("label").GetComponent<UILabel>();
 
-            mTrCursor = transform.Find("CursorP");
+            mSpeedCursor = mTrSpeed.Find("SpeedCursor").gameObject;
+            mDiffCursor = mTrDifficulty.Find("DifficultyCursor").gameObject;
+            mStartCursor = mTrStart.Find("StartCursor").gameObject;
             mTrCursorDiff = mTrDifficulty.Find("CursorDiff");
         }
 
@@ -55,8 +56,6 @@ namespace SoundMax {
 
             mCursorIndex = 0;
             mBpm = mCurMusicList[0].mBpm;
-            mLabelBpm.text = mBpm.ToString();
-            mLableTitle.text = mCurMusicList[0].mTitle;
             mMaxDiffIndex = mCurMusicList.Count - 1;
             for (int i = 0; i < 4; i++) {
                 mListDifficulty[i].gameObject.SetActive(i < mCurMusicList.Count);
@@ -70,8 +69,15 @@ namespace SoundMax {
             mSprSpeed.spriteName = "Speed_" + (int)Mathf.Round(GetSpeed(mCurSpeedIndex) * 100);
             mLabelCalculated.text = Mathf.Round(GetSpeed(mCurSpeedIndex) * mBpm).ToString();
             mLabelLevel.text = mCurMusicList[mCursorDiffIndex].mLevel.ToString();
-            mTrCursor.localPosition = mTrSpeed.localPosition;
+
+            SetCursor(0);
             mTrCursorDiff.localPosition = mListDifficulty[mCursorDiffIndex].localPosition;
+        }
+
+        void SetCursor(int idx) {
+            mSpeedCursor.SetActive(idx == 0);
+            mDiffCursor.SetActive(idx == 1);
+            mStartCursor.SetActive(idx == 2);
         }
 
         float GetSpeed(int index) {
@@ -91,8 +97,7 @@ namespace SoundMax {
             else
                 mCursorIndex = Mathf.Max(--mCursorIndex, 0);
 
-            mTrCursor.localPosition = mCursorIndex == 0 ? mTrSpeed.localPosition : 
-                                    mCursorIndex == 1 ? mTrDifficulty.localPosition : mTrStart.localPosition;
+            SetCursor(mCursorIndex);
         }
 
         /// <summary> Y축 마우스가 움직이면 해야할 일 </summary>

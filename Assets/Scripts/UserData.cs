@@ -35,6 +35,7 @@ namespace SoundMax {
     public class MusicDifficultySaveData {
         public int mClearStatus;
         public int mScore;
+        public int mClearRate; // 단위 백분율
 
         public int mDmaxNum;
         public int mMaxNum;

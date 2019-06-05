@@ -64,6 +64,9 @@ namespace SoundMax {
             mLabelDmaxNum.text = "0";
             mLabelMaxNum.text = "0";
             mLabelMissNum.text = "0";
+            int dmaxNum = Scoring.inst.categorizedHits[2];
+            int maxNum = Scoring.inst.categorizedHits[1];
+            int missNum = Scoring.inst.categorizedHits[0];
 
             // rank, result
             string rank = Scoring.inst.CalculateGrade(score);
@@ -91,18 +94,24 @@ namespace SoundMax {
             int musicIndex = ((SelectPanel)GuiManager.inst.GetPanel(PanelType.Select)).mCurIndex;
             MusicSaveData tmpData = DataBase.inst.mUserData.GetMusicData(DataBase.inst.mMusicList[musicIndex]);
             MusicDifficultySaveData savedData = tmpData.mListPlayData[(int)data.mDifficulty];
+            int prevScore = savedData.mScore;
             // save hiscore status
-            if (savedData.mScore < score) {
+            if (prevScore < score) {
                 savedData.mScore = score;
-                savedData.mDmaxNum = (int)Scoring.inst.categorizedHits[2];
-                savedData.mMaxNum = (int)Scoring.inst.categorizedHits[1];
-                savedData.mMissNum = (int)Scoring.inst.categorizedHits[0];
+                savedData.mDmaxNum = dmaxNum;
+                savedData.mMaxNum = maxNum;
+                savedData.mMissNum = missNum;
 
                 savedData.mGuage = Scoring.inst.currentGauge;
                 savedData.mClearStatus = rank == "F" ? 1 :
                                          Scoring.inst.comboState == 0 ? 2 :
                                          Scoring.inst.comboState == 1 ? 3 : 4;
             }
+
+            // information
+            int totalNote = dmaxNum + maxNum + missNum;
+            int clearRate = (int)((dmaxNum + maxNum * .5f) * 100 / totalNote);
+            string rate = string.Format("{0:f2}%", clearRate * 0.01f);
         }
 
         public void StartPlay() {
@@ -119,9 +128,9 @@ namespace SoundMax {
             float score = Scoring.inst.CalculateCurrentScore();
             EasingFunction.Function func = EasingFunction.GetEasingFunction(EasingFunction.Ease.EaseOutCubic);
 
-            float dmaxNum = (int)Scoring.inst.categorizedHits[2];
-            float maxNum = (int)Scoring.inst.categorizedHits[1];
-            float missNum = (int)Scoring.inst.categorizedHits[0];
+            float dmaxNum = Scoring.inst.categorizedHits[2];
+            float maxNum = Scoring.inst.categorizedHits[1];
+            float missNum = Scoring.inst.categorizedHits[0];
             float maxGuage = Scoring.inst.currentGauge;
             bool bChangeGuage = false;
 
