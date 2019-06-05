@@ -79,8 +79,8 @@ namespace SoundMax {
             TweenScale rankScale = mSprRank.GetComponent<TweenScale>();
             rankScale.ResetToBeginning();
             mSprRank.gameObject.SetActive(false);
-            TweenAlpha resultAlpha = mSprRank.GetComponent<TweenAlpha>();
-            rankScale.ResetToBeginning();
+            TweenAlpha resultAlpha = mSprResult.GetComponent<TweenAlpha>();
+            resultAlpha.ResetToBeginning();
             mSprResult.gameObject.SetActive(false);
 
             // guage

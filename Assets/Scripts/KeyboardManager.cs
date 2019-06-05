@@ -5,7 +5,7 @@ using SoundMax;
 
 public enum InputCode {
     mouseLeft, mouseRight, mouseWheel, tab, capsLock, shiftLeft, ctrlLeft, altLeft,
-    W, A, S, D, Q, E, R, F, Z, X, C, V, P
+    W, A, S, D, Q, E, R, F, Z, X, C, V, B, P
 }
 public class KeyboardManager : Singleton<KeyboardManager> {
     float frame;
@@ -82,6 +82,17 @@ public class KeyboardManager : Singleton<KeyboardManager> {
             return;
         }
 
+        // 피버 게이지 증가
+        if (info[(int)InputCode.B, index].stay) {
+            Debug.Log("fever stay");
+            IngameEngine.inst.UpdateMaximizeGuage(IngameEngine.STAY_MAXIMIZE_PERCENT * Time.deltaTime);
+        }
+        // 피버 클릭
+        if (info[(int)InputCode.B, index].down) {
+            Debug.Log("fever down");
+            IngameEngine.inst.StartMaximizeTime();
+        }
+
         // 게임용 체크
         for (int i = 0; i < mButtonInputCode.Length; i++) {
             if (info[(int)mButtonInputCode[i], index].down) {
@@ -145,72 +156,30 @@ public class KeyboardManager : Singleton<KeyboardManager> {
             return System.Math.Sign(mLaserKeyValue[num]);
     }
 
+    KeyCode GetKeyCode(InputCode code) {
+        if (code == InputCode.tab)
+            return KeyCode.Tab;
+        if (code == InputCode.capsLock)
+            return KeyCode.CapsLock;
+        if (code == InputCode.shiftLeft)
+            return KeyCode.LeftShift;
+        if (code == InputCode.ctrlLeft)
+            return KeyCode.LeftControl;
+        if (code == InputCode.altLeft)
+            return KeyCode.LeftAlt;
+
+        return (KeyCode)System.Enum.Parse(typeof(KeyCode), code.ToString());
+    }
+
     void SaveInfo(InputCode type) {
-        switch (type) {
-            case InputCode.mouseLeft:
+        if (type == InputCode.mouseLeft)
             InputMouseInfo((int)type, 0);
-            break;
-            case InputCode.mouseRight:
+        else if (type == InputCode.mouseRight)
             InputMouseInfo((int)type, 1);
-            break;
-            case InputCode.mouseWheel:
+        else if (type == InputCode.mouseWheel)
             InputMouseInfo((int)type, 2);
-            break;
-            case InputCode.tab:
-            InputKeyInfo((int)type, KeyCode.Tab);
-            break;
-            case InputCode.capsLock:
-            InputKeyInfo((int)type, KeyCode.CapsLock);
-            break;
-            case InputCode.shiftLeft:
-            InputKeyInfo((int)type, KeyCode.LeftShift);
-            break;
-            case InputCode.ctrlLeft:
-            InputKeyInfo((int)type, KeyCode.LeftControl);
-            break;
-            case InputCode.altLeft:
-            InputKeyInfo((int)type, KeyCode.LeftAlt);
-            break;
-            case InputCode.W:
-            InputKeyInfo((int)type, KeyCode.W);
-            break;
-            case InputCode.A:
-            InputKeyInfo((int)type, KeyCode.A);
-            break;
-            case InputCode.S:
-            InputKeyInfo((int)type, KeyCode.S);
-            break;
-            case InputCode.D:
-            InputKeyInfo((int)type, KeyCode.D);
-            break;
-            case InputCode.Q:
-            InputKeyInfo((int)type, KeyCode.Q);
-            break;
-            case InputCode.E:
-            InputKeyInfo((int)type, KeyCode.E);
-            break;
-            case InputCode.R:
-            InputKeyInfo((int)type, KeyCode.R);
-            break;
-            case InputCode.F:
-            InputKeyInfo((int)type, KeyCode.F);
-            break;
-            case InputCode.Z:
-            InputKeyInfo((int)type, KeyCode.Z);
-            break;
-            case InputCode.X:
-            InputKeyInfo((int)type, KeyCode.X);
-            break;
-            case InputCode.C:
-            InputKeyInfo((int)type, KeyCode.C);
-            break;
-            case InputCode.V:
-            InputKeyInfo((int)type, KeyCode.V);
-            break;
-            case InputCode.P:
-            InputKeyInfo((int)type, KeyCode.P);
-            break;
-        }
+        else
+            InputKeyInfo((int)type, GetKeyCode(type));
     }
 
     void InputKeyInfo(int type, KeyCode code) {

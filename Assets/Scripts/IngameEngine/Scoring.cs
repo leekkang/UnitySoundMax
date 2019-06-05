@@ -28,10 +28,10 @@ namespace SoundMax {
                 if (!HasFlag(TickFlags.Start) && !HasFlag(TickFlags.Slam))
                     return 0;
 
-                return Scoring.inst.perfectHitTime;
+                return Scoring.inst.PERFECT_HIT_TIME;
             }
 
-            return Scoring.inst.missHitTime;
+            return Scoring.inst.MISS_HIT_TIME;
         }
 
         public ScoreHitRating GetHitRating(int currentTime) {
@@ -42,9 +42,9 @@ namespace SoundMax {
             delta = Math.Abs(delta);
 
             if (HasFlag(TickFlags.Button)) {
-                if (delta <= Scoring.inst.perfectHitTime)
+                if (delta <= Scoring.inst.PERFECT_HIT_TIME)
                     return ScoreHitRating.Perfect;
-                if (delta <= Scoring.inst.goodHitTime)
+                if (delta <= Scoring.inst.GOOD_HIT_TIME)
                     return ScoreHitRating.Good;
                 return ScoreHitRating.Miss;
             }
@@ -88,37 +88,11 @@ namespace SoundMax {
         }
     }
 
-    class SimpleHitStat {
-        // 0 = miss, 1 = near, 2 = crit, 3 = idle
-        public byte rating;
-        public byte lane;
-        public int time;
-        public int delta;
-        // Hold state
-        // This is the amount of gotten ticks in a hold sequence
-        public uint hold;
-        // This is the amount of total ticks in this hold sequence
-        public uint holdMax;
-    }
-
-    class ScoreIndex {
-        public int id;
-        public int diffid;
-        public int score;
-        public int crit;
-        public int almost;
-        public int miss;
-        public float gauge;
-        public uint gameflags;
-        public List<SimpleHitStat> hitStats;
-        public long timestamp;
-    };
-
     public class Scoring : Singleton<Scoring> {
-        public readonly int missHitTime = 275;
-        public readonly int goodHitTime = 100;
-        public readonly int perfectHitTime = 42;
-        public readonly float idleLaserSpeed = 1f;
+        public readonly int MISS_HIT_TIME = 275;
+        public readonly int GOOD_HIT_TIME = 100;
+        public readonly int PERFECT_HIT_TIME = 42;
+        public readonly float IDLE_LASER_SPEED = 1f;
 
         /// <summary> 오토 플레이 모드 </summary>
         public bool autoplay = false;
@@ -173,40 +147,37 @@ namespace SoundMax {
         public float[] laserTargetPositions = new float[2];
         /// <summary> 레이저 파티클 </summary>
         ParticleSystem[] mLaserParticle = new ParticleSystem[2];
-        // Current lasers are extended
+        /// <summary> 현재 레이저 노트가 익스텐디드 노트인지 확인. 현재 지원하지 않음 </summary>
         bool[] lasersAreExtend = new bool[2];
-        // Time since laser has been used
+        /// <summary> 레이저노트를 맞춘 시점부터의 시간 </summary>
         public float[] timeSinceLaserUsed = new float[2];
 
-        bool m_interpolateLaserOutput = false;
-
-        // Lerp for laser output
-        float m_laserOutputSource = 0.0f;
-        float m_laserOutputTarget = 0.0f;
-        float m_timeSinceOutputSet = 0.0f;
-
+        /// <summary> 플레이 엔진 </summary>
         PlaybackEngine m_playback;
 
-        // Input values for laser [-1,1]
+        /// <summary> 사용자의 노브 입력값. 빨리돌리면 -1, 1보다 커질 수 있지만 계산 시 클리핑된다. </summary>
         float[] m_laserInput = new float[2];
-        // Keeps being set to the last direction the laser was moving in to create laser intertia
-        float[] m_lastLaserInputDirection = new float[2];
-        // Decides if the coming tick should be auto completed
+        /// <summary> 현재 시점에서 트래커가 자동으로 따라가는 최대 시간 </summary>
         float[] m_autoLaserTime = new float[2];
-        // Saves the time when a button was hit, used to decide if a button was held before a hold object was active
+        /// <summary> 사용자가 버튼을 누른 시각 </summary>
         int[] m_buttonHitTime = new int[6];
-        // Saves the time when a button was hit or released for bounce guarding
+        /// <summary> 버튼 오작동을 막기 위한 버튼 간 입력 인터벌. 사용하지 않음 </summary>
         int[] m_buttonGuardTime = new int[6];
+
         // 레이저 노트 최초 진입 시 마커 자동 도우미 시간
         float m_assistLevel = .5f;
         float m_assistSlamBoost = 1f;
         float m_assistPunish = 1.5f;
         float m_assistTime = 0.0f;
-        // Offet to use for calculating judge (ms)
-        int m_inputOffset = 0;
-        int m_bounceGuard = 0;
 
-        // used the update the amount of hit ticks for hold/laser notes
+        /// <summary> 판정선 위치 조절 시각. 단위 ms </summary>
+        int m_inputOffset = 0;
+        /// <summary> 버튼 오작동을 막기 위한 버튼 간 입력 인터벌 기준 시각. 단위 ms, 사용하지 않음 </summary>
+        int m_bounceGuard = 0;
+        
+        /// <summary>
+        /// 롱노트, 레이저 노트의 히트 정보를 저장하는 딕셔너리. 한 오브젝트당 히트 정보가 여러개 나올 수 있기 때문. 
+        /// </summary>
         Dictionary<ObjectDataBase, HitStat> m_holdHitStats = new Dictionary<ObjectDataBase, HitStat>();
 
         // Laser objects currently in range
@@ -217,54 +188,46 @@ namespace SoundMax {
 
         // Ticks for each BT[4] / FX[2] / Laser[2]
         List<ScoreTick>[] m_ticks = new List<ScoreTick>[] {
-        new List<ScoreTick>(),
-        new List<ScoreTick>(),
-        new List<ScoreTick>(),
-        new List<ScoreTick>(),
-        new List<ScoreTick>(),
-        new List<ScoreTick>(),
-        new List<ScoreTick>(),
-        new List<ScoreTick>()
-    };
+            new List<ScoreTick>(),
+            new List<ScoreTick>(),
+            new List<ScoreTick>(),
+            new List<ScoreTick>(),
+            new List<ScoreTick>(),
+            new List<ScoreTick>(),
+            new List<ScoreTick>(),
+            new List<ScoreTick>()
+        };
         // Hold objects
         ObjectDataBase[] m_holdObjects = new ObjectDataBase[8];
         List<ObjectDataBase> m_heldObjects = new List<ObjectDataBase>();
 
-        GameFlags m_flags;
+        public GameFlags mGameFlag;
 
-        // Called when a hit is recorded on a given button index (excluding hold notes)
-        // (Hit Button, Score, Hit Object(optional))
-        public System.Action<ObjectDataBase> OnObjectEntered;
+        /// <summary> 노트를 맞출때마다 호출할 리스너. 홀드, 레이저는 틱마다 호출 </summary>
         public System.Action<int, ScoreHitRating, ObjectDataBase, bool> OnButtonHit;
-        // Called when a miss is recorded on a given button index
-        public System.Action<int, bool> OnButtonMiss;
+        /// <summary> 버튼이 미스났을 때 호출할 리스너. 홀드, 레이저는 틱마다 호출 </summary>
+        public System.Action<int> OnButtonMiss;
 
-        // Called when an object is picked up
+        /// <summary> 롱노트를 맞췄을 때 호출할 리스너 </summary>
         public System.Action<int, ObjectDataBase> OnObjectHold;
-        // Called when an object is let go of
+        /// <summary> 롱노트가 끝나거나 누른 버튼을 뗐을 때 호출할 리스너 </summary>
         public System.Action<int, ObjectDataBase> OnObjectReleased;
-
-        // Called when a laser slam was hit
-        // (Laser slam segment)
+        
+        /// <summary> 슬램 레이저를 맞췄을 때 호출할 리스너 </summary>
         public System.Action<LaserData> OnLaserSlamHit;
-        // Called when the combo counter changed
-        // (New Combo)
+        /// <summary> 콤보가 변경될 때 호출할 리스너 </summary>
         public System.Action<int> OnComboChanged;
-
-        // Called when score has changed
-        //	(New Score)
+        /// <summary> 스코어가 변경될 때 호출할 리스너 </summary>
         public System.Action<int> OnScoreChanged;
 
+        /// <summary> <see cref="PlaybackEngine"/>의 리스너에 함수 설정 </summary>
         public void SetPlayback(PlaybackEngine playback) {
             m_playback = playback;
             m_playback.OnObjectEntered = m_OnObjectEntered;
             m_playback.OnObjectLeaved = m_OnObjectLeaved;
         }
 
-        public void SetFlags(GameFlags flags) {
-            m_flags = flags;
-        }
-
+        /// <summary> 변수 초기화 </summary>
         public void Reset() {
             // Reset score/combo counters
             currentHitScore = 0;
@@ -295,7 +258,7 @@ namespace SoundMax {
 
             currentGauge = 0.0f;
             float total = m_playback.m_beatmap.mSetting.total / 100.0f + 0.001f; //Add a little in case floats go under
-            if ((m_flags & GameFlags.Hard) != GameFlags.None) {
+            if ((mGameFlag & GameFlags.Hard) != GameFlags.None) {
                 total *= 12f / 21f;
                 currentGauge = 1.0f;
             }
@@ -320,6 +283,7 @@ namespace SoundMax {
             OnScoreChanged(0);
         }
 
+        /// <summary> 엔진에서 게임이 종료되었을 때 호출되는 함수 </summary>
         public void FinishGame() {
             m_CleanupTicks();
             for (int i = 0; i < 8; i++) {
@@ -327,6 +291,7 @@ namespace SoundMax {
             }
         }
 
+        /// <summary> 엔진에서 틱을 진행할 때 호출하는 함수 </summary>
         public void Tick(float deltaTime) {
             m_UpdateLasers(deltaTime);
             m_UpdateTicks();
@@ -344,96 +309,11 @@ namespace SoundMax {
             }
         }
 
-        float GetLaserRollOutput(uint index) {
-            //assert(index >= 0 && index <= 1);
-            if (m_currentLaserSegments[index] != null) {
-                if (index == 0)
-                    return -laserTargetPositions[index];
-                if (index == 1)
-                    return (1.0f - laserTargetPositions[index]);
-            } else { // Check if any upcoming lasers are within 2 beats
-                for (int i = 0; i < m_laserSegmentQueue.Count; i++) {
-                    LaserData laser = m_laserSegmentQueue[i];
-                    if (laser.mIndex == index && laser.mPrev == null) {
-                        if (laser.mTime - m_playback.GetLastTime() <= m_playback.GetCurrentTimingPoint().mBeatDuration * 2) {
-                            if (index == 0)
-                                return -laser.mPoints[0];
-                            if (index == 1)
-                                return (1.0f - laser.mPoints[0]);
-                        }
-                    }
-                }
-            }
-            return 0.0f;
-        }
-
-        const float laserOutputInterpolationDuration = 0.1f;
-        public float GetLaserOutput() {
-            float f = Math.Min(1.0f, m_timeSinceOutputSet / laserOutputInterpolationDuration);
-            return m_laserOutputSource + (m_laserOutputTarget - m_laserOutputSource) * f;
-        }
-        float GetMeanHitDelta() {
-            float sum = 0;
-            uint count = 0;
-            for (int i = 0; i < hitStats.Count; i++) {
-                HitStat hit = hitStats[i];
-                if (hit.obj.mType != ButtonType.Single || hit.rating == ScoreHitRating.Miss)
-                    continue;
-
-                sum += hit.delta;
-                count++;
-            }
-            return sum / count;
-        }
-        int GetMedianHitDelta() {
-            List<int> deltas = new List<int>();
-            for (int i = 0; i < hitStats.Count; i++) {
-                HitStat hit = hitStats[i];
-                if (hit.obj.mType == ButtonType.Single && hit.rating != ScoreHitRating.Miss)
-                    deltas.Add(hit.delta);
-            }
-
-            if (deltas.Count == 0)
-                return 0;
-
-            deltas.Sort();
-            return deltas[deltas.Count / 2];
-        }
-
-        float m_GetLaserOutputRaw() {
-            float val = 0.0f;
-            for (int i = 0; i < 2; i++) {
-                if (!IsLaserHeld(i, false) || m_currentLaserSegments[i] == null)
-                    continue;
-
-                // Skip single or end slams
-                if (m_currentLaserSegments[i].mNext == null && (m_currentLaserSegments[i].mFlags & LaserData.mFlagInstant) != 0)
-                    continue;
-
-                float actual = laserTargetPositions[i];
-                // Undo laser extension
-                if ((m_currentLaserSegments[i].mFlags & LaserData.mFlagExtended) != 0) {
-                    actual = (actual + 0.5f) * 0.5f;
-                    //assert(actual >= 0.0f && actual <= 1.0f);
-                }
-                // Second laser goes the other way
-                if (i == 1)
-                    actual = 1.0f - actual;
-                val = Math.Max(actual, val);
-            }
-            return val;
-        }
-
-        void m_UpdateLaserOutput(float deltaTime) {
-            m_timeSinceOutputSet += deltaTime;
-            float v = m_GetLaserOutputRaw();
-            if (v != m_laserOutputTarget) {
-                m_laserOutputTarget = v;
-                m_laserOutputSource = GetLaserOutput();
-                m_timeSinceOutputSet = m_interpolateLaserOutput ? 0.0f : laserOutputInterpolationDuration;
-            }
-        }
-
+        /// <summary>
+        /// 노트를 맞추거나 놓쳤을 때 해당 정보를 저장하는 함수
+        /// </summary>
+        /// <param name="obj"></param>
+        /// <returns></returns>
         HitStat m_AddOrUpdateHitStat(ObjectDataBase obj) {
             if (obj.mType == ButtonType.Single) {
                 HitStat stat = new HitStat(obj);
@@ -520,6 +400,9 @@ namespace SoundMax {
             return m_laserSegmentQueue.Count == 0 && m_currentLaserSegments[0] == null && m_currentLaserSegments[1] == null;
         }
 
+        /// <summary> 롱노트의 틱 시간을 계산해서 리턴하는 함수 </summary>
+        /// <param name="hold"> 대상 롱노트 </param>
+        /// <returns> 틱의 타이밍 리스트 </returns>
         List<int> m_CalculateHoldTicks(HoldButtonData hold) {
             List<int> ticks = new List<int>();
             TimingPoint tp = m_playback.GetTimingPointAt(hold.mTime);
@@ -545,6 +428,9 @@ namespace SoundMax {
             return ticks;
         }
 
+        /// <summary> 레이저 노트의 틱 시간과 종류를 계산해서 리턴하는 함수 </summary>
+        /// <param name="hold"> 대상 레이저 노트 </param>
+        /// <returns> 틱 정보를 가진 인스턴스 리스트 </returns>
         List<ScoreTick> m_CalculateLaserTicks(LaserData laserRoot) {
             //assert(laserRoot.mPrev == null);
             List<ScoreTick> ticks = new List<ScoreTick>();
@@ -611,6 +497,11 @@ namespace SoundMax {
             return ticks;
         }
 
+        /// <summary>
+        /// 오브젝트가 판정 범위 안으로 들어왔을 때 호출되는 함수
+        /// <see cref="PlaybackEngine"/> 의 콜백 함수로 등록해놓음
+        /// </summary>
+        /// <param name="obj"> 대상 오브젝트 </param>
         void m_OnObjectEntered(ObjectDataBase obj) {
             // The following code registers which ticks exist depending on the object type / duration
             if (obj.mType == ButtonType.Single) {
@@ -669,6 +560,10 @@ namespace SoundMax {
                 m_laserSegmentQueue.Add(laser);
             }
         }
+        /// <summary>
+        /// 오브젝트가 판정 범위 밖으로 나갔을 때 호출되는 함수
+        /// </summary>
+        /// <param name="obj"> 대상 오브젝트 </param>
         void m_OnObjectLeaved(ObjectDataBase obj) {
             if (obj.mType == ButtonType.Laser) {
                 LaserData laser = (LaserData)obj;
@@ -681,6 +576,9 @@ namespace SoundMax {
             IngameEngine.inst.ChangeObjectParent(obj);
         }
 
+        /// <summary>
+        /// 엔진 업데이트마다 호출되는 함수. 저장해놓은 <see cref="ScoreTick"/> 리스트를 사용하여 판정 계산을 한다.
+        /// </summary>
         void m_UpdateTicks() {
             int currentTime = m_playback.m_playbackTime;
 
@@ -704,7 +602,7 @@ namespace SoundMax {
                             int holdStart = hold.GetRoot().mTime;
 
                             // 홀드버튼 첫번째 버튼을 눌렀으면 ㅇㅋ
-                            if ((KeyboardManager.inst.CheckHold(buttonCode) && holdStart - goodHitTime < m_buttonHitTime[buttonCode]) || autoplay || autoplayButtons) {
+                            if ((KeyboardManager.inst.CheckHold(buttonCode) && holdStart - GOOD_HIT_TIME < m_buttonHitTime[buttonCode]) || autoplay || autoplayButtons) {
                                 m_TickHit(tick, buttonCode);
                                 HitStat stat = new HitStat(tick.obj);
                                 stat.time = currentTime;
@@ -768,7 +666,7 @@ namespace SoundMax {
                         }
                     }
 
-                    if (delta > goodHitTime && !processed) {
+                    if (delta > GOOD_HIT_TIME && !processed) {
                         m_TickMiss(tick, buttonCode, delta);
                         processed = true;
                     }
@@ -784,6 +682,9 @@ namespace SoundMax {
             }
         }
 
+        /// <summary> 버튼 입력이 감지되었을 때 호출. 판정 판단을 한다. </summary>
+        /// <param name="buttonCode"></param>
+        /// <returns> 싱글노트일 때만 해당 노트 오브젝트를 리턴 </returns>
         ObjectDataBase m_ConsumeTick(int buttonCode) {
             //assert(buttonCode < 8);
 
@@ -798,12 +699,12 @@ namespace SoundMax {
                 } else if (tick.HasFlag(TickFlags.Hold)) {
                     HoldButtonData hbd = (HoldButtonData)hitObject;
                     hbd = hbd.GetRoot();
-                    if (hbd.mTime - goodHitTime <= currentTime + m_inputOffset)
+                    if (hbd.mTime - GOOD_HIT_TIME <= currentTime + m_inputOffset)
                         m_SetHoldObject(hitObject, buttonCode);
                     return null;
                 }
 
-                if (Math.Abs(delta) <= goodHitTime)
+                if (Math.Abs(delta) <= GOOD_HIT_TIME)
                     m_TickHit(tick, buttonCode, delta);
                 else
                     m_TickMiss(tick, buttonCode, delta);
@@ -815,15 +716,23 @@ namespace SoundMax {
             return null;
         }
 
+        /// <summary> 각 버튼의 판정 계산 이후 호출되는 콜백 함수 </summary>
+        /// <param name="tick"> 미리 계산된 틱당 정보 </param>
+        /// <param name="index"> 노트 인덱스 </param>
         void m_OnTickProcessed(ScoreTick tick, int index) {
             OnScoreChanged(CalculateCurrentScore());
         }
 
+        /// <summary> 해당 노트를 맞췄을 때 호출 </summary>
+        /// <param name="tick"> 미리 계산된 틱당 정보 </param>
+        /// <param name="index"> 노트 인덱스 </param>
+        /// <param name="delta"> 빨리 눌렀는지 늦게 눌렀는지 판단. 0보다 크면 늦게 누른것 </param>
         void m_TickHit(ScoreTick tick, int index, int delta = 0) {
             HitStat stat = m_AddOrUpdateHitStat(tick.obj);
             if (tick.HasFlag(TickFlags.Button)) {
                 stat.delta = delta;
-                stat.rating = tick.GetHitRatingFromDelta(delta);
+                // 맥시마이즈 모드에선 무조건 퍼펙
+                stat.rating = IngameEngine.inst.mMaximizeMode ? ScoreHitRating.Perfect : tick.GetHitRatingFromDelta(delta);
                 OnButtonHit(index, stat.rating, tick.obj, Math.Sign(delta) > 0);
 
                 if (stat.rating == ScoreHitRating.Perfect) {
@@ -869,21 +778,26 @@ namespace SoundMax {
             categorizedHits[(int)stat.rating]++;
         }
 
+        /// <summary> 해당 노트를 놓쳤을 때 호출 </summary>
+        /// <param name="tick"> 미리 계산된 틱당 정보 </param>
+        /// <param name="index"> 노트 인덱스 </param>
+        /// <param name="delta"> 빨리 눌렀는지 늦게 눌렀는지 판단. 0보다 크면 늦게 누른것 </param>
         void m_TickMiss(ScoreTick tick, int index, int delta) {
             HitStat stat = m_AddOrUpdateHitStat(tick.obj);
             stat.hasMissed = true;
             float shortMissDrain = 0.02f;
-            if ((m_flags & GameFlags.Hard) != GameFlags.None) {
+            if ((mGameFlag & GameFlags.Hard) != GameFlags.None) {
                 // Thanks to Hibiki_ext in the discord for help with this
                 float drainMultiplier = Mathf.Clamp(1.0f - ((0.3f - currentGauge) * 2f), 0.5f, 1.0f);
                 shortMissDrain = 0.09f * drainMultiplier;
             }
             if (tick.HasFlag(TickFlags.Button)) {
-                OnButtonMiss(index, delta < 0 && Math.Abs(delta) > goodHitTime);
+                OnButtonMiss(index);
                 stat.rating = ScoreHitRating.Miss;
                 stat.delta = delta;
                 currentGauge -= shortMissDrain;
             } else if (tick.HasFlag(TickFlags.Hold)) {
+                OnButtonMiss(index);
                 m_ReleaseHoldObject(index);
                 currentGauge -= shortMissDrain / 4f;
                 stat.rating = ScoreHitRating.Miss;
@@ -908,12 +822,14 @@ namespace SoundMax {
             categorizedHits[0]++;
         }
 
+        /// <summary> 틱 정보 초기화 </summary>
         void m_CleanupTicks() {
-            for (uint i = 0; i < 8; i++) {
+            for (int i = 0; i < 8; i++) {
                 m_ticks[i].Clear();
             }
         }
 
+        /// <summary> 스코어 갱신. 추가로 콤보와 클리어 스테이터스도 갱신한다. </summary>
         void m_AddScore(int score) {
             //assert(score > 0 && score <= 2);
             if (score == 1 && comboState == 2)
@@ -930,6 +846,9 @@ namespace SoundMax {
             OnComboChanged(currentComboCounter);
         }
 
+        /// <summary> 롱노트를 맞췄을 때 호출되는 함수 </summary>
+        /// <param name="obj"> 노트 오브젝트 </param>
+        /// <param name="index"> 버튼 인덱스 </param>
         void m_SetHoldObject(ObjectDataBase obj, int index) {
             if (m_holdObjects[index] == obj)
                 return;
@@ -942,6 +861,8 @@ namespace SoundMax {
         void m_ReleaseHoldObject(int index) {
             m_ReleaseHoldObject(m_holdObjects[index]);
         }
+        /// <summary> 롱노트가 끝나거나 누른 버튼을 뗐을 때 호출되는 함수 </summary>
+        /// <param name="obj"> 노트 오브젝트 </param>
         void m_ReleaseHoldObject(ObjectDataBase obj) {
             int index = m_heldObjects.FindIndex((x) => x == obj);
             if (index != -1) {
@@ -1078,6 +999,12 @@ namespace SoundMax {
                         mLaserParticle[i].transform.localPosition = new Vector3(-450f + laserTargetPositions[i] * 900f, 0f, 0f);
                 } else {
                     m_ReleaseHoldObject(6 + i);
+
+                    // 레이저 판정 출력
+                    if (currentSegment != null)
+                        IngameEngine.inst.PrintJudgement(i + 6, ScoreHitRating.Miss, laserPositions[i]);
+
+                    // 레이저 파티클 멈춤
                     if (mLaserParticle[i] != null) {
                         mLaserParticle[i].Stop();
                         mLaserParticle[i].gameObject.SetActive(false);
@@ -1093,6 +1020,8 @@ namespace SoundMax {
             //m_UpdateLaserOutput(deltaTime);
         }
 
+        /// <summary> 버튼을 눌렀을 때 호출 </summary>
+        /// <param name="buttonCode"> 버튼 인덱스 </param>
         public void OnButtonPressed(int buttonCode) {
             // Ignore buttons on autoplay
             if (autoplay)
@@ -1103,7 +1032,7 @@ namespace SoundMax {
                 IngameEngine.inst.mNoteClickObject[buttonCode].SetActive(true);
 
                 int guardDelta = m_playback.GetLastTime() - m_buttonGuardTime[buttonCode];
-                if (guardDelta < m_bounceGuard && guardDelta >= 0) {
+                if (guardDelta >= 0 && guardDelta < m_bounceGuard) {
                     //Logf("Button %d press bounce guard hit at %dms", Logger.Info, buttonCode, m_playback.GetLastTime());
                     return;
                 }
@@ -1125,13 +1054,15 @@ namespace SoundMax {
                     m_ConsumeTick(7); // Laser R
             }
         }
+        /// <summary> 버튼 뗐을 때 호출 </summary>
+        /// <param name="buttonCode"> 버튼 인덱스 </param>
         public void OnButtonReleased(int buttonCode) {
             if (buttonCode < 6) {
                 // 버튼 클릭 이펙트 감춤
                 IngameEngine.inst.mNoteClickObject[buttonCode].SetActive(false);
 
                 int guardDelta = m_playback.GetLastTime() - m_buttonGuardTime[(uint)buttonCode];
-                if (guardDelta < m_bounceGuard && guardDelta >= 0) {
+                if (guardDelta >= 0 && guardDelta < m_bounceGuard) {
                     //Logf("Button %d release bounce guard hit at %dms", Logger.Info, buttonCode, m_playback.GetLastTime());
                     return;
                 }
@@ -1142,6 +1073,7 @@ namespace SoundMax {
             m_ReleaseHoldObject(buttonCode);
         }
 
+        /// <summary> 현재 곡의 전체 노트 수 정보를 리턴 </summary>
         MapTotals CalculateMapTotals() {
             MapTotals ret = new MapTotals();
             Beatmap map = m_playback.m_beatmap;
@@ -1220,6 +1152,132 @@ namespace SoundMax {
         //    return 5; // F
         //}
 
+        #region 미사용 코드
+
+        class SimpleHitStat {
+            // 0 = miss, 1 = near, 2 = crit, 3 = idle
+            public byte rating;
+            public byte lane;
+            public int time;
+            public int delta;
+            // Hold state
+            // This is the amount of gotten ticks in a hold sequence
+            public uint hold;
+            // This is the amount of total ticks in this hold sequence
+            public uint holdMax;
+        }
+
+        class ScoreIndex {
+            public int id;
+            public int diffid;
+            public int score;
+            public int crit;
+            public int almost;
+            public int miss;
+            public float gauge;
+            public uint gameflags;
+            public List<SimpleHitStat> hitStats;
+            public long timestamp;
+        };
+
+        bool m_interpolateLaserOutput = false;
+        // Lerp for laser output
+        float m_laserOutputSource = 0.0f;
+        float m_laserOutputTarget = 0.0f;
+        float m_timeSinceOutputSet = 0.0f;
+
+        const float laserOutputInterpolationDuration = 0.1f;
+        public float GetLaserOutput() {
+            float f = Math.Min(1.0f, m_timeSinceOutputSet / laserOutputInterpolationDuration);
+            return m_laserOutputSource + (m_laserOutputTarget - m_laserOutputSource) * f;
+        }
+        float GetMeanHitDelta() {
+            float sum = 0;
+            uint count = 0;
+            for (int i = 0; i < hitStats.Count; i++) {
+                HitStat hit = hitStats[i];
+                if (hit.obj.mType != ButtonType.Single || hit.rating == ScoreHitRating.Miss)
+                    continue;
+
+                sum += hit.delta;
+                count++;
+            }
+            return sum / count;
+        }
+        int GetMedianHitDelta() {
+            List<int> deltas = new List<int>();
+            for (int i = 0; i < hitStats.Count; i++) {
+                HitStat hit = hitStats[i];
+                if (hit.obj.mType == ButtonType.Single && hit.rating != ScoreHitRating.Miss)
+                    deltas.Add(hit.delta);
+            }
+
+            if (deltas.Count == 0)
+                return 0;
+
+            deltas.Sort();
+            return deltas[deltas.Count / 2];
+        }
+
+        float m_GetLaserOutputRaw() {
+            float val = 0.0f;
+            for (int i = 0; i < 2; i++) {
+                if (!IsLaserHeld(i, false) || m_currentLaserSegments[i] == null)
+                    continue;
+
+                // Skip single or end slams
+                if (m_currentLaserSegments[i].mNext == null && (m_currentLaserSegments[i].mFlags & LaserData.mFlagInstant) != 0)
+                    continue;
+
+                float actual = laserTargetPositions[i];
+                // Undo laser extension
+                if ((m_currentLaserSegments[i].mFlags & LaserData.mFlagExtended) != 0) {
+                    actual = (actual + 0.5f) * 0.5f;
+                    //assert(actual >= 0.0f && actual <= 1.0f);
+                }
+                // Second laser goes the other way
+                if (i == 1)
+                    actual = 1.0f - actual;
+                val = Math.Max(actual, val);
+            }
+            return val;
+        }
+
+        void m_UpdateLaserOutput(float deltaTime) {
+            m_timeSinceOutputSet += deltaTime;
+            float v = m_GetLaserOutputRaw();
+            if (v != m_laserOutputTarget) {
+                m_laserOutputTarget = v;
+                m_laserOutputSource = GetLaserOutput();
+                m_timeSinceOutputSet = m_interpolateLaserOutput ? 0.0f : laserOutputInterpolationDuration;
+            }
+        }
+
+        float GetLaserRollOutput(uint index) {
+            //assert(index >= 0 && index <= 1);
+            if (m_currentLaserSegments[index] != null) {
+                if (index == 0)
+                    return -laserTargetPositions[index];
+                if (index == 1)
+                    return (1.0f - laserTargetPositions[index]);
+            } else { // Check if any upcoming lasers are within 2 beats
+                for (int i = 0; i < m_laserSegmentQueue.Count; i++) {
+                    LaserData laser = m_laserSegmentQueue[i];
+                    if (laser.mIndex == index && laser.mPrev == null) {
+                        if (laser.mTime - m_playback.GetLastTime() <= m_playback.GetCurrentTimingPoint().mBeatDuration * 2) {
+                            if (index == 0)
+                                return -laser.mPoints[0];
+                            if (index == 1)
+                                return (1.0f - laser.mPoints[0]);
+                        }
+                    }
+                }
+            }
+            return 0.0f;
+        }
+
+        /// <summary> 클리어 스테이터스를 리턴 </summary>
+        /// <param name="score"> 최종 스코어 </param>
         byte CalculateBadge(ScoreIndex score) {
             if (score.score == 10000000) //Perfect
                 return 5;
@@ -1245,5 +1303,7 @@ namespace SoundMax {
             }
             return top;
         }
+
+        #endregion
     }
 }

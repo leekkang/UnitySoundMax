@@ -7,6 +7,8 @@ using System.IO;
 
 namespace SoundMax {
     public class IngameEngine : Singleton<IngameEngine> {
+        /// <summary> 오브젝트를 렌더링 할 시간 간격. 현재시간 + 변수 이내에 있는 오브젝트만 setactive(true) 가 된다. </summary>
+        public const float OBJECT_ACTIVE_INTERVAL = 10000f;
         /// <summary> 트랙 노트 간격 조절용 </summary>
         public const float TRACK_HEIGHT_INTERVAL = 0.01f;
         /// <summary> 트랙의 버튼홈 너비 </summary>
@@ -23,14 +25,24 @@ namespace SoundMax {
         public const float LASER_START_INTERVAL = 1000f;
         /// <summary> 레이저가 끝난 뒤부터 Laser_Alert를 출력하기까지의 시간 간격. 단위는 sec </summary>
         public const float LASER_ALERT_INTERVAL = 3f;
-        /// <summary> 오브젝트를 렌더링 할 시간 간격. 현재시간 + 변수 이내에 있는 오브젝트만 setactive(true) 가 된다. </summary>
-        public const float OBJECT_ACTIVE_INTERVAL = 10000f;
+
+        /// <summary> 맥시마이즈 유지 시간. 단위 sec </summary>
+        public const float MAXIMIZE_STAY_TIME = 10f;
+        /// <summary> DMAX 판정 시 피버 올라가는 비율. 단위 백분율 </summary>
+        public const int SINGLENOTE_MAXIMIZE_PERCENT = 66;
+        /// <summary> MAX 판정 시 피버 올라가는 비율. 단위 백분율 </summary>
+        public const int LONGNOTE_MAXIMIZE_PERCENT = 33;
+        /// <summary> 초음파센서 피버 올라가는 비율 (1초 기준) </summary>
+        public const float STAY_MAXIMIZE_PERCENT = 1000;
 
         public bool mPlaying;
         public bool mForceEnd;
         public bool m_paused;
         public bool m_ended;
         public float mSpeed = 1f;
+
+        /// <summary> 맥시마이즈 모드 </summary>
+        public bool mMaximizeMode;
 
         // Map object approach speed, scaled by BPM
         float m_hispeed = 1.0f;
@@ -64,8 +76,9 @@ namespace SoundMax {
         bool mIsHPOver70;                       // 컬러값을 바꿔야 하는지 확인
         public Color mHealthUnder70 = new Color(118f / 255f, 1f, 1f, 1f);  // 체력 70% 미만일 때의 컬러값
         public Color mHealthOver70 = Color.white;      // 체력 70% 이상일 때의 컬러값
+        UISprite mSprMaximizeBar;               // 우측의 체력 게이지
 
-        UILabel mLabelCombo;                     // 트랙 가운데 뜨는 콤보 텍스트
+        UILabel mLabelCombo;                    // 트랙 가운데 뜨는 콤보 텍스트
         TweenScale mComboTweenScale;            // 트랙 가운데 뜨는 콤보의 스케일 트윈
         DisappearObject mComboDisappearScript;  // 트랙 가운데 뜨는 콤보의 알파 트윈
 
@@ -89,7 +102,7 @@ namespace SoundMax {
         AudioSource[] m_clickSamples = new AudioSource[2];
         List<AudioSource> m_fxSamples = new List<AudioSource>();
 
-        GameFlags m_flags;
+        public GameFlags mGameFlag;
 
         // pool
         public ParticleSystem[] mNormalHitEffect;
@@ -125,6 +138,8 @@ namespace SoundMax {
             mLabelScore = scoreBoard.Find("ScoreLabel").GetComponent<UILabel>();
             mLabelBoardCombo = scoreBoard.Find("ComboLabel").GetComponent<UILabel>();
             mSprHealthBar = transform.FindRecursive("HPRemain").GetComponent<UISprite>();
+            mSprMaximizeBar = transform.FindRecursive("FeverGuage").GetComponent<UISprite>();
+
             Transform musicInfo = transform.FindRecursive("MusicInfo");
             mJacketImage = musicInfo.Find("JacketImage").GetComponent<UITexture>();
             mDifficultyLabel = musicInfo.Find("MusicDifficulty").GetComponent<UILabel>();
@@ -232,7 +247,7 @@ namespace SoundMax {
             yield return CoInitSFX();
 
             // Do this here so we don't get input events while still loading
-            m_scoring.SetFlags(m_flags);
+            m_scoring.mGameFlag = mGameFlag;
             m_scoring.SetPlayback(m_playback);
             //m_scoring.SetInput(&g_input);
             m_scoring.Reset(); // Initialize
@@ -326,6 +341,7 @@ namespace SoundMax {
             m_paused = false;
             m_ended = false;
             mForceEnd = false;
+            mMaximizeMode = false;
 
             // Playback and timing
             m_playback.SetBeatmap(m_beatmap); 
@@ -357,12 +373,13 @@ namespace SoundMax {
             m_scoring.OnObjectReleased = OnObjectReleased;
             m_scoring.OnScoreChanged = OnScoreChanged;
 
-            m_playback.hittableObjectEnter = m_scoring.missHitTime;
-            m_playback.hittableObjectLeave = m_scoring.goodHitTime;
+            m_playback.hittableObjectEnter = m_scoring.MISS_HIT_TIME;
+            m_playback.hittableObjectLeave = m_scoring.GOOD_HIT_TIME;
 
             mIsHPOver70 = false;
             mSprHealthBar.fillAmount = 0;
             mSprHealthBar.color = mHealthUnder70;
+            mSprMaximizeBar.fillAmount = 0;
 
             for (int i = 0; i < 6; i++)
                 mNoteClickObject[i].SetActive(false);
@@ -900,7 +917,7 @@ namespace SoundMax {
             m_audioPlayback.SetFXTrackEnabled(m_scoring.currentComboCounter > 0);
 
             // Stop playing if gauge is on hard and at 0%
-            if ((m_flags & GameFlags.Hard) != GameFlags.None && m_scoring.currentGauge == 0f) {
+            if ((mGameFlag & GameFlags.Hard) != GameFlags.None && m_scoring.currentGauge == 0f) {
                 FinishGame();
             }
             
@@ -984,7 +1001,7 @@ namespace SoundMax {
             }
         }
 
-        // Called when game is finished and the score screen should show up
+        /// <summary> 게임이 끝났으면 호출 </summary>
         void FinishGame() {
             if (m_ended)
                 return;
@@ -1007,6 +1024,8 @@ namespace SoundMax {
             Debug.Log("Game end");
         }
 
+        /// <summary> 가로로 누운 레이저 노트를 맞췄을 때 호출 </summary>
+        /// <param name="laser"> 레이저 노트 오브젝트 </param>
         void OnLaserSlamHit(LaserData laser) {
             float slamSize = (laser.mPoints[1] - laser.mPoints[0]);
             slamSize = Math.Abs(slamSize);
@@ -1032,12 +1051,24 @@ namespace SoundMax {
                 mJudgeObject[index].ResetTime();
             else
                 mJudgeObject[index].Move(pos, false, true);
+
+            // 맥시마이즈 게이지 갱신
+            if (rate == ScoreHitRating.Good) {
+                UpdateMaximizeGuage(SINGLENOTE_MAXIMIZE_PERCENT * 0.5f);
+            } else if (rate == ScoreHitRating.Perfect) {
+                UpdateMaximizeGuage(index < 6 ? SINGLENOTE_MAXIMIZE_PERCENT : LONGNOTE_MAXIMIZE_PERCENT);
+            }
         }
 
+        /// <summary>
+        /// 버튼 맞췄을 때 호출. 롱노트는 해당안됨.
+        /// </summary>
+        /// <param name="buttonIdx"> 버튼 인덱스 </param>
+        /// <param name="rating"> 히트 판정 </param>
+        /// <param name="hitObject"> 대상 버튼 오브젝트 </param>
+        /// <param name="late"> 늦게 눌렀으면 true, 일찍 눌렀으면 false </param>
         void OnButtonHit(int buttonIdx, ScoreHitRating rating, ObjectDataBase hitObject, bool late) {
             NormalButtonData st = (NormalButtonData)hitObject;
-
-            // 레일에 빛나는 스프라이트 출력
 
             // fx버튼에 달려있는 오디오 출력
             if (st != null && st.mHasSample) {
@@ -1059,9 +1090,7 @@ namespace SoundMax {
         }
 
         /// <summary> 오버트랙 콤보 제거 </summary>
-        void OnButtonMiss(int buttonIdx, bool hitEffect) {
-            if (hitEffect) {
-            }
+        void OnButtonMiss(int buttonIdx) {
             PrintJudgement(buttonIdx, ScoreHitRating.Miss);
 
             if (mLabelCombo.gameObject.activeSelf) {
@@ -1088,11 +1117,12 @@ namespace SoundMax {
 
         /// <summary> 스코어 라벨 변경 </summary>
         void OnScoreChanged(int newScore) {
-            //Debug.Log("OnScoreChanged : " + newScore);
             mLabelScore.text = newScore.ToString();
         }
-
-        // These functions control if FX button DSP's are muted or not
+        
+        /// <summary> 롱노트, 레이저 노트가 들어왔을 때 히트하면 한번 호출되는 함수 </summary>
+        /// <param name="buttonIdx"> 버튼 인덱스 </param>
+        /// <param name="obj"> 노트 </param>
         void OnObjectHold(int buttonIdx, ObjectDataBase obj) {
             if (obj.mType == ButtonType.Hold) {
                 HoldButtonData hold = (HoldButtonData)obj;
@@ -1120,7 +1150,7 @@ namespace SoundMax {
                 }
 
                 int currentTime = m_playback.m_playbackTime;
-                if (Math.Abs(currentTime - (hold.mDuration + hold.mTime)) <= m_scoring.goodHitTime || m_scoring.autoplay || m_scoring.autoplayButtons) {
+                if (Math.Abs(currentTime - (hold.mDuration + hold.mTime)) <= m_scoring.GOOD_HIT_TIME || m_scoring.autoplay || m_scoring.autoplayButtons) {
                     obj.mNote.gameObject.SetActive(false);
                 }
             } else if (obj.mType == ButtonType.Laser) {
@@ -1176,6 +1206,35 @@ namespace SoundMax {
                     mLaserAlertObject[obj.mIndex].gameObject.SetActive(true);
                 mLaserAlertObject[obj.mIndex].ResetTime();
             }
+        }
+
+        /// <summary> 맥시마이즈 게이지 변경 함수 </summary>
+        public void UpdateMaximizeGuage(float percent) {
+            int amount = (int)Mathf.Round(percent);
+            if (mMaximizeMode || mSprMaximizeBar.fillAmount >= 1)
+                return;
+
+            int curRatio = (int)(mSprMaximizeBar.fillAmount * 10000);
+            curRatio = Math.Min(curRatio + amount, 10000);
+            mSprMaximizeBar.fillAmount = curRatio * 0.0001f;
+        }
+
+        public void StartMaximizeTime() {
+            if (mMaximizeMode || mSprMaximizeBar.fillAmount < 1)
+                return;
+
+            mMaximizeMode = true;
+            StartCoroutine(CoMaximizeTime());
+        }
+        IEnumerator CoMaximizeTime() {
+            WaitForSeconds waitTime = new WaitForSeconds(0.1f);
+            for(int i = 0; i < MAXIMIZE_STAY_TIME; i++) {
+                for (int j = 0; j < 10; j++) {
+                    mSprMaximizeBar.fillAmount -= .1f * .1f;
+                    yield return waitTime;
+                }
+            }
+            mMaximizeMode = false;
         }
     }
 }
