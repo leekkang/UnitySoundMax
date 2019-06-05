@@ -45,74 +45,9 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   material: {fileID: 2100000, guid: 7cdd9ac6923119d40830366a24fc3989, type: 2}
   mSprites:
-  - name: Pannel_Inform
-    x: 1347
-    y: 775
-    width: 516
-    height: 249
-    borderLeft: 0
-    borderRight: 0
-    borderTop: 0
-    borderBottom: 0
-    paddingLeft: 0
-    paddingRight: 0
-    paddingTop: 0
-    paddingBottom: 0
-  - name: Pannel_Rank
-    x: 0
-    y: 478
-    width: 516
-    height: 546
-    borderLeft: 0
-    borderRight: 0
-    borderTop: 0
-    borderBottom: 0
-    paddingLeft: 0
-    paddingRight: 0
-    paddingTop: 0
-    paddingBottom: 0
-  - name: Pannel_Result
-    x: 932
-    y: 248
-    width: 516
-    height: 216
-    borderLeft: 0
-    borderRight: 0
-    borderTop: 0
-    borderBottom: 0
-    paddingLeft: 0
-    paddingRight: 0
-    paddingTop: 0
-    paddingBottom: 0
-  - name: Pannel_Score
-    x: 932
-    y: 67
-    width: 516
-    height: 180
-    borderLeft: 0
-    borderRight: 0
-    borderTop: 0
-    borderBottom: 0
-    paddingLeft: 0
-    paddingRight: 0
-    paddingTop: 0
-    paddingBottom: 0
-  - name: Pannel_Status
-    x: 0
-    y: 27
-    width: 516
-    height: 450
-    borderLeft: 0
-    borderRight: 0
-    borderTop: 0
-    borderBottom: 0
-    paddingLeft: 0
-    paddingRight: 0
-    paddingTop: 0
-    paddingBottom: 0
   - name: Rank_A
-    x: 932
-    y: 715
+    x: 942
+    y: 1739
     width: 414
     height: 309
     borderLeft: 0
@@ -124,8 +59,8 @@ MonoBehaviour:
     paddingTop: 2
     paddingBottom: 0
   - name: Rank_B
-    x: 517
-    y: 715
+    x: 940
+    y: 1326
     width: 414
     height: 309
     borderLeft: 0
@@ -137,8 +72,8 @@ MonoBehaviour:
     paddingTop: 2
     paddingBottom: 0
   - name: Rank_C
-    x: 517
-    y: 95
+    x: 1355
+    y: 1429
     width: 414
     height: 309
     borderLeft: 0
@@ -150,8 +85,8 @@ MonoBehaviour:
     paddingTop: 2
     paddingBottom: 0
   - name: Rank_F
-    x: 517
-    y: 405
+    x: 1357
+    y: 1739
     width: 414
     height: 309
     borderLeft: 0
@@ -163,8 +98,8 @@ MonoBehaviour:
     paddingTop: 2
     paddingBottom: 0
   - name: Rank_S
-    x: 1347
-    y: 465
+    x: 939
+    y: 808
     width: 414
     height: 309
     borderLeft: 0
@@ -176,8 +111,8 @@ MonoBehaviour:
     paddingTop: 0
     paddingBottom: 0
   - name: Result_Allcombo
-    x: 1449
-    y: 318
+    x: 1354
+    y: 1045
     width: 489
     height: 72
     borderLeft: 0
@@ -189,8 +124,8 @@ MonoBehaviour:
     paddingTop: 0
     paddingBottom: 0
   - name: Result_Clear
-    x: 1762
-    y: 702
+    x: 1354
+    y: 972
     width: 278
     height: 72
     borderLeft: 0
@@ -202,8 +137,8 @@ MonoBehaviour:
     paddingTop: 0
     paddingBottom: 0
   - name: Result_Destroyed
-    x: 1449
-    y: 391
+    x: 1355
+    y: 1355
     width: 499
     height: 73
     borderLeft: 0
@@ -214,9 +149,35 @@ MonoBehaviour:
     paddingRight: 0
     paddingTop: 0
     paddingBottom: 0
+  - name: Result_Inform
+    x: 0
+    y: 927
+    width: 938
+    height: 340
+    borderLeft: 0
+    borderRight: 0
+    borderTop: 0
+    borderBottom: 0
+    paddingLeft: 0
+    paddingRight: 0
+    paddingTop: 0
+    paddingBottom: 0
+  - name: Result_Music_Inform
+    x: 939
+    y: 1118
+    width: 851
+    height: 182
+    borderLeft: 0
+    borderRight: 0
+    borderTop: 0
+    borderBottom: 0
+    paddingLeft: 0
+    paddingRight: 0
+    paddingTop: 0
+    paddingBottom: 0
   - name: Result_Perfect
-    x: 517
-    y: 22
+    x: 942
+    y: 1666
     width: 391
     height: 72
     borderLeft: 0
@@ -224,6 +185,45 @@ MonoBehaviour:
     borderTop: 0
     borderBottom: 0
     paddingLeft: 3
+    paddingRight: 0
+    paddingTop: 0
+    paddingBottom: 0
+  - name: Result_Rank
+    x: 0
+    y: 1268
+    width: 469
+    height: 780
+    borderLeft: 0
+    borderRight: 0
+    borderTop: 0
+    borderBottom: 0
+    paddingLeft: 0
+    paddingRight: 0
+    paddingTop: 0
+    paddingBottom: 0
+  - name: Result_Score
+    x: 470
+    y: 1301
+    width: 469
+    height: 334
+    borderLeft: 0
+    borderRight: 0
+    borderTop: 0
+    borderBottom: 0
+    paddingLeft: 0
+    paddingRight: 0
+    paddingTop: 0
+    paddingBottom: 0
+  - name: Result_Status
+    x: 470
+    y: 1636
+    width: 471
+    height: 412
+    borderLeft: 0
+    borderRight: 0
+    borderTop: 0
+    borderBottom: 0
+    paddingLeft: 0
     paddingRight: 0
     paddingTop: 0
     paddingBottom: 0
