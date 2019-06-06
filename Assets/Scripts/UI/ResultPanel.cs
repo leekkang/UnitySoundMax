@@ -177,7 +177,8 @@ namespace SoundMax {
             float maxGuage = Scoring.inst.currentGauge;
             bool bChangeGuage = false;
 
-            string deltaFormat = mScoreDelta < 0 ? "{0}" : "+{0}";
+            string scoreDeltaFormat = mScoreDelta < 0 ? "{0}" : "+{0}";
+            string clearRateDeltaFormat = clearRateDelta < 0 ? "{0}" : "+{0}";
 
             float maxTime = 1f;
             float curTime = 0f;
@@ -199,8 +200,8 @@ namespace SoundMax {
                 mLabelGuage.text = ((int)Mathf.Round(mSprGuage.fillAmount * 100f)).ToString();
 
                 mLabelClearRate.text = ((int)Mathf.Round(func(0f, clearRate, t))).ToString();
-                mLabelScoreDelta.text = string.Format(deltaFormat, (int)Mathf.Round(func(0f, mScoreDelta, t)));
-                mLabelClearRateDelta.text = string.Format(deltaFormat, (int)Mathf.Round(func(0f, clearRateDelta, t)));
+                mLabelScoreDelta.text = string.Format(scoreDeltaFormat, (int)Mathf.Round(func(0f, mScoreDelta, t)));
+                mLabelClearRateDelta.text = string.Format(clearRateDeltaFormat, (int)Mathf.Round(func(0f, clearRateDelta, t)));
 
                 curTime += interval;
                 yield return waitSecond;

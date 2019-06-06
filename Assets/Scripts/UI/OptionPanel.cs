@@ -130,6 +130,7 @@ namespace SoundMax {
                 return;
 
             SetUserData();
+            SoundManager.inst.StopPreviewNaturally();
             IngameEngine.inst.StartGame(mCurMusicList[mCursorDiffIndex], GetSpeed(mCurSpeedIndex));
         }
 

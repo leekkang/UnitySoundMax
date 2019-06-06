@@ -97,9 +97,9 @@ namespace SoundMax {
 
         // Combo gain animation
         //Timer m_comboAnimation;
-        Transform mAudioRoot;
-        AudioSource m_slamSample;
-        AudioSource[] m_clickSamples = new AudioSource[2];
+        public Transform mAudioRoot;
+        public AudioSource m_slamSample;
+        public AudioSource[] m_clickSamples = new AudioSource[2];
         List<AudioSource> m_fxSamples = new List<AudioSource>();
 
         public GameFlags mGameFlag;
@@ -120,7 +120,6 @@ namespace SoundMax {
             m_audioPlayback = new AudioEngine();
             
             // 트랙 관련 게임 오브젝트
-            mAudioRoot = transform.Find("Audio");
             m_camera = transform.FindRecursive("CameraAnchor").GetComponent<CameraMotion>();
             mTrackAnchor = transform.FindRecursive("Anchor");
             mStaticTrack = mTrackAnchor.parent.Find("Track");
@@ -150,24 +149,7 @@ namespace SoundMax {
             mSprMusicInfo = musicInfo.gameObject;
             mSprScoreBoard = scoreBoard.gameObject;
 
-            // 샘플 오디오 로드
-            m_slamSample = mAudioRoot.Find("SlamSound").GetComponent<AudioSource>();
-            m_clickSamples[0] = mAudioRoot.Find("ClickSound1").GetComponent<AudioSource>();
-            m_clickSamples[1] = mAudioRoot.Find("ClickSound2").GetComponent<AudioSource>();
-
-            string rootPath = Path.Combine(Application.streamingAssetsPath, "fxAudio");
-            string audioPath = Path.Combine(rootPath, "laser_slam.wav").Trim();
-            DataBase.inst.LoadAudio(audioPath, (audio) => {
-                m_slamSample.clip = audio;
-            });
-            audioPath = Path.Combine(rootPath, "click-01.wav").Trim();
-            DataBase.inst.LoadAudio(audioPath, (audio) => {
-                m_clickSamples[0].clip = audio;
-            });
-            audioPath = Path.Combine(rootPath, "click-02.wav").Trim();
-            DataBase.inst.LoadAudio(audioPath, (audio) => {
-                m_clickSamples[1].clip = audio;
-            });
+            // 샘플 오디오 로드 -> SoundManager로 이동함
 
             // 풀링 오브젝트 생성
             CreatePoolObject();
@@ -261,7 +243,6 @@ namespace SoundMax {
 
         /// <summary> 샘플오디오 로드 </summary>
         IEnumerator CoInitSFX() {
-            string rootPath = Path.Combine(Application.streamingAssetsPath, "fxAudio");
             string audioPath;
 
             for (int i = 0; i < m_fxSamples.Count; i++)
@@ -280,7 +261,7 @@ namespace SoundMax {
 
             bool bLoad = false;
             for (int i = 0; i < samples.Count; i++) {
-                audioPath = Path.Combine(rootPath, samples[i]).Trim();
+                audioPath = Path.Combine(DataBase.inst.fxAudioPath, samples[i]).Trim();
                 bLoad = false;
                 if (!DataBase.inst.LoadAudio(audioPath, (audio) => {
                     m_fxSamples[i].clip = audio;

@@ -60,10 +60,11 @@ public class AudioEngine {
         
         BeatmapSetting mapSettings = playback.m_beatmap.mSetting;
 
-        string rootPath = Path.Combine(Application.streamingAssetsPath, data.mPathName);
+        string rootPath = Path.Combine(DataBase.inst.musicPath, data.mPathName);
         string audioPath = Path.Combine(rootPath, mapSettings.audioNoFX).Trim();
 
         // Load Audio File
+        // MusicData에 미리보기용으로 로드해놓은걸 쓰면 되긴함. 일단 냄겨둔다.
         if (!DataBase.inst.LoadAudio(audioPath, (audio) => {
             m_music.clip = audio;
             m_music.volume = mapSettings.musicVolume;

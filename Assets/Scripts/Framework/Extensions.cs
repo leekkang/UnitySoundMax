@@ -1,6 +1,8 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.Networking;
+using System.Runtime.CompilerServices;
 
 public static class Extensions {
     public static Transform FindRecursive(this Transform t, string str) {
@@ -15,5 +17,31 @@ public static class Extensions {
             }
         }
         return null;
+    }
+
+    public static UnityWebRequestAwaiter GetAwaiter(this UnityWebRequestAsyncOperation asyncOp) {
+        return new UnityWebRequestAwaiter(asyncOp);
+    }
+}
+
+public class UnityWebRequestAwaiter : INotifyCompletion {
+    private UnityWebRequestAsyncOperation asyncOp;
+    private System.Action continuation;
+
+    public UnityWebRequestAwaiter(UnityWebRequestAsyncOperation asyncOp) {
+        this.asyncOp = asyncOp;
+        asyncOp.completed += OnRequestCompleted;
+    }
+
+    public bool IsCompleted { get { return asyncOp.isDone; } }
+
+    public void GetResult() { }
+
+    public void OnCompleted(System.Action continuation) {
+        this.continuation = continuation;
+    }
+
+    private void OnRequestCompleted(AsyncOperation obj) {
+        continuation();
     }
 }

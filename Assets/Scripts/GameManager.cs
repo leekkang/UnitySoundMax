@@ -6,11 +6,12 @@ namespace SoundMax {
     public class GameManager : MonoBehaviour {
         void Start() {
             GuiManager.inst.Open();
-            SoundManager.inst.Open();
-            KeyboardManager.inst.Open();
-            IngameEngine.inst.Open();
             MainPanel mainPanel = (MainPanel)GuiManager.inst.GetPanel(PanelType.Main);
             DataBase.inst.Open(mainPanel.SetLoadMusic);
+
+            KeyboardManager.inst.Open();
+            IngameEngine.inst.Open();
+            SoundManager.inst.Open();
 
             StartCoroutine(CoLoadMain(mainPanel));
 

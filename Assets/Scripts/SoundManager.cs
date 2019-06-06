@@ -1,14 +1,118 @@
-﻿using System.Collections;
+﻿
+using System.IO;
+using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
 namespace SoundMax {
     public class SoundManager : Singleton<SoundManager> {
+        public const float PREVIEW_PLAY_DELAY = 0.5f;
+        public const float PREVIEW_PLAY_FADE_TIME = 0.5f;
+        public const float PREVIEW_PLAY_CHANGE_MUSIC_TIME = 1f;
+
+        bool mPlayingPreview;
+        public AudioSource mPreviewAudio;
+        Coroutine mCoPlayPreview;
+
         public void Open() {
-            Debug.Log("SoundManager Open");
+            mPlayingPreview = false;
+            mCoPlayPreview = null;
+            mPreviewAudio = transform.Find("PreviewAudio").GetComponent<AudioSource>();
+
+            // ingame sound
+            Transform root = transform.Find("IngameAudio");
+            IngameEngine.inst.mAudioRoot = root;
+            IngameEngine.inst.m_slamSample = root.Find("SlamSound").GetComponent<AudioSource>();
+            IngameEngine.inst.m_clickSamples[0] = root.Find("ClickSound1").GetComponent<AudioSource>();
+            IngameEngine.inst.m_clickSamples[1] = root.Find("ClickSound2").GetComponent<AudioSource>();
+
+            string rootPath = DataBase.inst.fxAudioPath;
+            string audioPath = Path.Combine(rootPath, "laser_slam.wav").Trim();
+            DataBase.inst.LoadAudio(audioPath, (audio) => {
+                IngameEngine.inst.m_slamSample.clip = audio;
+            });
+            audioPath = Path.Combine(rootPath, "click-01.wav").Trim();
+            DataBase.inst.LoadAudio(audioPath, (audio) => {
+                IngameEngine.inst.m_clickSamples[0].clip = audio;
+            });
+            audioPath = Path.Combine(rootPath, "click-02.wav").Trim();
+            DataBase.inst.LoadAudio(audioPath, (audio) => {
+                IngameEngine.inst.m_clickSamples[1].clip = audio;
+            });
+        }
+
+        public void PlayPreview(MusicData data) {
+            if (mCoPlayPreview != null) {
+                StopCoroutine(mCoPlayPreview);
+                mCoPlayPreview = null;
+            }
+
+            if (mPlayingPreview) {
+                mPreviewAudio.Stop();
+                mPlayingPreview = false;
+            }
+
+            if (data.mAudioClip == null)
+                return;
+
+            mCoPlayPreview = StartCoroutine(CoPlayPreview(data));
+        }
+
+        IEnumerator CoPlayPreview(MusicData data) {
+            yield return new WaitForSeconds(PREVIEW_PLAY_DELAY);
+
+            mPreviewAudio.clip = data.mAudioClip;
+            float previewLength = data.mPreviewDuration * 0.001f;
+            WaitForSeconds waitFade = new WaitForSeconds(previewLength - PREVIEW_PLAY_FADE_TIME * 2);
+
+            mPlayingPreview = true;
+            while (true) {
+                mPreviewAudio.time = data.mPreviewOffset * 0.001f;
+                yield return FadeIn(mPreviewAudio, data.mAudioVolume, PREVIEW_PLAY_FADE_TIME);
+                yield return waitFade;
+                yield return FadeOut(mPreviewAudio, PREVIEW_PLAY_FADE_TIME, null);
+                yield return new WaitForSeconds(PREVIEW_PLAY_CHANGE_MUSIC_TIME);
+            }
+        }
+
+        IEnumerator FadeIn(AudioSource audioSource, float targetVolume, float FadeTime) {
+            audioSource.volume = 0;
+            audioSource.Play();
+
+            while (audioSource.volume < targetVolume) {
+                audioSource.volume = Mathf.Min(audioSource.volume + Time.deltaTime / FadeTime, targetVolume);
+                yield return null;
+            }
+        }
+
+        IEnumerator FadeOut(AudioSource audioSource, float FadeTime, System.Action actOnAfter) {
+            float startVolume = audioSource.volume;
+
+            while (audioSource.volume > 0) {
+                audioSource.volume -= startVolume * Time.deltaTime / FadeTime;
+                yield return null;
+            }
+
+            audioSource.Stop();
+            audioSource.volume = startVolume;
+
+            if (actOnAfter != null)
+                actOnAfter();
+        }
+
+        public void StopPreviewNaturally() {
+            if (!mPlayingPreview)
+                return;
+
+            if (mCoPlayPreview != null) {
+                StopCoroutine(mCoPlayPreview);
+                mCoPlayPreview = null;
+            }
+
+            StartCoroutine(FadeOut(mPreviewAudio, PREVIEW_PLAY_FADE_TIME, () => { mPlayingPreview = false; }));
         }
     }
-
+    
     public class EffectDuration {
         public enum Type : byte {
             Rate, // Relative (1/4, 1/2, 0.5, etc), all relative to whole notes

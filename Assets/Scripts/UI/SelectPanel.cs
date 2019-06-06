@@ -65,6 +65,7 @@ namespace SoundMax {
 
             mCurIndex = 0;
             SetMusicInformation();
+            PlayPreviewMusic();
             mCursorSelect.SetParent(mBackPanel[mCurIndex], false);
             mCursorSelect.localPosition = new Vector3(0f, 15f, 0f);
             mCompleteLoad = false;
@@ -132,6 +133,13 @@ namespace SoundMax {
                                       clearStatus == 1 ? "Result_Destroyed" : "";
         }
 
+        void PlayPreviewMusic() {
+            string music = DataBase.inst.mMusicList[mCurIndex];
+            MusicSaveData savedData = DataBase.inst.mUserData.GetMusicData(music);
+            MusicData musicData = DataBase.inst.mDicMusic[music][savedData.mDifficulty];
+            SoundManager.inst.PlayPreview(musicData);
+        }
+
         /// <summary> X축 마우스가 움직이면 해야할 일 </summary>
         public override void CursorXMoveProcess(bool positiveDirection) {
             if (positiveDirection) {
@@ -145,6 +153,7 @@ namespace SoundMax {
             }
 
             SetMusicInformation();
+            PlayPreviewMusic();
         }
 
         /// <summary> Y축 마우스가 움직이면 해야할 일 </summary>
@@ -167,6 +176,7 @@ namespace SoundMax {
 
         /// <summary> FX 버튼을 눌렀을 때 해야 할 일 </summary>
         public override void OnClickBtnFX() {
+            SoundManager.inst.StopPreviewNaturally();
             GuiManager.inst.ActivatePanel(PanelType.Main, true);
         }
     }

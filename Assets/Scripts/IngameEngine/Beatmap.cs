@@ -353,6 +353,7 @@ namespace SoundMax {
             };
 
             // Process map settings
+            // TODO : MusicData에 담아놓고 꺼내쓰는 방법으로 변경
             mSetting = new BeatmapSetting();
             foreach (var s in data.mDicSettings) {
                 if (s.Key == "title")

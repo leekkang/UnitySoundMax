@@ -4,6 +4,8 @@ using System.Collections.Generic;
 using UnityEngine;
 using System.IO;
 using UnityEngine.Networking;
+using System.Threading.Tasks;
+using Unity.Jobs;
 
 namespace SoundMax {
     public class DataBase : Singleton<DataBase> {
@@ -27,6 +29,9 @@ namespace SoundMax {
             "world_vertex"
         };
 
+        public string musicPath;
+        public string fxAudioPath;
+
         public bool mOpenComplete;
         public Texture mDefaultJacket;
         public List<char> mListLaserChar = new List<char>();
@@ -35,7 +40,9 @@ namespace SoundMax {
         public Dictionary<string, List<MusicData>> mDicMusic = new Dictionary<string, List<MusicData>>();
         public UserData mUserData = new UserData();
 
+        System.Action<string> test;
         public void Open(System.Action<string> actOnLoading) {
+            test = actOnLoading;
             mOpenComplete = false;
             mDefaultJacket = Resources.Load("Default_Jacket") as Texture;
 
@@ -52,7 +59,21 @@ namespace SoundMax {
             UserData userData = SaveDataAdapter.LoadData("user") as UserData;
             if (userData != null)
                 mUserData = userData;
-            StartCoroutine(CoLoadMusicList(actOnLoading));
+
+            musicPath = Path.Combine(Application.streamingAssetsPath, "Music");
+            fxAudioPath = Path.Combine(Application.streamingAssetsPath, "fxAudio");
+
+            // 스트리밍애셋폴더를 뒤져서 동적으로 음악을 가져온다.
+            mMusicList = Directory.GetDirectories(musicPath);
+            char[] separator = new char[] { '/', '\\' };
+            for (int i = 0; i < mMusicList.Length; i++) {
+                string[] split = mMusicList[i].Split(separator);
+                mMusicList[i] = split[split.Length - 1];
+            }
+            
+            Task loadAsync = LoadMusicListAsync(actOnLoading);
+            //loadAsync.Start();
+            //StartCoroutine(CoLoadMusicList(actOnLoading));
             //LoadAudio("colorfulsky", AudioType.OGGVORBIS, (audio) => { Debug.Log("load complete"); });
         }
 
@@ -79,11 +100,49 @@ namespace SoundMax {
             return null;
         }
 
+        public async Task<AudioClip> LoadAudioAsync(string path) {
+            if (!File.Exists(path)) {
+                Debug.Log("오디오 파일이 없습니다. : " + path);
+                return null;
+            }
+
+            AudioType aType = GetAudioType(path.Split('.')[1].ToLower());
+            if (aType == AudioType.UNKNOWN)
+                return null;
+
+            using (var request = UnityWebRequestMultimedia.GetAudioClip(path, aType)) {
+                await request.SendWebRequest();
+
+                if (request.isNetworkError || request.isHttpError) {
+                    Debug.LogError(request.error);
+                    request.Dispose();
+                    return null;
+                }
+                AudioClip clip = DownloadHandlerAudioClip.GetContent(request);
+
+                request.Dispose();
+                return clip;
+            }
+        }
+
         public void LoadAudio(string filename, AudioType extension, Action<AudioClip> onLoadCompleted) {
             string ksh = string.Format("{0}{1}{0}", filename, Path.DirectorySeparatorChar);
             if (extension == AudioType.OGGVORBIS) ksh += ".ogg";
             else if (extension == AudioType.WAV) ksh += ".wav";
-            StartCoroutine(CoLoadAudio(Path.Combine(Application.streamingAssetsPath, ksh), extension, onLoadCompleted));
+            StartCoroutine(CoLoadAudio(Path.Combine(musicPath, ksh), extension, onLoadCompleted));
+        }
+
+        AudioType GetAudioType(string type) {
+            if (type == "ogg")
+                return AudioType.OGGVORBIS;
+            else if (type == "wav")
+                return AudioType.WAV;
+            else if (type == "mp3")
+                return AudioType.MPEG;
+            else {
+                Debug.Log("오디오 파일 확장자가 이상합니다. : " + type);
+                return AudioType.UNKNOWN;
+            }
         }
 
         public bool LoadAudio(string path, Action<AudioClip> onLoadCompleted) {
@@ -91,18 +150,11 @@ namespace SoundMax {
                 Debug.Log("오디오 파일이 없습니다. : " + path);
                 return false;
             }
-            string type = path.Split('.')[1].ToLower();
-            AudioType aType;
-            if (type == "ogg")
-                aType = AudioType.OGGVORBIS;
-            else if (type == "wav")
-                aType = AudioType.WAV;
-            else if (type == "mp3")
-                aType = AudioType.MPEG;
-            else {
-                Debug.Log("오디오 파일 확장자가 이상합니다. : " + path);
+          
+            AudioType aType = GetAudioType(path.Split('.')[1].ToLower());
+            if (aType == AudioType.UNKNOWN)
                 return false;
-            }
+
             StartCoroutine(CoLoadAudio(path, aType, onLoadCompleted));
 
             return true;
@@ -115,6 +167,7 @@ namespace SoundMax {
 
                 if (request.isNetworkError || request.isHttpError) {
                     Debug.LogError(request.error);
+                    request.Dispose();
                     yield break;
                 }
                 AudioClip clip = DownloadHandlerAudioClip.GetContent(request);
@@ -126,9 +179,28 @@ namespace SoundMax {
             }
         }
 
+        public async Task<Texture> LoadImageAsync(string musicname, string filename) {
+            string path = string.Format("{0}{1}{2}", musicname, Path.DirectorySeparatorChar, filename);
+            path = Path.Combine(musicPath, path);
+
+            using (var request = UnityWebRequestTexture.GetTexture(path)) {
+                await request.SendWebRequest();
+
+                if (request.isNetworkError || request.isHttpError) {
+                    Debug.LogWarning(request.error + ", so replace default jacket");
+                    request.Dispose();
+                    return mDefaultJacket;
+                }
+                Texture tex = DownloadHandlerTexture.GetContent(request);
+
+                request.Dispose();
+                return tex;
+            }
+        }
+
         public void LoadImage(string musicname, string filename, Action<Texture> onLoadCompleted) {
             string url = string.Format("{0}{1}{2}", musicname, Path.DirectorySeparatorChar, filename);
-            StartCoroutine(CoLoadImage(Path.Combine(Application.streamingAssetsPath, url), onLoadCompleted));
+            StartCoroutine(CoLoadImage(Path.Combine(musicPath, url), onLoadCompleted));
         }
 
         IEnumerator CoLoadImage(string url, Action<Texture> onLoadCompleted) {
@@ -140,6 +212,7 @@ namespace SoundMax {
                     Debug.LogWarning(request.error + ", so replace default jacket");
                     if (onLoadCompleted != null)
                         onLoadCompleted(mDefaultJacket);
+                    request.Dispose();
                     yield break;
                 }
                 Texture tex = DownloadHandlerTexture.GetContent(request);
@@ -151,7 +224,32 @@ namespace SoundMax {
             }
         }
 
-        IEnumerator CoLoadMusicList(System.Action<string> actOnLoading) {
+        async Task LoadMusicListAsync(Action<string> actOnLoading) {
+            for (int i = 0; i < mMusicList.Length; i++) {
+                //actOnLoading(mMusicList[i]);
+                List<MusicData> dataList = new List<MusicData>();
+                for (Difficulty j = Difficulty.Novice; j <= Difficulty.Infinity; j++) {
+                    MusicData data = new MusicData();
+
+                    bool bComplete = await data.LoadAsync(mMusicList[i], j);
+                    if (!bComplete)
+                        continue;
+
+                    dataList.Add(data);
+                    
+                    string path = Path.Combine(musicPath, Path.Combine(data.mPathName, data.mAudioName));
+                    data.mAudioClip = await LoadAudioAsync(path);
+                }
+                mDicMusic.Add(mMusicList[i], dataList);
+            }
+
+            for (int i = 0; i < mMusicList.Length; i++) {
+                Debug.Log(mMusicList[i] + " : " + mDicMusic[mMusicList[i]].Count);
+            }
+            mOpenComplete = true;
+        }
+
+        IEnumerator CoLoadMusicList(Action<string> actOnLoading) {
             for (int i = 0; i < mMusicList.Length; i++) {
                 actOnLoading(mMusicList[i]);
                 List<MusicData> dataList = new List<MusicData>();
@@ -218,6 +316,12 @@ namespace SoundMax {
         public bool mDefaultJacketImage;
         public Texture mJacketImage;
 
+        public string mAudioName;       // 미리듣기용 오디오
+        public AudioClip mAudioClip;    // 미리듣기용 오디오
+        public float mAudioVolume;      // 미리듣기용 오디오 볼륨
+        public int mPreviewOffset;      // 미리듣기 시작 시간
+        public int mPreviewDuration;    // 미리듣기 지속 시간
+
         public KShootTime mTime = new KShootTime();
         public List<KShootBlock> mListBlocks = new List<KShootBlock>();
 
@@ -228,155 +332,213 @@ namespace SoundMax {
         public void Load(string musicName, Difficulty difficulty, System.Action<bool> afterLoad) {
             mPathName = musicName;
             mDifficulty = difficulty;
-            string ksh = string.Format("{0}{1}{2}.ksh", musicName, Path.DirectorySeparatorChar, DataBase.inst.GetDifficultyPostfix(difficulty));
+            string ksh = string.Format("{0}.ksh", Path.Combine(musicName, DataBase.inst.GetDifficultyPostfix(difficulty)));
 
             mDicSettings.Clear();
             mListBlocks.Clear();
 
             try {
                 string imageName = null;
-                using (StreamReader sr = new StreamReader(Application.streamingAssetsPath + Path.DirectorySeparatorChar + ksh)) {
-                    // setting
-                    string line = "";
-                    while (sr.Peek() >= 0) {
-                        line = sr.ReadLine().Trim();
-
-                        if (line == BLOCK_SEPARATOR)
-                            break;
-
-                        if (string.IsNullOrEmpty(line))
-                            continue;
-
-                        if (line.Substring(0, 2).Equals("//"))
-                            continue;
-
-                        string[] splitted = line.Split('=');
-                        if (splitted.Length > 1) {
-                            mDicSettings.Add(splitted[0], splitted[1]);
-                            if (splitted[0] == "t")
-                                mBpm = int.Parse(splitted[1]);
-                            else if (splitted[0] == "title")
-                                mTitle = splitted[1];
-                            else if (splitted[0] == "artist")
-                                mArtist = splitted[1];
-                            else if (splitted[0] == "effect")
-                                mEffector = splitted[1];
-                            else if (splitted[0] == "illustrator")
-                                mIllustrator = splitted[1];
-                            else if (splitted[0] == "level")
-                                mLevel = int.Parse(splitted[1]);
-                            else if (splitted[0] == "jacket")
-                                imageName = splitted[1];
-                        }
-                    }
-
-                    // note information
-                    int n_count = 0;
-                    KShootBlock block = new KShootBlock();
-                    KShootTick tick = new KShootTick();
-                    mTime.Reset(0, 0);
-                    while (sr.Peek() >= 0) {
-                        line = sr.ReadLine().Trim();
-
-                        if (string.IsNullOrEmpty(line))
-                            continue;
-
-                        n_count++;
-                        // next block create
-                        if (line == BLOCK_SEPARATOR) {
-                            mListBlocks.Add(block);
-                            block = new KShootBlock();
-                            mTime.mIndexBlock++;
-                            mTime.mIndexTick = 0;
-                        } else {
-                            if (line.Substring(0, 2).Equals("//"))
-                                continue;
-                            if (line[0].Equals(";"))
-                                continue;
-
-                            if (line[0].Equals("#")) {
-                                // TODO : 커스텀 fx 이펙트를 설정할 수 있으나 일단 복잡해서 뺌
-                                string[] custom = line.Split(' ');
-                                if (custom.Length != 3) {
-                                    Debug.Log(string.Format("Invalid define found in ksh map @{0}: {1}", n_count, line));
-                                }
-                                KShootEffectDefinition def = new KShootEffectDefinition();
-                                def.mTypeName = custom[1];
-
-                                string[] parameters = custom[2].Split(';');
-                                for (int i = 0; i < parameters.Length; i++) {
-                                    string[] param = parameters[i].Split('=');
-                                    if (param.Length != 2) {
-                                        Debug.Log(string.Format("Invalid parameter in custom effect definition for {0}@{1}: \"{2}\"", def.mTypeName, n_count, line));
-                                        continue;
-                                    }
-                                    def.mParameters.Add(param[0], param[1]);
-                                }
-
-                                if (custom[0] == "#define_fx")
-                                    mDicFxDefine.Add(def.mTypeName, def);
-                                else if (custom[0] == "#define_filter")
-                                    mDicFilterDefine.Add(def.mTypeName, def);
-                                else
-                                    Debug.Log(string.Format("Unkown define statement in ksh @{0}: {1}", n_count, line));
-
-                                continue;
-                            }
-
-                            string[] splitted;
-                            if (line.Contains("=")) {
-                                splitted = line.Split('=');
-                                tick.mDicSetting.Add(splitted[0], splitted[1]);
-                                continue;
-                            }
-
-                            splitted = line.Split('|');
-                            tick.mButtons = splitted[0];
-                            tick.mFx = splitted[1];
-                            tick.mLaser = splitted[2];
-                            if (splitted.Length < 3) {
-                                Debug.Log("text format error : note information malformed");
-                                return;
-                            }
-                            if (splitted[0].Length != 4) {
-                                Debug.Log("text format error : normal button information malformed");
-                                return;
-                            }
-                            if (splitted[1].Length != 2) {
-                                Debug.Log("text format error : fx button information malformed");
-                                return;
-                            }
-                            if (splitted[2].Length < 2) {
-                                Debug.Log("text format error : laser information malformed");
-                                return;
-                            }
-                            if (splitted[2].Length > 2) {
-                                tick.mAdd = splitted[2].Substring(2);
-                                tick.mLaser = splitted[2].Substring(0, 2);
-                            }
-
-                            block.mListTick.Add(tick);
-                            tick = new KShootTick();
-                            mTime.mIndexTick++;
-                        }
-                    }
+                bool success = SetNoteData(Path.Combine(DataBase.inst.musicPath, ksh), ref imageName);
+                if (!success) {
+                    Debug.LogError("unexpected error");
+                    afterLoad(false);
+                    return;
                 }
 
+                string path = Path.Combine(DataBase.inst.musicPath, Path.Combine(mPathName, mAudioName));
+                Action<AudioClip> afterLoadAudio = delegate (AudioClip audio) {
+                    mAudioClip = audio;
+                    afterLoad(true);
+                };
                 if (string.IsNullOrEmpty(imageName)) {
                     mJacketImage = DataBase.inst.mDefaultJacket;
                     mDefaultJacketImage = true;
-                    afterLoad(true);
+                    if (!DataBase.inst.LoadAudio(path, afterLoadAudio))
+                        afterLoad(true);
                 } else {
                     DataBase.inst.LoadImage(musicName, imageName, (texture) => {
                         mJacketImage = texture;
                         mDefaultJacketImage = false;
-                        afterLoad(true);
+                        if (!DataBase.inst.LoadAudio(path, afterLoadAudio))
+                            afterLoad(true);
                     });
                 }
             } catch (Exception e) {
                 Debug.Log("exception : " + e.Message + ", ksh path : " + ksh);
                 afterLoad(false);
             }
+        }
+
+        public async Task<bool> LoadAsync(string musicName, Difficulty difficulty) {
+            mPathName = musicName;
+            mDifficulty = difficulty;
+            string ksh = string.Format("{0}.ksh", Path.Combine(musicName, DataBase.inst.GetDifficultyPostfix(difficulty)));
+
+            mDicSettings.Clear();
+            mListBlocks.Clear();
+
+            try {
+                string imageName = null;
+                bool success = SetNoteData(Path.Combine(DataBase.inst.musicPath, ksh), ref imageName);
+                if (!success) {
+                    Debug.LogError("unexpected error");
+                    return false;
+                }
+
+                if (string.IsNullOrEmpty(imageName)) {
+                    mJacketImage = DataBase.inst.mDefaultJacket;
+                    mDefaultJacketImage = true;
+                    return true;
+                } else {
+                    Texture tex = await DataBase.inst.LoadImageAsync(musicName, imageName);
+                    mJacketImage = tex;
+                    mDefaultJacketImage = false;
+                    return true;
+                }
+            } catch (Exception e) {
+                Debug.Log("exception : " + e.Message + ", ksh path : " + ksh);
+                return false;
+            }
+        }
+
+        bool SetNoteData(string path, ref string imageName) {
+            using (StreamReader sr = new StreamReader(path)) {
+                // setting
+                string line = "";
+                while (sr.Peek() >= 0) {
+                    line = sr.ReadLine().Trim();
+
+                    if (line == BLOCK_SEPARATOR)
+                        break;
+
+                    if (string.IsNullOrEmpty(line))
+                        continue;
+
+                    if (line.Substring(0, 2).Equals("//"))
+                        continue;
+
+                    string[] splitted = line.Split('=');
+                    if (splitted.Length > 1) {
+                        mDicSettings.Add(splitted[0], splitted[1]);
+                        if (splitted[0] == "t")
+                            mBpm = int.Parse(splitted[1]);
+                        else if (splitted[0] == "title")
+                            mTitle = splitted[1];
+                        else if (splitted[0] == "artist")
+                            mArtist = splitted[1];
+                        else if (splitted[0] == "effect")
+                            mEffector = splitted[1];
+                        else if (splitted[0] == "illustrator")
+                            mIllustrator = splitted[1];
+                        else if (splitted[0] == "level")
+                            mLevel = int.Parse(splitted[1]);
+                        else if (splitted[0] == "jacket")
+                            imageName = splitted[1];
+                        else if (splitted[0] == "po")
+                            mPreviewOffset = int.Parse(splitted[1]);
+                        else if (splitted[0] == "plength")
+                            mPreviewDuration = int.Parse(splitted[1]);
+                        else if (splitted[0] == "m")
+                            mAudioName = splitted[1].Split(';')[0];
+                        else if (splitted[0] == "mvol")
+                            mAudioVolume = int.Parse(splitted[1]) / 100.0f;
+                    }
+                }
+
+                // note information
+                int n_count = 0;
+                KShootBlock block = new KShootBlock();
+                KShootTick tick = new KShootTick();
+                mTime.Reset(0, 0);
+                while (sr.Peek() >= 0) {
+                    line = sr.ReadLine().Trim();
+
+                    if (string.IsNullOrEmpty(line))
+                        continue;
+
+                    n_count++;
+                    // next block create
+                    if (line == BLOCK_SEPARATOR) {
+                        mListBlocks.Add(block);
+                        block = new KShootBlock();
+                        mTime.mIndexBlock++;
+                        mTime.mIndexTick = 0;
+                    } else {
+                        if (line.Substring(0, 2).Equals("//"))
+                            continue;
+                        if (line[0].Equals(";"))
+                            continue;
+
+                        if (line[0].Equals("#")) {
+                            // TODO : 커스텀 fx 이펙트를 설정할 수 있으나 일단 복잡해서 뺌
+                            string[] custom = line.Split(' ');
+                            if (custom.Length != 3) {
+                                Debug.Log(string.Format("Invalid define found in ksh map @{0}: {1}", n_count, line));
+                            }
+                            KShootEffectDefinition def = new KShootEffectDefinition();
+                            def.mTypeName = custom[1];
+
+                            string[] parameters = custom[2].Split(';');
+                            for (int i = 0; i < parameters.Length; i++) {
+                                string[] param = parameters[i].Split('=');
+                                if (param.Length != 2) {
+                                    Debug.Log(string.Format("Invalid parameter in custom effect definition for {0}@{1}: \"{2}\"", def.mTypeName, n_count, line));
+                                    continue;
+                                }
+                                def.mParameters.Add(param[0], param[1]);
+                            }
+
+                            if (custom[0] == "#define_fx")
+                                mDicFxDefine.Add(def.mTypeName, def);
+                            else if (custom[0] == "#define_filter")
+                                mDicFilterDefine.Add(def.mTypeName, def);
+                            else
+                                Debug.Log(string.Format("Unkown define statement in ksh @{0}: {1}", n_count, line));
+
+                            continue;
+                        }
+
+                        string[] splitted;
+                        if (line.Contains("=")) {
+                            splitted = line.Split('=');
+                            tick.mDicSetting.Add(splitted[0], splitted[1]);
+                            continue;
+                        }
+
+                        splitted = line.Split('|');
+                        tick.mButtons = splitted[0];
+                        tick.mFx = splitted[1];
+                        tick.mLaser = splitted[2];
+                        if (splitted.Length < 3) {
+                            Debug.Log("text format error : note information malformed");
+                            return false;
+                        }
+                        if (splitted[0].Length != 4) {
+                            Debug.Log("text format error : normal button information malformed");
+                            return false;
+                        }
+                        if (splitted[1].Length != 2) {
+                            Debug.Log("text format error : fx button information malformed");
+                            return false;
+                        }
+                        if (splitted[2].Length < 2) {
+                            Debug.Log("text format error : laser information malformed");
+                            return false;
+                        }
+                        if (splitted[2].Length > 2) {
+                            tick.mAdd = splitted[2].Substring(2);
+                            tick.mLaser = splitted[2].Substring(0, 2);
+                        }
+
+                        block.mListTick.Add(tick);
+                        tick = new KShootTick();
+                        mTime.mIndexTick++;
+                    }
+                }
+            }
+
+            return true;
         }
 
         public bool NextTime() {
