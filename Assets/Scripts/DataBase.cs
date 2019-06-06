@@ -64,16 +64,16 @@ namespace SoundMax {
             fxAudioPath = Path.Combine(Application.streamingAssetsPath, "fxAudio");
 
             // 스트리밍애셋폴더를 뒤져서 동적으로 음악을 가져온다.
-            mMusicList = Directory.GetDirectories(musicPath);
+            mMusicList = Directory.GetDirectories(Path.Combine(Application.streamingAssetsPath, "Music"));
             char[] separator = new char[] { '/', '\\' };
             for (int i = 0; i < mMusicList.Length; i++) {
                 string[] split = mMusicList[i].Split(separator);
                 mMusicList[i] = split[split.Length - 1];
             }
             
-            Task loadAsync = LoadMusicListAsync(actOnLoading);
+            //Task loadAsync = LoadMusicListAsync(actOnLoading);
             //loadAsync.Start();
-            //StartCoroutine(CoLoadMusicList(actOnLoading));
+            StartCoroutine(CoLoadMusicList(actOnLoading));
             //LoadAudio("colorfulsky", AudioType.OGGVORBIS, (audio) => { Debug.Log("load complete"); });
         }
 
@@ -110,7 +110,7 @@ namespace SoundMax {
             if (aType == AudioType.UNKNOWN)
                 return null;
 
-            using (var request = UnityWebRequestMultimedia.GetAudioClip(path, aType)) {
+            using (var request = UnityWebRequestMultimedia.GetAudioClip(path.Replace('\\', '/'), aType)) {
                 await request.SendWebRequest();
 
                 if (request.isNetworkError || request.isHttpError) {
@@ -125,12 +125,12 @@ namespace SoundMax {
             }
         }
 
-        public void LoadAudio(string filename, AudioType extension, Action<AudioClip> onLoadCompleted) {
-            string ksh = string.Format("{0}{1}{0}", filename, Path.DirectorySeparatorChar);
-            if (extension == AudioType.OGGVORBIS) ksh += ".ogg";
-            else if (extension == AudioType.WAV) ksh += ".wav";
-            StartCoroutine(CoLoadAudio(Path.Combine(musicPath, ksh), extension, onLoadCompleted));
-        }
+        //public void LoadAudio(string filename, AudioType extension, Action<AudioClip> onLoadCompleted) {
+        //    string ksh = string.Format("{0}{1}{0}", filename, Path.DirectorySeparatorChar);
+        //    if (extension == AudioType.OGGVORBIS) ksh += ".ogg";
+        //    else if (extension == AudioType.WAV) ksh += ".wav";
+        //    StartCoroutine(CoLoadAudio(Path.Combine(musicPath, ksh), extension, onLoadCompleted));
+        //}
 
         AudioType GetAudioType(string type) {
             if (type == "ogg")
@@ -150,8 +150,8 @@ namespace SoundMax {
                 Debug.Log("오디오 파일이 없습니다. : " + path);
                 return false;
             }
-          
-            AudioType aType = GetAudioType(path.Split('.')[1].ToLower());
+            string[] splitted = path.Split('.');
+            AudioType aType = GetAudioType(splitted[splitted.Length - 1].ToLower());
             if (aType == AudioType.UNKNOWN)
                 return false;
 
@@ -161,7 +161,7 @@ namespace SoundMax {
         }
 
         IEnumerator CoLoadAudio(string url, AudioType extension, Action<AudioClip> onLoadCompleted) {
-            Debug.Log(url);
+            Debug.Log("CoLoadAudio : " + url);
             using (var request = UnityWebRequestMultimedia.GetAudioClip(url, extension)) {
                 yield return request.SendWebRequest();
 
@@ -204,7 +204,7 @@ namespace SoundMax {
         }
 
         IEnumerator CoLoadImage(string url, Action<Texture> onLoadCompleted) {
-            Debug.Log(url);
+            Debug.Log("CoLoadImage : " + url);
             using (var request = UnityWebRequestTexture.GetTexture(url)) {
                 yield return request.SendWebRequest();
 
@@ -226,7 +226,7 @@ namespace SoundMax {
 
         async Task LoadMusicListAsync(Action<string> actOnLoading) {
             for (int i = 0; i < mMusicList.Length; i++) {
-                //actOnLoading(mMusicList[i]);
+                actOnLoading(mMusicList[i]);
                 List<MusicData> dataList = new List<MusicData>();
                 for (Difficulty j = Difficulty.Novice; j <= Difficulty.Infinity; j++) {
                     MusicData data = new MusicData();
@@ -354,14 +354,16 @@ namespace SoundMax {
                 if (string.IsNullOrEmpty(imageName)) {
                     mJacketImage = DataBase.inst.mDefaultJacket;
                     mDefaultJacketImage = true;
-                    if (!DataBase.inst.LoadAudio(path, afterLoadAudio))
+                    if (!DataBase.inst.LoadAudio(path, afterLoadAudio)) {
                         afterLoad(true);
+                    }
                 } else {
                     DataBase.inst.LoadImage(musicName, imageName, (texture) => {
                         mJacketImage = texture;
                         mDefaultJacketImage = false;
-                        if (!DataBase.inst.LoadAudio(path, afterLoadAudio))
+                        if (!DataBase.inst.LoadAudio(path, afterLoadAudio)) {
                             afterLoad(true);
+                        }
                     });
                 }
             } catch (Exception e) {

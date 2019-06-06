@@ -77,6 +77,8 @@ namespace SoundMax {
         public Color mHealthUnder70 = new Color(118f / 255f, 1f, 1f, 1f);  // 체력 70% 미만일 때의 컬러값
         public Color mHealthOver70 = Color.white;      // 체력 70% 이상일 때의 컬러값
         UISprite mSprMaximizeBar;               // 우측의 체력 게이지
+        GameObject mMaximizeBg;                 // 맥시마이즈 상태에서 나오는 백판
+        GameObject mMaximizeSprite;             // 맥시마이즈 상태에서 나오는 스프라이트
 
         UILabel mLabelCombo;                    // 트랙 가운데 뜨는 콤보 텍스트
         TweenScale mComboTweenScale;            // 트랙 가운데 뜨는 콤보의 스케일 트윈
@@ -138,6 +140,8 @@ namespace SoundMax {
             mLabelBoardCombo = scoreBoard.Find("ComboLabel").GetComponent<UILabel>();
             mSprHealthBar = transform.FindRecursive("HPRemain").GetComponent<UISprite>();
             mSprMaximizeBar = transform.FindRecursive("FeverGuage").GetComponent<UISprite>();
+            mMaximizeBg = transform.FindRecursive("MaximizeBG").gameObject;
+            mMaximizeSprite = transform.FindRecursive("MaximizeSprite").gameObject;
 
             Transform musicInfo = transform.FindRecursive("MusicInfo");
             mJacketImage = musicInfo.Find("JacketImage").GetComponent<UITexture>();
@@ -323,6 +327,8 @@ namespace SoundMax {
             m_ended = false;
             mForceEnd = false;
             mMaximizeMode = false;
+            mMaximizeBg.SetActive(false);
+            mMaximizeSprite.SetActive(false);
 
             // Playback and timing
             m_playback.SetBeatmap(m_beatmap); 
@@ -992,6 +998,8 @@ namespace SoundMax {
             m_scoring.FinishGame();
             m_camera.ResetVal();
             m_audioPlayback.Stop();
+            mMaximizeBg.SetActive(false);
+            mMaximizeSprite.SetActive(false);
             m_ended = true;
             mPlaying = false;
 
@@ -1209,6 +1217,11 @@ namespace SoundMax {
             StartCoroutine(CoMaximizeTime());
         }
         IEnumerator CoMaximizeTime() {
+            mMaximizeBg.SetActive(true);
+            TweenAlpha alpha = mMaximizeSprite.GetComponent<TweenAlpha>();
+            mMaximizeSprite.SetActive(true);
+            alpha.ResetToBeginning();
+
             WaitForSeconds waitTime = new WaitForSeconds(0.1f);
             for(int i = 0; i < MAXIMIZE_STAY_TIME; i++) {
                 for (int j = 0; j < 10; j++) {
@@ -1216,6 +1229,8 @@ namespace SoundMax {
                     yield return waitTime;
                 }
             }
+            mMaximizeBg.SetActive(false);
+            mMaximizeSprite.SetActive(false);
             mMaximizeMode = false;
         }
     }

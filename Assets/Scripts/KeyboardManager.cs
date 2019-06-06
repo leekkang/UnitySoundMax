@@ -84,12 +84,10 @@ public class KeyboardManager : Singleton<KeyboardManager> {
 
         // 피버 게이지 증가
         if (info[(int)InputCode.B, index].stay) {
-            Debug.Log("fever stay");
             IngameEngine.inst.UpdateMaximizeGuage(IngameEngine.STAY_MAXIMIZE_PERCENT * Time.deltaTime);
         }
         // 피버 클릭
         if (info[(int)InputCode.B, index].down) {
-            Debug.Log("fever down");
             IngameEngine.inst.StartMaximizeTime();
         }
 
