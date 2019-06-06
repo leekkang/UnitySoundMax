@@ -7,7 +7,8 @@ using UnityEngine;
 namespace SoundMax {
     public class SoundManager : Singleton<SoundManager> {
         public const float PREVIEW_PLAY_DELAY = 0.5f;
-        public const float PREVIEW_PLAY_FADE_TIME = 0.5f;
+        public const float PREVIEW_PLAY_FADE_IN_TIME = 0.5f;
+        public const float PREVIEW_PLAY_FADE_OUT_TIME = 1f;
         public const float PREVIEW_PLAY_CHANGE_MUSIC_TIME = 1f;
 
         bool mPlayingPreview;
@@ -63,14 +64,14 @@ namespace SoundMax {
 
             mPreviewAudio.clip = data.mAudioClip;
             float previewLength = data.mPreviewDuration * 0.001f;
-            WaitForSeconds waitFade = new WaitForSeconds(previewLength - PREVIEW_PLAY_FADE_TIME * 2);
+            WaitForSeconds waitFade = new WaitForSeconds(previewLength - PREVIEW_PLAY_FADE_IN_TIME - PREVIEW_PLAY_FADE_OUT_TIME);
 
             mPlayingPreview = true;
             while (true) {
                 mPreviewAudio.time = data.mPreviewOffset * 0.001f;
-                yield return FadeIn(mPreviewAudio, data.mAudioVolume, PREVIEW_PLAY_FADE_TIME);
+                yield return FadeIn(mPreviewAudio, data.mAudioVolume, PREVIEW_PLAY_FADE_IN_TIME);
                 yield return waitFade;
-                yield return FadeOut(mPreviewAudio, PREVIEW_PLAY_FADE_TIME, null);
+                yield return FadeOut(mPreviewAudio, PREVIEW_PLAY_FADE_OUT_TIME, null);
                 yield return new WaitForSeconds(PREVIEW_PLAY_CHANGE_MUSIC_TIME);
             }
         }
@@ -109,7 +110,7 @@ namespace SoundMax {
                 mCoPlayPreview = null;
             }
 
-            StartCoroutine(FadeOut(mPreviewAudio, PREVIEW_PLAY_FADE_TIME, () => { mPlayingPreview = false; }));
+            StartCoroutine(FadeOut(mPreviewAudio, PREVIEW_PLAY_FADE_OUT_TIME, () => { mPlayingPreview = false; }));
         }
     }
     

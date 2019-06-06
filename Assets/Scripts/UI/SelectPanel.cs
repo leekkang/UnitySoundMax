@@ -133,7 +133,7 @@ namespace SoundMax {
                                       clearStatus == 1 ? "Result_Destroyed" : "";
         }
 
-        void PlayPreviewMusic() {
+        public void PlayPreviewMusic() {
             string music = DataBase.inst.mMusicList[mCurIndex];
             MusicSaveData savedData = DataBase.inst.mUserData.GetMusicData(music);
             MusicData musicData = DataBase.inst.mDicMusic[music][savedData.mDifficulty];

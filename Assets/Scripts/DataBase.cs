@@ -9,7 +9,7 @@ using Unity.Jobs;
 
 namespace SoundMax {
     public class DataBase : Singleton<DataBase> {
-        public string[] mMusicList = {
+        public string[] mMusicList;/* = {
             "max_burning",
             "xross_infection",
             "dignity",
@@ -27,7 +27,7 @@ namespace SoundMax {
             "trueblue",
             "vision",
             "world_vertex"
-        };
+        };*/
 
         public string musicPath;
         public string fxAudioPath;

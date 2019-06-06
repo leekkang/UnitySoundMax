@@ -237,6 +237,7 @@ namespace SoundMax {
 
             SelectPanel sel = (SelectPanel)GuiManager.inst.GetPanel(PanelType.Select);
             sel.UpdateMusicMetaData();
+            sel.PlayPreviewMusic();
             GuiManager.inst.ActivatePanel(PanelType.Select, true);
         }
 
