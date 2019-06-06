@@ -67,6 +67,10 @@ namespace SoundMax {
         /// Hold buttons, lasers, etc. give 2 points per tick
         /// </summary>
         public int maxScore;
+
+        public int GetWholeNoteNum() {
+            return numSingles + numTicks;
+        }
     }
 
     public class HitStat {
@@ -76,11 +80,11 @@ namespace SoundMax {
         public ScoreHitRating rating;
 
         // Hold state
-        // This is the amount of gotten ticks in a hold sequence
+        /// <summary> 현재 롱노트, 레이저 노트를 맞춘 개수 </summary>
         public uint hold;
-        // This is the amount of total ticks in this hold sequence
+        /// <summary> 현재 롱노트, 레이저 노트의 전체 개수 </summary>
         public uint holdMax;
-        // If at least one hold tick has been missed
+        /// <summary> 한번이라도 미스가 났는지 확인 </summary>
         public bool hasMissed = false;
 
         public HitStat(ObjectDataBase src) {
@@ -1105,6 +1109,10 @@ namespace SoundMax {
             }
 
             return ret;
+        }
+
+        public int GetWholeNoteNum() {
+            return mapTotals.numSingles + mapTotals.numTicks;
         }
 
         public int CalculateCurrentScore() {

@@ -878,7 +878,7 @@ namespace SoundMax {
                 TickGameplay(deltaTime);
 
             if (mForceEnd)
-                FinishGame();
+                FinishGame(true);
         }
 
         // Processes input and Updates scoring, also handles audio timing management
@@ -918,7 +918,7 @@ namespace SoundMax {
 
             // Stop playing if gauge is on hard and at 0%
             if ((mGameFlag & GameFlags.Hard) != GameFlags.None && m_scoring.currentGauge == 0f) {
-                FinishGame();
+                FinishGame(true);
             }
             
             // Update scoring
@@ -955,7 +955,7 @@ namespace SoundMax {
             }
 
             if (m_audioPlayback.HasEnded()) {
-                FinishGame();
+                FinishGame(false);
             }
 
             // 카메라 회전
@@ -1002,7 +1002,7 @@ namespace SoundMax {
         }
 
         /// <summary> 게임이 끝났으면 호출 </summary>
-        void FinishGame() {
+        void FinishGame(bool forceEnd) {
             if (m_ended)
                 return;
 
@@ -1016,7 +1016,7 @@ namespace SoundMax {
 
             if (!m_paused) {
                 ResultPanel result = (ResultPanel)GuiManager.inst.GetPanel(PanelType.Result);
-                result.UpdateView();
+                result.UpdateView(forceEnd);
                 GuiManager.inst.ActivatePanel(PanelType.Result, true);
                 result.StartPlay();
             }
@@ -1056,7 +1056,8 @@ namespace SoundMax {
             if (rate == ScoreHitRating.Good) {
                 UpdateMaximizeGuage(SINGLENOTE_MAXIMIZE_PERCENT * 0.5f);
             } else if (rate == ScoreHitRating.Perfect) {
-                UpdateMaximizeGuage(index < 6 ? SINGLENOTE_MAXIMIZE_PERCENT : LONGNOTE_MAXIMIZE_PERCENT);
+                UpdateMaximizeGuage(index < 4 ? SINGLENOTE_MAXIMIZE_PERCENT : 
+                                    index < 6 ? LONGNOTE_MAXIMIZE_PERCENT : LONGNOTE_MAXIMIZE_PERCENT * 0.5f);
             }
         }
 
@@ -1180,7 +1181,7 @@ namespace SoundMax {
             } else if (key == EventKey.SlamVolume) {
                 m_slamSample.volume = data.mFloatVal * 0.4f;
             } else if (key == EventKey.ChartEnd) {
-                FinishGame();
+                FinishGame(false);
             }
         }
 

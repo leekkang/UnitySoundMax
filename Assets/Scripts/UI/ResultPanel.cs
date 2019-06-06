@@ -4,52 +4,68 @@ using UnityEngine;
 
 namespace SoundMax {
     public class ResultPanel : PanelBase {
+        TweenPosition mTweenTop;
         UITexture mJacketImage;
         UILabel mLabelName;
         UILabel mLabelLevel;
 
         TweenPosition mTweenRight;
         UILabel mLabelScore;
+        UILabel mLabelCombo;
         UILabel mLabelDmaxNum;
         UILabel mLabelMaxNum;
         UILabel mLabelMissNum;
         UISprite mSprGuage;
+        UILabel mLabelGuage;
 
         TweenPosition mTweenLeft;
         UISprite mSprRank;
         UISprite mSprResult;
+        UILabel mLabelClearRate;
+
+        TweenPosition mTweenBottom;
+        UILabel mLabelScoreDelta;
+        UILabel mLabelClearRateDelta;
 
         bool mTweening;
+        int mClearRate;
+        int mScoreDelta;
+        int mClearRateDelta;
         
         /// <summary> 해당 패널의 초기화에 필요한 정보를 로드하는 함수 </summary>
         public override void Init() {
             base.Init();
 
-            Transform tr = transform.Find("MusicInfo");
+            mTweenTop = transform.Find("TweenTop").GetComponent<TweenPosition>();
+            Transform tr = mTweenTop.transform.Find("MusicInfo");
             mJacketImage = tr.Find("JacketTexture").GetComponent<UITexture>();
             mLabelName = tr.Find("name").GetComponent<UILabel>();
             mLabelLevel = tr.Find("level").GetComponent<UILabel>();
 
+            mTweenLeft = transform.Find("TweenLeft").GetComponent<TweenPosition>();
+            mSprRank = mTweenLeft.transform.FindRecursive("RankSprite").GetComponent<UISprite>();
+            mSprResult = mTweenLeft.transform.FindRecursive("ResultSprite").GetComponent<UISprite>();
+            mLabelClearRate = mTweenLeft.transform.FindRecursive("RateLabel").GetComponent<UILabel>();
+
             mTweenRight = transform.Find("TweenRight").GetComponent<TweenPosition>();
-            mLabelScore = mTweenRight.transform.FindRecursive("ScoreLabel").GetComponent<UILabel>();
+            mLabelScore = transform.FindRecursive("ScoreLabel").GetComponent<UILabel>();
+            mLabelCombo = transform.FindRecursive("ComboLabel").GetComponent<UILabel>();
             tr = mTweenRight.transform.Find("StatusPanel");
             mLabelDmaxNum = tr.Find("DmaxLabel").GetComponent<UILabel>();
             mLabelMaxNum = tr.Find("MaxLabel").GetComponent<UILabel>();
             mLabelMissNum = tr.Find("MissLabel").GetComponent<UILabel>();
             mSprGuage = tr.FindRecursive("HPRemain").GetComponent<UISprite>();
+            mLabelGuage = tr.Find("HPLabel").GetComponent<UILabel>();
 
-            mTweenLeft = transform.Find("TweenLeft").GetComponent<TweenPosition>();
-            mSprRank = mTweenLeft.transform.FindRecursive("RankSprite").GetComponent<UISprite>();
-            mSprResult = mTweenLeft.transform.FindRecursive("ResultSprite").GetComponent<UISprite>();
+            mTweenBottom = transform.Find("TweenBottom").GetComponent<TweenPosition>();
+            mLabelScoreDelta = mTweenBottom.transform.FindRecursive("TotalScoreLabel").GetComponent<UILabel>();
+            mLabelClearRateDelta = mTweenBottom.transform.FindRecursive("ClearRateLabel").GetComponent<UILabel>();
         }
 
-        public void UpdateView() {
+        public void UpdateView(bool forceEnd) {
             mTweening = true;
             IngameEngine.inst.SetUIActivity(false);
-            mTweenLeft.ResetToBeginning();
-            mTweenLeft.enabled = false;
-            mTweenRight.ResetToBeginning();
-            mTweenRight.enabled = false;
+            ResetTween();
 
             // music info
             MusicData data = IngameEngine.inst.mMusicData;
@@ -61,6 +77,7 @@ namespace SoundMax {
             // score, status
             int score = Scoring.inst.CalculateCurrentScore();
             mLabelScore.text = "0";
+            mLabelCombo.text = "0";
             mLabelDmaxNum.text = "0";
             mLabelMaxNum.text = "0";
             mLabelMissNum.text = "0";
@@ -85,18 +102,20 @@ namespace SoundMax {
             TweenAlpha resultAlpha = mSprResult.GetComponent<TweenAlpha>();
             resultAlpha.ResetToBeginning();
             mSprResult.gameObject.SetActive(false);
+            mLabelClearRate.text = "0";
 
             // guage
             mSprGuage.fillAmount = 0;
             mSprGuage.color = IngameEngine.inst.mHealthUnder70;
+            mLabelGuage.text = "0";
             
             // user data
             int musicIndex = ((SelectPanel)GuiManager.inst.GetPanel(PanelType.Select)).mCurIndex;
             MusicSaveData tmpData = DataBase.inst.mUserData.GetMusicData(DataBase.inst.mMusicList[musicIndex]);
             MusicDifficultySaveData savedData = tmpData.mListPlayData[(int)data.mDifficulty];
-            int prevScore = savedData.mScore;
+            mScoreDelta = score - savedData.mScore;
             // save hiscore status
-            if (prevScore < score) {
+            if (savedData.mScore < score) {
                 savedData.mScore = score;
                 savedData.mDmaxNum = dmaxNum;
                 savedData.mMaxNum = maxNum;
@@ -109,9 +128,27 @@ namespace SoundMax {
             }
 
             // information
-            int totalNote = dmaxNum + maxNum + missNum;
-            int clearRate = (int)((dmaxNum + maxNum * .5f) * 100 / totalNote);
-            string rate = string.Format("{0:f2}%", clearRate * 0.01f);
+            // 전체 노트랑 판정나온 개수가 달라서 임시방편으로 해결봄. 시간나면 확인
+            int totalNote = forceEnd ? Scoring.inst.GetWholeNoteNum() : dmaxNum + maxNum + missNum;
+            mClearRate = (int)((dmaxNum + maxNum * .5f) * 10000 / totalNote);
+            mClearRateDelta = mClearRate - savedData.mClearRate;
+            savedData.mClearRate = mClearRate;
+
+            mLabelScoreDelta.text = "0";
+            mLabelClearRateDelta.text = "0";
+            //string rate = string.Format("{0}", (int)Mathf.Round(mClearRateDelta * 0.01f));
+            //string rate = string.Format("{0:f2}%", mClearRateDelta * 0.01f);
+        }
+
+        void ResetTween() {
+            mTweenTop.ResetToBeginning();
+            mTweenTop.enabled = false;
+            mTweenLeft.ResetToBeginning();
+            mTweenLeft.enabled = false;
+            mTweenRight.ResetToBeginning();
+            mTweenRight.enabled = false;
+            mTweenBottom.ResetToBeginning();
+            mTweenBottom.enabled = false;
         }
 
         public void StartPlay() {
@@ -119,20 +156,28 @@ namespace SoundMax {
         }
 
         IEnumerator CoPlay() {
+            mTweenTop.PlayForward();
             mTweenLeft.PlayForward();
             mTweenRight.PlayForward();
+            mTweenBottom.PlayForward();
 
             yield return new WaitForSeconds(mTweenLeft.duration);
 
+            EasingFunction.Function func = EasingFunction.GetEasingFunction(EasingFunction.Ease.EaseOutCubic);
+
             // score, status
             float score = Scoring.inst.CalculateCurrentScore();
-            EasingFunction.Function func = EasingFunction.GetEasingFunction(EasingFunction.Ease.EaseOutCubic);
+            float combo = Scoring.inst.maxComboCounter;
+            float clearRate = mClearRate * 0.01f;
+            float clearRateDelta = mClearRateDelta * 0.01f;
 
             float dmaxNum = Scoring.inst.categorizedHits[2];
             float maxNum = Scoring.inst.categorizedHits[1];
             float missNum = Scoring.inst.categorizedHits[0];
             float maxGuage = Scoring.inst.currentGauge;
             bool bChangeGuage = false;
+
+            string deltaFormat = mScoreDelta < 0 ? "{0}" : "+{0}";
 
             float maxTime = 1f;
             float curTime = 0f;
@@ -141,6 +186,7 @@ namespace SoundMax {
             while (maxTime + 0.03f >= curTime) {
                 float t = curTime / maxTime;
                 mLabelScore.text = ((int)Mathf.Round(func(0f, score, t))).ToString();
+                mLabelCombo.text = ((int)Mathf.Round(func(0f, combo, t))).ToString();
                 mLabelDmaxNum.text = ((int)Mathf.Round(func(0f, dmaxNum, t))).ToString();
                 mLabelMaxNum.text = ((int)Mathf.Round(func(0f, maxNum, t))).ToString();
                 mLabelMissNum.text = ((int)Mathf.Round(func(0f, missNum, t))).ToString();
@@ -150,6 +196,11 @@ namespace SoundMax {
                     mSprGuage.color = IngameEngine.inst.mHealthOver70;
                     bChangeGuage = true;
                 }
+                mLabelGuage.text = ((int)Mathf.Round(mSprGuage.fillAmount * 100f)).ToString();
+
+                mLabelClearRate.text = ((int)Mathf.Round(func(0f, clearRate, t))).ToString();
+                mLabelScoreDelta.text = string.Format(deltaFormat, (int)Mathf.Round(func(0f, mScoreDelta, t)));
+                mLabelClearRateDelta.text = string.Format(deltaFormat, (int)Mathf.Round(func(0f, clearRateDelta, t)));
 
                 curTime += interval;
                 yield return waitSecond;

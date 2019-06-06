@@ -104,7 +104,7 @@ namespace SoundMax {
                 IngameEngine.inst.Restart();
             } else {
                 ResultPanel result = (ResultPanel)GuiManager.inst.GetPanel(PanelType.Result);
-                result.UpdateView();
+                result.UpdateView(true);
                 GuiManager.inst.ActivatePanel(PanelType.Result, true);
                 result.StartPlay();
             }
