@@ -169,7 +169,7 @@ namespace SoundMax {
         int[] m_buttonGuardTime = new int[6];
 
         // 레이저 노트 최초 진입 시 마커 자동 도우미 시간
-        float m_assistLevel = .5f;
+        float m_assistLevel = 0.2f;
         float m_assistSlamBoost = 1f;
         float m_assistPunish = 1.5f;
         float m_assistTime = 0.0f;

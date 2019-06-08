@@ -73,7 +73,7 @@ MonoBehaviour:
     paddingBottom: 0
   - name: Combo
     x: 443
-    y: 26
+    y: 28
     width: 1000
     height: 107
     borderLeft: 0
@@ -137,8 +137,8 @@ MonoBehaviour:
     paddingTop: 0
     paddingBottom: 0
   - name: HP_Percentage
-    x: 2788
-    y: 1017
+    x: 2520
+    y: 924
     width: 125
     height: 70
     borderLeft: 0
@@ -151,7 +151,7 @@ MonoBehaviour:
     paddingBottom: 0
   - name: Ingame_Music_Inform
     x: 443
-    y: 152
+    y: 154
     width: 699
     height: 384
     borderLeft: 0
@@ -176,8 +176,8 @@ MonoBehaviour:
     paddingTop: 0
     paddingBottom: 0
   - name: Judge_MAX
-    x: 3303
-    y: 1376
+    x: 3246
+    y: 859
     width: 475
     height: 106
     borderLeft: 0
@@ -214,6 +214,19 @@ MonoBehaviour:
     paddingRight: 0
     paddingTop: 0
     paddingBottom: 0
+  - name: Maximize_Alarm
+    x: 3150
+    y: 24
+    width: 565
+    height: 61
+    borderLeft: 0
+    borderRight: 0
+    borderTop: 0
+    borderBottom: 0
+    paddingLeft: 0
+    paddingRight: 0
+    paddingTop: 0
+    paddingBottom: 0
   - name: Maximize_Bar
     x: 2353
     y: 910
@@ -240,9 +253,35 @@ MonoBehaviour:
     paddingRight: 0
     paddingTop: 0
     paddingBottom: 0
+  - name: Nobe_Alarm_Left
+    x: 2788
+    y: 920
+    width: 127
+    height: 167
+    borderLeft: 0
+    borderRight: 0
+    borderTop: 0
+    borderBottom: 0
+    paddingLeft: 0
+    paddingRight: 0
+    paddingTop: 0
+    paddingBottom: 0
+  - name: Nobe_Alarm_Right
+    x: 3303
+    y: 1072
+    width: 127
+    height: 167
+    borderLeft: 0
+    borderRight: 0
+    borderTop: 0
+    borderBottom: 0
+    paddingLeft: 0
+    paddingRight: 0
+    paddingTop: 0
+    paddingBottom: 0
   - name: Nobe_Guide_L
-    x: 1143
-    y: 134
+    x: 2052
+    y: 1250
     width: 300
     height: 798
     borderLeft: 0
@@ -254,8 +293,8 @@ MonoBehaviour:
     paddingTop: 0
     paddingBottom: 0
   - name: Nobe_Guide_R
-    x: 2052
-    y: 1250
+    x: 1143
+    y: 136
     width: 300
     height: 798
     borderLeft: 0
@@ -320,7 +359,7 @@ MonoBehaviour:
     paddingBottom: 0
   - name: Nobe_Right
     x: 3060
-    y: 966
+    y: 1240
     width: 273
     height: 242
     borderLeft: 0
@@ -333,7 +372,7 @@ MonoBehaviour:
     paddingBottom: 0
   - name: Nobe_Right_Corner
     x: 3060
-    y: 1209
+    y: 966
     width: 242
     height: 273
     borderLeft: 0
@@ -397,8 +436,8 @@ MonoBehaviour:
     paddingTop: 21
     paddingBottom: 0
   - name: NormalNote
-    x: 2052
-    y: 922
+    x: 3060
+    y: 935
     width: 150
     height: 30
     borderLeft: 0
@@ -411,20 +450,20 @@ MonoBehaviour:
     paddingBottom: 0
   - name: Pannel_Bottom
     x: 443
-    y: 1406
+    y: 1408
     width: 1080
-    height: 642
+    height: 640
     borderLeft: 0
     borderRight: 0
     borderTop: 0
     borderBottom: 0
     paddingLeft: 0
     paddingRight: 0
-    paddingTop: 0
+    paddingTop: 2
     paddingBottom: 0
   - name: Pannel_Upside
     x: 443
-    y: 933
+    y: 935
     width: 1080
     height: 472
     borderLeft: 0
@@ -437,7 +476,7 @@ MonoBehaviour:
     paddingBottom: 0
   - name: Scoreboard
     x: 443
-    y: 537
+    y: 539
     width: 691
     height: 395
     borderLeft: 0

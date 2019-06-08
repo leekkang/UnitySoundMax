@@ -46,7 +46,7 @@ MonoBehaviour:
   material: {fileID: 2100000, guid: f15aaa4efa2043640b29ff1000a0a86b, type: 2}
   mSprites:
   - name: BackPannel
-    x: 844
+    x: 1790
     y: 1287
     width: 733
     height: 761
@@ -58,6 +58,19 @@ MonoBehaviour:
     paddingRight: 0
     paddingTop: 0
     paddingBottom: 0
+  - name: Music_Select_Alarm
+    x: 838
+    y: 555
+    width: 1080
+    height: 575
+    borderLeft: 0
+    borderRight: 0
+    borderTop: 0
+    borderBottom: 0
+    paddingLeft: 0
+    paddingRight: 0
+    paddingTop: 5
+    paddingBottom: 1
   - name: select_cursor
     x: 0
     y: 219
@@ -85,8 +98,8 @@ MonoBehaviour:
     paddingTop: 1
     paddingBottom: 1
   - name: UpsidePannel
-    x: 838
-    y: 503
+    x: 844
+    y: 1421
     width: 945
     height: 627
     borderLeft: 0
@@ -98,8 +111,8 @@ MonoBehaviour:
     paddingTop: 1
     paddingBottom: 0
   - name: UpsidePannel_Difficulty_ADV
-    x: 1706
-    y: 1729
+    x: 844
+    y: 1261
     width: 127
     height: 159
     borderLeft: 0
@@ -111,8 +124,8 @@ MonoBehaviour:
     paddingTop: 0
     paddingBottom: 0
   - name: UpsidePannel_Difficulty_EXH
-    x: 1578
-    y: 1889
+    x: 972
+    y: 1261
     width: 127
     height: 159
     borderLeft: 0
@@ -124,8 +137,8 @@ MonoBehaviour:
     paddingTop: 0
     paddingBottom: 0
   - name: UpsidePannel_Difficulty_INF
-    x: 1578
-    y: 1729
+    x: 1228
+    y: 1261
     width: 127
     height: 159
     borderLeft: 0
@@ -137,8 +150,8 @@ MonoBehaviour:
     paddingTop: 0
     paddingBottom: 0
   - name: UpsidePannel_Difficulty_NOV
-    x: 1706
-    y: 1889
+    x: 1100
+    y: 1261
     width: 127
     height: 159
     borderLeft: 0

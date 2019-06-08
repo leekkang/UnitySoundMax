@@ -46,8 +46,6 @@ namespace SoundMax {
             mTweenFirst = mLoadingPanel.transform.Find("TweenFirst").GetComponent<TweenPosition>();
             mTweenSecond = mLoadingPanel.transform.Find("TweenSecond").GetComponent<TweenPosition>();
             mLoadingSprite = mLoadingPanel.transform.FindRecursive("Background").gameObject;
-            mLoadingInfo1 = mLoadingPanel.transform.FindRecursive("Info1").GetComponent<UILabel>();
-            mLoadingInfo2 = mLoadingPanel.transform.FindRecursive("Info2").GetComponent<UILabel>();
 
             mDicPanel.Add((int)PanelType.Main, transform.Find("MainPanel").GetComponent<PanelBase>());
             mDicPanel.Add((int)PanelType.Select, transform.Find("SelectPanel").GetComponent<PanelBase>());
@@ -184,8 +182,6 @@ namespace SoundMax {
 
         public void PlayLoading(string info1, string info2) {
             mLoading = true;
-            mLoadingInfo1.text = info1;
-            mLoadingInfo2.text = info2;
             StartCoroutine(CoPlayLoading());
         }
 
