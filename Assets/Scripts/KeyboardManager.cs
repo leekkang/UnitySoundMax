@@ -79,6 +79,12 @@ public class KeyboardManager : Singleton<KeyboardManager> {
                 Debug.Log("autoplay : " + Scoring.inst.autoplay);
             }
 
+            // 레이저 마우스 조작 전환
+            if (info[(int)InputCode.P, index].down) {
+                mIsLaserUseMouse = !mIsLaserUseMouse;
+                Debug.Log("user mouse for laser : " + mIsLaserUseMouse);
+            }
+
             return;
         }
 

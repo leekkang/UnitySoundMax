@@ -12,7 +12,7 @@ GameObject:
   - component: {fileID: 2241938439704756346}
   - component: {fileID: 2837746335202571584}
   - component: {fileID: 4185157722093297689}
-  m_Layer: 11
+  m_Layer: 5
   m_Name: ObjectLaserAlert
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -86,7 +86,7 @@ MonoBehaviour:
   bottomType: 1
   topType: 1
   mAtlas: {fileID: 1173416172374522772, guid: 44755db7625569643b2476e1aea5e1a5, type: 3}
-  mSpriteName: Nobe_Tracker_L
+  mSpriteName: Nobe_Alarm_Left
   mFillCenter: 1
 --- !u!114 &2837746335202571584
 MonoBehaviour:

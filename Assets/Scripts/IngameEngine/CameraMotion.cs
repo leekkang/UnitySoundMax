@@ -37,6 +37,7 @@ namespace SoundMax {
         public void Start() {
             //mRadius = (int)transform.Find("CameraRotationCenter").localPosition.y;
             mOriginAngle = transform.localRotation;
+            mOriginPos = transform.localPosition;
             mTiltIntensity = 1f;
 
             for (int i = 0; i <= 900; i++) {
@@ -48,10 +49,17 @@ namespace SoundMax {
         }
 
         public void ResetVal() {
+            mListCurSpins.Clear();
+            mTiltIntensity = 1f;
+            mShakeDuration = 0f;
             transform.localPosition = mOriginPos;
             transform.localRotation = mOriginAngle;
-            mTiltIntensity = 1f;
-            mListCurSpins.Clear();
+            mLastDegreeByLaser[0] = 0;
+            mLastDegreeByLaser[1] = 0;
+            mLastDestDegreeByLaser[0] = 0;
+            mLastDestDegreeByLaser[1] = 0;
+            mLastLaserValue[0] = 0f;
+            mLastLaserValue[1] = 0f;
         }
 
         public void SetOriginPos() {
@@ -85,7 +93,7 @@ namespace SoundMax {
             // 계산된 각도를 카메라에 적용
             transform.localRotation = Quaternion.Euler(-87f, 0f, degree * .1f);
             //MoveCameraByDegree(NormalizeDegree(degree));
-            
+
             // 카메라 쉐이크 적용
             if (mShakeDuration > 0) {
                 mShakeDuration -= delta * 1000f;

@@ -344,7 +344,8 @@ namespace SoundMax {
 
                 HitStat stat = new HitStat(rootLaser);
                 hitStats.Add(stat);
-                m_holdHitStats.Add(obj, stat);
+                if (!m_holdHitStats.ContainsKey(obj))
+                    m_holdHitStats.Add(obj, stat);
 
                 // Get tick count
                 List<ScoreTick> ticks = m_CalculateLaserTicks(rootLaser);
@@ -775,6 +776,8 @@ namespace SoundMax {
 
                 stat.rating = ScoreHitRating.Perfect;
                 stat.hold++;
+                
+                IngameEngine.inst.UpdateMaximizeGuage(laser.mIndex + 6, ScoreHitRating.Perfect);
             }
             m_OnTickProcessed(tick, index);
 
@@ -994,7 +997,7 @@ namespace SoundMax {
                     bHitLaser = true;
 
                     // 레이저 판정 출력
-                    IngameEngine.inst.PrintJudgement(i + 6, ScoreHitRating.Perfect, laserPositions[i]);
+                    IngameEngine.inst.PrintJudgement(i + 6, ScoreHitRating.Perfect, laserPositions[i], false);
 
                     // 레이저 파티클 재생
                     if (mLaserParticle[i] == null)

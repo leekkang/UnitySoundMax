@@ -339,7 +339,7 @@ namespace SoundMax {
             m_playback.Reset(0);
 
             // Set camera start position
-            //m_camera.ResetVal();
+            m_camera.ResetVal();
             //m_camera.pLaneZoom = m_playback.GetZoom(0);
             //m_camera.pLanePitch = m_playback.GetZoom(1);
             //m_camera.pLaneOffset = m_playback.GetZoom(2);
@@ -439,14 +439,14 @@ namespace SoundMax {
             mLaserAlertObject[0] = Instantiate(nobeObject, overTrack).GetComponent<DisappearObject>();
             mLaserAlertObject[0].transform.localPosition = pos;
             mLaserAlertObject[0].Open(1.3f, 0.3f);
-            mLaserAlertObject[0].GetComponent<UISprite>().spriteName = "Nobe_Tracker_L";
+            mLaserAlertObject[0].GetComponent<UISprite>().spriteName = "Nobe_Alarm_Left";
             mLaserAlertObject[0].ResetTime();
 
             pos = new Vector3(420f, -240f, 0f);
             mLaserAlertObject[1] = Instantiate(nobeObject, overTrack).GetComponent<DisappearObject>();
             mLaserAlertObject[1].transform.localPosition = pos;
             mLaserAlertObject[1].Open(1.3f, 0.3f);
-            mLaserAlertObject[1].GetComponent<UISprite>().spriteName = "Nobe_Tracker_R";
+            mLaserAlertObject[1].GetComponent<UISprite>().spriteName = "Nobe_Alarm_Right";
             mLaserAlertObject[1].ResetTime();
 
             // make judgement object
@@ -778,7 +778,7 @@ namespace SoundMax {
                 }
             }
 
-            Debug.Log("length : " + mListObj.Count);
+            //Debug.Log("length : " + mListObj.Count);
 
             // 트랙 눕히기
             //mTrackAnchor.parent.localRotation = Quaternion.Euler(new Vector3(68f, 0f, 0f));
@@ -935,6 +935,11 @@ namespace SoundMax {
                 }
             }
 
+            if (mListObj.Count <= mListObjIndex) {
+                FinishGame(false);
+                return;
+            }
+
             // 트랙 하이라이트 부모 변경
             if (mListObj[mListObjIndex].localPosition.y + 200f < -mTrackAnchor.localPosition.y) {
                 mListObj[mListObjIndex].parent = mStaticTrack;
@@ -1032,7 +1037,7 @@ namespace SoundMax {
         }
 
         /// <summary> 오버트랙 판정 오브젝트 출력 </summary>
-        public void PrintJudgement(int index, ScoreHitRating rate, float pos = 0f) {
+        public void PrintJudgement(int index, ScoreHitRating rate, float pos = 0f, bool bMaximize = true) {
             UISprite spr = mJudgeObject[index].GetComponent<UISprite>();
             spr.spriteName = rate == ScoreHitRating.Perfect ? "Judge_DMAX" :
                              rate == ScoreHitRating.Good ? "Judge_MAX" : "Judge_Miss";
@@ -1042,11 +1047,15 @@ namespace SoundMax {
                 mJudgeObject[index].Move(pos, false, true);
 
             // 맥시마이즈 게이지 갱신
+            if (bMaximize)
+                UpdateMaximizeGuage(index, rate);
+        }
+
+        public void UpdateMaximizeGuage(int index, ScoreHitRating rate) {
             if (rate == ScoreHitRating.Good) {
                 UpdateMaximizeGuage(SINGLENOTE_MAXIMIZE_PERCENT * 0.5f);
             } else if (rate == ScoreHitRating.Perfect) {
-                UpdateMaximizeGuage(index < 4 ? SINGLENOTE_MAXIMIZE_PERCENT : 
-                                    index < 6 ? LONGNOTE_MAXIMIZE_PERCENT : LONGNOTE_MAXIMIZE_PERCENT * 0.5f);
+                UpdateMaximizeGuage(index < 4 ? SINGLENOTE_MAXIMIZE_PERCENT : LONGNOTE_MAXIMIZE_PERCENT);
             }
         }
 

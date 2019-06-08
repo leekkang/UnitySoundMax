@@ -35,9 +35,9 @@ namespace SoundMax {
         GameObject mLoadingPanel;
         TweenPosition mTweenFirst;
         TweenPosition mTweenSecond;
-        GameObject mLoadingSprite;
-        UILabel mLoadingInfo1;
-        UILabel mLoadingInfo2;
+        UISprite mLoadingSprite;
+        UIAtlas mSelectAtlas;
+        UIAtlas mOptionAtlas;
 
         #endregion
 
@@ -45,7 +45,9 @@ namespace SoundMax {
             mLoadingPanel = transform.Find("LoadingPanel").gameObject;
             mTweenFirst = mLoadingPanel.transform.Find("TweenFirst").GetComponent<TweenPosition>();
             mTweenSecond = mLoadingPanel.transform.Find("TweenSecond").GetComponent<TweenPosition>();
-            mLoadingSprite = mLoadingPanel.transform.FindRecursive("Background").gameObject;
+            mLoadingSprite = mLoadingPanel.transform.FindRecursive("Background").GetComponent<UISprite>();
+            mSelectAtlas = mLoadingSprite.atlas;
+            mOptionAtlas = transform.Find("OptionPanel").Find("mainUI").GetComponent<UISprite>().atlas;
 
             mDicPanel.Add((int)PanelType.Main, transform.Find("MainPanel").GetComponent<PanelBase>());
             mDicPanel.Add((int)PanelType.Select, transform.Find("SelectPanel").GetComponent<PanelBase>());
@@ -180,12 +182,14 @@ namespace SoundMax {
             return pb;
         }
 
-        public void PlayLoading(string info1, string info2) {
+        public void PlayLoading(bool bSelect = true) {
             mLoading = true;
-            StartCoroutine(CoPlayLoading());
+            StartCoroutine(CoPlayLoading(bSelect));
         }
 
-        IEnumerator CoPlayLoading() {
+        IEnumerator CoPlayLoading(bool bSelect) {
+            mLoadingSprite.atlas = bSelect ? mSelectAtlas : mOptionAtlas;
+            mLoadingSprite.spriteName = bSelect ? "Music_Select_Alarm" : "Mode_Select_Alarm";
             mLoadingSprite.transform.SetParent(mTweenFirst.transform, false);
             mTweenFirst.PlayForward();
             yield return new WaitForSeconds(mTweenFirst.duration);

@@ -141,7 +141,7 @@ namespace SoundMax {
 
         /// <summary> FX 버튼을 눌렀을 때 해야 할 일 </summary>
         public override void OnClickBtnFX() {
-            GuiManager.inst.PlayLoading("select Music!", "from option");
+            GuiManager.inst.PlayLoading();
             SelectPanel sel = (SelectPanel)GuiManager.inst.GetPanel(PanelType.Select);
             SetUserData();
             sel.UpdateMusicMetaData();

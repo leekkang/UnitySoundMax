@@ -163,7 +163,7 @@ namespace SoundMax {
 
         /// <summary> 스타트 버튼을 눌렀을 때 해야 할 일 </summary>
         public override void OnClickBtnStart() {
-            GuiManager.inst.PlayLoading("Option Select!", "from select");
+            GuiManager.inst.PlayLoading(false);
             OptionPanel opt = (OptionPanel)GuiManager.inst.GetPanel(PanelType.Option);
             opt.UpdateView(DataBase.inst.mMusicList[mCurIndex]);
             GuiManager.inst.ActivatePanel(PanelType.Option, false);

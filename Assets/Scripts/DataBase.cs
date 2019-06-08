@@ -161,7 +161,7 @@ namespace SoundMax {
         }
 
         IEnumerator CoLoadAudio(string url, AudioType extension, Action<AudioClip> onLoadCompleted) {
-            Debug.Log("CoLoadAudio : " + url);
+            //Debug.Log("CoLoadAudio : " + url);
             using (var request = UnityWebRequestMultimedia.GetAudioClip(url, extension)) {
                 yield return request.SendWebRequest();
 
@@ -204,7 +204,7 @@ namespace SoundMax {
         }
 
         IEnumerator CoLoadImage(string url, Action<Texture> onLoadCompleted) {
-            Debug.Log("CoLoadImage : " + url);
+            //Debug.Log("CoLoadImage : " + url);
             using (var request = UnityWebRequestTexture.GetTexture(url)) {
                 yield return request.SendWebRequest();
 
@@ -242,10 +242,7 @@ namespace SoundMax {
                 }
                 mDicMusic.Add(mMusicList[i], dataList);
             }
-
-            for (int i = 0; i < mMusicList.Length; i++) {
-                Debug.Log(mMusicList[i] + " : " + mDicMusic[mMusicList[i]].Count);
-            }
+            
             mOpenComplete = true;
         }
 
@@ -265,9 +262,9 @@ namespace SoundMax {
                 mDicMusic.Add(mMusicList[i], dataList);
             }
 
-            for (int i = 0; i < mMusicList.Length; i++) {
-                Debug.Log(mMusicList[i] + " : " + mDicMusic[mMusicList[i]].Count);
-            }
+            //for (int i = 0; i < mMusicList.Length; i++) {
+            //    Debug.Log(mMusicList[i] + " : " + mDicMusic[mMusicList[i]].Count);
+            //}
             mOpenComplete = true;
         }
     }

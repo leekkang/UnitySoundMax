@@ -75,7 +75,7 @@ namespace SoundMax {
         /// <summary> 스타트 버튼을 눌렀을 때 해야 할 일 </summary>
         public override void OnClickBtnStart() {
             if (mCursorIndex == 0 && DataBase.inst.mOpenComplete) {
-                GuiManager.inst.PlayLoading("select Music!", "blabla....");
+                GuiManager.inst.PlayLoading();
                 GuiManager.inst.ActivatePanel(PanelType.Select, true);
             }
             else if (mCursorIndex == 1)
