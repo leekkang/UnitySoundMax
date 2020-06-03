@@ -9,7 +9,8 @@
 
 ## Demo Video
 
-![]()
+[!<img src="img/vid1.png" width="150px" height="250px">](https://youtu.be/pm43H-W0rKc)
+[!<img src="img/vid2.png" width="150px" height="250px">](https://youtu.be/wq6vCOTDPcM)
 
 ## Usage
 
