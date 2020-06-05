@@ -9,8 +9,10 @@
 
 ## Demo Video
 
-[!<img src="img/vid1.png" width="150px" height="250px">](https://youtu.be/pm43H-W0rKc)
-[!<img src="img/vid2.png" width="150px" height="250px">](https://youtu.be/wq6vCOTDPcM)
+<p align="center">
+  <a href="https://youtu.be/pm43H-W0rKc"><img src="img/vid1.png" width="300"/></a>
+  <a href="https://youtu.be/wq6vCOTDPcM"><img src="img/vid2.png" width="300"/></a>
+</p>
 
 ## Usage
 
